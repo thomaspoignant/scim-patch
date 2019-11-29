@@ -1,0 +1,28 @@
+{
+  "name": "scim-patch",
+  "version": "1.0.0",
+  "description": "SCIM Patch operation (rfc7644).",
+  "main": "lib/src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thomaspoignant/scim-patch"
+  },
+  "keywords": [],
+  "scripts": {
+    "test": "npm run build && ./node_modules/.bin/mocha 'lib/test/**/*.test.js'",
+    "build": "tsc"
+  },
+  "author": "thomas.poignant@gmail.com",
+  "license": "The Unlicense",
+  "devDependencies": {
+    "@types/chai": "^4.2.0",
+    "@types/mocha": "^5.2.7",
+    "mocha": "^6.2.2",
+    "chai": "^4.2.0",
+    "ts-node": "^8.5.0",
+    "typescript": "^3.7.2"
+  },
+  "dependencies": {
+    "scim2-parse-filter": "^0.1.0"
+  }
+}
