@@ -9,9 +9,9 @@
   },
   "keywords": [],
   "scripts": {
-    "test": "npm run build && ./node_modules/.bin/mocha 'lib/test/**/*.test.js'",
-    "build": "tsc",
-    "cover": "npm run test && istanbul report text-summary lcov"
+    "test": "npm run mocha && istanbul report text-summary lcov",
+    "mocha": "npm run build && ./node_modules/.bin/mocha 'lib/test/**/*.test.js'",
+    "build": "tsc"
   },
   "author": "thomas.poignant@gmail.com",
   "license": "The Unlicense",
