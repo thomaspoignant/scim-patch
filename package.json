@@ -14,7 +14,7 @@
     "build": "tsc"
   },
   "author": "thomas.poignant@gmail.com",
-  "license": "The Unlicense",
+  "license": "Unlicense",
   "devDependencies": {
     "@types/chai": "^4.2.0",
     "@types/mocha": "^5.2.7",
