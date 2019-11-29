@@ -10,7 +10,8 @@
   "keywords": [],
   "scripts": {
     "test": "npm run build && ./node_modules/.bin/mocha 'lib/test/**/*.test.js'",
-    "build": "tsc"
+    "build": "tsc",
+    "cover": "npm run test && istanbul report text-summary lcov"
   },
   "author": "thomas.poignant@gmail.com",
   "license": "The Unlicense",
@@ -19,6 +20,7 @@
     "@types/mocha": "^5.2.7",
     "chai": "^4.2.0",
     "coveralls": "^3.0.9",
+    "istanbul": "^0.4.5",
     "mocha": "^6.2.2",
     "mocha-lcov-reporter": "^1.3.0",
     "ts-node": "^8.5.0",

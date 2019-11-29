@@ -8,3 +8,5 @@ before_install:
     - npm i
 script:
   - npm run test
+after_success:
+  - 'cat ./coverage/lcov.info | ./node_modules/.bin/coveralls'
