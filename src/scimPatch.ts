@@ -1,7 +1,33 @@
-import {ScimPatchOperation, ScimPatch, ScimResource} from './types/types';
-import * as scimErr from './errors/scimErrors';
+import {
+    ScimError,
+    InvalidScimFilterError,
+    InvalidScimSortError,
+    InvalidScimPatch,
+    InvalidScimPatchOp,
+    NoPathInScimPatchOp,
+    InvalidScimPatchRequest,
+    InvalidScimPatchRemoveMandatory,
+    UnknownScimError
+} from './errors/scimErrors';
+import {ScimResource, ScimPatch, ScimPatchOperation} from './types/types';
 import {parse, filter} from 'scim2-parse-filter';
 
+/*
+ * Export types
+ */
+export {
+    ScimResource,
+    ScimPatch,
+    ScimPatchOperation,
+    ScimError,
+    InvalidScimFilterError,
+    InvalidScimSortError,
+    InvalidScimPatch,
+    InvalidScimPatchOp,
+    NoPathInScimPatchOp,
+    InvalidScimPatchRequest,
+    InvalidScimPatchRemoveMandatory,
+    UnknownScimError};
 /*
  * This file implement the SCIM PATCH specification.
  * RFC : https://tools.ietf.org/html/rfc7644#section-3.5.2
@@ -29,10 +55,10 @@ const AUTHORIZED_OPERATION: Array<String> = [
 export function patchBodyValidation(body: ScimPatch): void {
     const patchOpSchema = 'urn:ietf:params:scim:api:messages:2.0:PatchOp';
     if (!body.schemas || !body.schemas.includes(patchOpSchema))
-        throw new scimErr.InvalidScimPatchRequest('Missing schemas.');
+        throw new InvalidScimPatchRequest('Missing schemas.');
 
     if (!body.Operations || body.Operations.length <= 0)
-        throw new scimErr.InvalidScimPatchRequest('Missing operations.');
+        throw new InvalidScimPatchRequest('Missing operations.');
 
     body.Operations.forEach((operation: ScimPatchOperation) => validateOperation(operation));
 }
@@ -46,16 +72,16 @@ export function patchBodyValidation(body: ScimPatch): void {
  */
 function validateOperation(operation: ScimPatchOperation): void {
     if (!operation.op || Array.isArray(operation.op) || !AUTHORIZED_OPERATION.includes(operation.op))
-        throw new scimErr.InvalidScimPatchRequest(`Invalid op "${operation.op}" in the request.`);
+        throw new InvalidScimPatchRequest(`Invalid op "${operation.op}" in the request.`);
 
     if (operation.op === 'remove' && !operation.path)
-        throw new scimErr.NoPathInScimPatchOp();
+        throw new NoPathInScimPatchOp();
 
     if (operation.op === 'add' && !operation.value)
-        throw new scimErr.InvalidScimPatchRequest(`The operation ${operation.op} MUST contain a "value" member whose content specifies the value to be added`);
+        throw new InvalidScimPatchRequest(`The operation ${operation.op} MUST contain a "value" member whose content specifies the value to be added`);
 
     if (operation.path && typeof operation.path !== 'string')
-        throw new scimErr.InvalidScimPatchRequest('Path is supposed to be a string');
+        throw new InvalidScimPatchRequest('Path is supposed to be a string');
 }
 
 /*
@@ -76,7 +102,7 @@ export function scimPatch<T extends ScimResource>(scimResource: T, patchOperatio
             case 'replace':
                 return applyReplaceOperation(patchedResource, patch);
             default:
-                throw new scimErr.InvalidScimPatchOp(`Operator "${patch.op}" is invalid for SCIM patch request.`);
+                throw new InvalidScimPatchOp(`Operator "${patch.op}" is invalid for SCIM patch request.`);
         }
     }, scimResource);
 }
@@ -119,14 +145,14 @@ function applyAddOperation<T extends ScimResource>(scimResource: T, patch: ScimP
         const f = filter(parse(matchRequest[2]));
         matchFilter = arr.filter(f);
     } catch (error) {
-        throw new scimErr.InvalidScimPatchOp(error);
+        throw new InvalidScimPatchOp(error);
     }
 
     // We are going backward to don't have any problems when adding things in the array
     for (let i = arr.length - 1; matchFilter.length > 0 && i >= 0; i--)
         if (matchFilter.includes(arr[i])) {
             if (typeof patch.value !== 'object')
-                throw new scimErr.InvalidScimPatchOp(`Invalid value for patch query "${patch.value}".`);
+                throw new InvalidScimPatchOp(`Invalid value for patch query "${patch.value}".`);
             arr[i] = {...arr[i], ...patch.value};
         }
 
@@ -163,7 +189,7 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
         const f = filter(parse(matchRequest[2]));
         matchFilter = arr.filter(f);
     } catch (error) {
-        throw new scimErr.InvalidScimPatchOp(error);
+        throw new InvalidScimPatchOp(error);
     }
 
     // We are going backward to don't have any problems when adding things in the array
@@ -211,7 +237,7 @@ function applyReplaceOperation<T extends ScimResource>(scimResource: T, patch: S
         const f = filter(parse(matchRequest[2]));
         matchFilter = arr.filter(f);
     } catch (error) {
-        throw new scimErr.InvalidScimPatchOp(error);
+        throw new InvalidScimPatchOp(error);
     }
 
     // We are going backward to don't have any problems when adding things in the array
@@ -243,13 +269,13 @@ function extractValuePath(subPath: string): Array<string> {
     // We extract the key of the table and what is inside [].
     const matchRequest = subPath.match(ARRAY_SEARCH);
     if (!matchRequest)
-        throw new scimErr.InvalidScimPatchOp(`This part of the path ${subPath} is invalid for SCIM patch request.`);
+        throw new InvalidScimPatchOp(`This part of the path ${subPath} is invalid for SCIM patch request.`);
     return matchRequest;
 }
 
 function applyPatchNoPath<T extends ScimResource>(scimResource: T, patch: ScimPatchOperation): T {
     if (typeof patch.value !== 'object')
-        throw new scimErr.InvalidScimPatchOp('Invalid patch query.');
+        throw new InvalidScimPatchOp('Invalid patch query.');
 
     return {
         ...scimResource,
@@ -277,7 +303,7 @@ function navigate(inputSchema: any, pList: string[]): any {
                         schema = arr[j];
 
             } catch (error) {
-                throw new scimErr.InvalidScimPatchOp(error);
+                throw new InvalidScimPatchOp(error);
             }
         } else {
             // The element is not an array.
