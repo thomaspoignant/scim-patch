@@ -90,20 +90,20 @@ This particular operation will return :
 
 ```json
 { 
-  schemas: [ 'urn:ietf:params:scim:schemas:core:2.0:User' ],
-  userName: 'user1@test.com',
-  name: { 
-    familyName: 'user1', 
-    givenName: 'user2' 
+  "schemas": [ "urn:ietf:params:scim:schemas:core:2.0:User" ],
+  "userName": "user1@test.com",
+  "name": { 
+    "familyName": "user1", 
+    "givenName": "user2"
   },
-  active: false,
-  emails: [
-    {value: 'user1@test.com', primary: true } 
+  "active": false,
+  "emails": [
+    {"value": "user1@test.com", "primary": true } 
   ],
-  meta: { 
-    resourceType: 'User',
-    created: 2019-12-19T14:36:08.838Z,
-    lastModified: 2019-12-19T14:36:08.838Z 
+  "meta": { 
+    "resourceType": "User",
+    "created": 2019-12-19T14:36:08.838Z,
+    "lastModified": 2019-12-19T14:36:08.838Z 
   }
 }
 ```
