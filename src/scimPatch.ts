@@ -76,27 +76,6 @@ export function patchBodyValidation(body: ScimPatch): void {
 }
 
 /*
- * validateOperation is validating that the SCIM Patch Operation follow the RFC.
- * If not, the function throw an Error.
- * @Param operation The SCIM operation we want to check.
- * @throws {InvalidScimPatchRequest} if the operation is not valid.
- * @throws {NoPathInScimPatchOp} if the operation is a remove with no path.
- */
-function validatePatchOperation(operation: ScimPatchOperation): void {
-    if (!operation.op || Array.isArray(operation.op) || !AUTHORIZED_OPERATION.includes(operation.op))
-        throw new InvalidScimPatchRequest(`Invalid op "${operation.op}" in the request.`);
-
-    if (operation.op === 'remove' && !operation.path)
-        throw new NoPathInScimPatchOp();
-
-    if (operation.op === 'add' && !('value' in operation))
-        throw new InvalidScimPatchRequest(`The operation ${operation.op} MUST contain a "value" member whose content specifies the value to be added`);
-
-    if (operation.path && typeof operation.path !== 'string')
-        throw new InvalidScimPatchRequest('Path is supposed to be a string');
-}
-
-/*
  * This method apply patch operations on a SCIM Resource.
  * @param scimResource The initial resource
  * @param patchOperations An array of SCIM patch operations we want to apply on the scimResource object.
@@ -116,6 +95,27 @@ export function scimPatch(scimResource: ScimResource, patchOperations: Array<Sci
                 throw new InvalidScimPatchRequest(`Operator is invalid for SCIM patch request. ${patch}`);
         }
     }, scimResource);
+}
+
+/*
+ * validateOperation is validating that the SCIM Patch Operation follow the RFC.
+ * If not, the function throw an Error.
+ * @Param operation The SCIM operation we want to check.
+ * @throws {InvalidScimPatchRequest} if the operation is not valid.
+ * @throws {NoPathInScimPatchOp} if the operation is a remove with no path.
+ */
+function validatePatchOperation(operation: ScimPatchOperation): void {
+    if (!operation.op || Array.isArray(operation.op) || !AUTHORIZED_OPERATION.includes(operation.op))
+        throw new InvalidScimPatchRequest(`Invalid op "${operation.op}" in the request.`);
+
+    if (operation.op === 'remove' && !operation.path)
+        throw new NoPathInScimPatchOp();
+
+    if (operation.op === 'add' && !('value' in operation))
+        throw new InvalidScimPatchRequest(`The operation ${operation.op} MUST contain a "value" member whose content specifies the value to be added`);
+
+    if (operation.path && typeof operation.path !== 'string')
+        throw new InvalidScimPatchRequest('Path is supposed to be a string');
 }
 
 function applyAddOperation(scimResource: ScimResource, patch: ScimPatchAddReplaceOperation): ScimResource {

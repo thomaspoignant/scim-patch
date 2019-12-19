@@ -4,6 +4,13 @@ export type ScimSchema = string;
 
 export type ScimPatchOperation = ScimPatchRemoveOperation | ScimPatchAddReplaceOperation;
 
+// Object to represent a ScimResource
+export interface ScimResource {
+  id?: ScimId; // Optional cause during POST we don't have the id.
+  readonly meta: ScimMeta;
+  schemas: Array<ScimSchema>;
+}
+
 // Object to represent PATCH inputs (RFC-7644)
 export interface ScimPatchRemoveOperation {
   readonly op: 'remove';
@@ -19,12 +26,6 @@ export interface ScimPatchAddReplaceOperation {
 export interface ScimPatch {
   readonly schemas: Array<ScimPatchSchema>,
   readonly Operations: Array<ScimPatchOperation>
-}
-
-export interface ScimResource {
-  id?: ScimId; // Optional cause during POST we don't have the id.
-  readonly meta: ScimMeta;
-  schemas: Array<ScimSchema>;
 }
 
 export interface ScimMeta {
