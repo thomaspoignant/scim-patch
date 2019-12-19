@@ -88,7 +88,7 @@ const patchedUser = scimPatch(scimUser, patch);
 
 This particular operation will return : 
 
-```shell script
+```json
 { 
   schemas: [ 'urn:ietf:params:scim:schemas:core:2.0:User' ],
   userName: 'user1@test.com',
