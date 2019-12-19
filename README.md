@@ -31,10 +31,79 @@ try {
 
 ## Patch a SCIM resource from a SCIM Patch Query.
 
-
 This implements the PATCH of a SCIM object from a SCIM Query.
 
+You should create a valid SCIM resource by extending the [ScimResource type](src/types.ts).
 
-This implements filter syntax parser and json filter function.
+```typescript
+export interface ScimUser extends ScimResource {
+    schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'];
+    userName: string;
+    name: {
+        familyName: string;
+        givenName: string;
+    };
+    active: boolean;
+    emails: Array<{
+        value: string;
+        primary: boolean;
+    }>;
+    roles?: Array<{
+        value: string;
+        type?: string;
+    }>;
+    meta: ScimMeta & { resourceType: 'User' };
+};
+```
 
-This is a fork https://www.npmjs.com/package/scim2-filter version 0.2.0 with bug correction.
+After you have created your object you can patch it by calling the `scimPatch` operation.
+```typescript
+const scimUser: ScimUser = {
+  schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
+  userName: 'user1@test.com',
+  name: {
+    familyName: 'user1',
+    givenName: 'user2'
+  },
+  active: true,
+  emails: [
+    {value: 'user1@test.com', primary: true}
+  ],
+  meta: {
+    resourceType: 'User',
+    created: new Date(),
+    lastModified: new Date()
+  }
+};
+
+const patch: ScimPatchOperation = {
+  op: 'replace',
+  value: {
+    active: false
+  }
+};
+
+const patchedUser = scimPatch(scimUser, patch);
+```
+
+This particular operation will return : 
+
+```json
+{ 
+  "schemas": [ "urn:ietf:params:scim:schemas:core:2.0:User" ],
+  "userName": "user1@test.com",
+  "name": { 
+    "familyName": "user1", 
+    "givenName": "user2"
+  },
+  "active": false,
+  "emails": [
+    {"value": "user1@test.com", "primary": true } 
+  ],
+  "meta": { 
+    "resourceType": "User",
+    "created": "2019-12-19T14:36:08.838Z",
+    "lastModified": "2019-12-19T14:36:08.838Z" 
+  }
+}
+```

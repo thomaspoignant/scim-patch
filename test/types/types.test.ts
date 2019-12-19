@@ -1,48 +1,41 @@
-import {ScimResource} from "../../src/types/types";
+import {ScimResource, ScimMeta} from '../../src/types/types';
+import {} from '../../src/types/types';
 
 export interface ScimUser extends ScimResource {
-    readonly schemas: Array<string>;
-    id?: string;
+    schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'];
     userName: string;
-    surName?: Array<object>;
-    name: ScimName;
+    surName?: Array<{
+        value: string;
+        primary: boolean;
+    }>;
+    name: {
+        familyName: string;
+        givenName: string;
+        nestedArray?: Array<{
+            value: string;
+            primary: boolean;
+            newProperty1?: string;
+            newProperty2?: string;
+        }>;
+        newProperty?: string;
+        newProperty1?: string;
+        newProperty2?: string;
+        surName2?: Array<string>;
+        surName3?: string;
+    };
     active: boolean;
-    emails: Array<ScimEmail>;
-    roles: Array<ScimRole>;
-    readonly meta: ScimMeta;
-    newProperty: string;
-    newProperty3: string;
-}
-
-export interface ScimName {
-    familyName: string;
-    givenName: string;
-    surName2?: Array<string>;
-    surName3?: string;
-    nestedArray: Array<MultiValue>;
-    newProperty: string;
-    newProperty1: string;
-    newProperty2: string;
-}
-
-export interface MultiValue {
-    value: string;
-    primary: boolean;
-    newProperty1?: string;
-    newProperty2?: string;
-}
-
-export interface ScimEmail extends MultiValue {
-    newProperty: string;
-}
-
-export interface ScimRole {
-    value: string;
-}
-
-export interface ScimMeta {
-    readonly resourceType: string;
-    readonly created: Date;
-    readonly lastModified: Date;
-    readonly location: string;
+    emails: Array<{
+        value: string;
+        primary: boolean;
+        newProperty?: string;
+        newProperty1?: string;
+        newProperty2?: string;
+    }>;
+    roles?: Array<{
+        value: string;
+        type?: string;
+    }>;
+    meta: ScimMeta & { resourceType: 'User' };
+    newProperty?: string;
+    newProperty3?: string;
 }
