@@ -8,7 +8,11 @@
     "type": "git",
     "url": "git+https://github.com/thomaspoignant/scim-patch"
   },
-  "keywords": [],
+  "keywords": [
+    "scim",
+    "patch",
+    "rfc7644"
+  ],
   "scripts": {
     "test": "npm run mocha && istanbul report text-summary lcov",
     "mocha": "npm run build && ./node_modules/.bin/mocha 'lib/test/**/*.test.js'",
