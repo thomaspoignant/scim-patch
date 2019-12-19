@@ -9,16 +9,32 @@ import {
     InvalidScimPatchRemoveMandatory,
     UnknownScimError
 } from './errors/scimErrors';
-import {ScimResource, ScimPatch, ScimPatchOperation} from './types/types';
+import {
+    ScimPatchSchema,
+    ScimId,
+    ScimSchema,
+    ScimPatchOperation,
+    ScimPatchRemoveOperation,
+    ScimPatchAddReplaceOperation,
+    ScimPatch,
+    ScimResource,
+    ScimMeta
+} from './types/types';
 import {parse, filter} from 'scim2-parse-filter';
 
 /*
  * Export types
  */
 export {
-    ScimResource,
-    ScimPatch,
+    ScimPatchSchema,
+    ScimId,
+    ScimSchema,
     ScimPatchOperation,
+    ScimPatchRemoveOperation,
+    ScimPatchAddReplaceOperation,
+    ScimPatch,
+    ScimResource,
+    ScimMeta,
     ScimError,
     InvalidScimFilterError,
     InvalidScimSortError,
@@ -27,24 +43,21 @@ export {
     NoPathInScimPatchOp,
     InvalidScimPatchRequest,
     InvalidScimPatchRemoveMandatory,
-    UnknownScimError};
+    UnknownScimError
+};
 /*
  * This file implement the SCIM PATCH specification.
  * RFC : https://tools.ietf.org/html/rfc7644#section-3.5.2
  * It allow to apply some patch on an existing SCIM resource.
  */
-
 // Regex to check if this is search into array request.
 const IS_ARRAY_SEARCH = /(\[|\])/;
 // Regex to extract key and search request (ex: emails[primary eq true).
 const ARRAY_SEARCH: RegExp = /^(.+)\[(.+)\]$/;
 
-const AUTHORIZED_OPERATION: Array<String> = [
-    'remove',
-    'add',
-    'replace'
-];
+const AUTHORIZED_OPERATION = ['remove', 'add', 'replace'] as const;
 
+export const PATCH_OPERATION_SCHEMA = 'urn:ietf:params:scim:api:messages:2.0:PatchOp';
 /*
  * PatchBodyValidation validate if the request body of the SCIM Patch is valid.
  * If the body is not valid the function throw an error.
@@ -53,35 +66,13 @@ const AUTHORIZED_OPERATION: Array<String> = [
  * @throws {NoPathInScimPatchOp} if one operation is a remove with no path.
  */
 export function patchBodyValidation(body: ScimPatch): void {
-    const patchOpSchema = 'urn:ietf:params:scim:api:messages:2.0:PatchOp';
-    if (!body.schemas || !body.schemas.includes(patchOpSchema))
+    if (!body.schemas || !body.schemas.includes(PATCH_OPERATION_SCHEMA))
         throw new InvalidScimPatchRequest('Missing schemas.');
 
     if (!body.Operations || body.Operations.length <= 0)
         throw new InvalidScimPatchRequest('Missing operations.');
 
-    body.Operations.forEach((operation: ScimPatchOperation) => validateOperation(operation));
-}
-
-/*
- * validateOperation is validating that the SCIM Patch Operation follow the RFC.
- * If not, the function throw an Error.
- * @Param operation The SCIM operation we want to check.
- * @throws {InvalidScimPatchRequest} if the operation is not valid.
- * @throws {NoPathInScimPatchOp} if the operation is a remove with no path.
- */
-function validateOperation(operation: ScimPatchOperation): void {
-    if (!operation.op || Array.isArray(operation.op) || !AUTHORIZED_OPERATION.includes(operation.op))
-        throw new InvalidScimPatchRequest(`Invalid op "${operation.op}" in the request.`);
-
-    if (operation.op === 'remove' && !operation.path)
-        throw new NoPathInScimPatchOp();
-
-    if (operation.op === 'add' && !operation.value)
-        throw new InvalidScimPatchRequest(`The operation ${operation.op} MUST contain a "value" member whose content specifies the value to be added`);
-
-    if (operation.path && typeof operation.path !== 'string')
-        throw new InvalidScimPatchRequest('Path is supposed to be a string');
+    body.Operations.forEach(validatePatchOperation);
 }
 
 /*
@@ -91,216 +82,187 @@ function validateOperation(operation: ScimPatchOperation): void {
  * @return the scimResource patched.
  * @throws {InvalidScimPatchOp} if the patch could not happen.
  */
-export function scimPatch<T extends ScimResource>(scimResource: T, patchOperations: Array<ScimPatchOperation>): T {
+export function scimPatch(scimResource: ScimResource, patchOperations: Array<ScimPatchOperation>): ScimResource {
     return patchOperations.reduce((patchedResource, patch) => {
-        validateOperation(patch);
         switch (patch.op) {
-            case 'add':
-                return applyAddOperation(patchedResource, patch);
             case 'remove':
                 return applyRemoveOperation(patchedResource, patch);
+            case 'add':
+                return applyAddOperation(patchedResource, patch);
             case 'replace':
                 return applyReplaceOperation(patchedResource, patch);
             default:
-                throw new InvalidScimPatchOp(`Operator "${patch.op}" is invalid for SCIM patch request.`);
+                throw new InvalidScimPatchRequest(`Operator is invalid for SCIM patch request. ${patch}`);
         }
     }, scimResource);
 }
 
-function applyAddOperation<T extends ScimResource>(scimResource: T, patch: ScimPatchOperation): T {
-    // We manipulate the object directly without knowing his property, that's why we use any.
-    let schema: any = scimResource;
+/*
+ * validateOperation is validating that the SCIM Patch Operation follow the RFC.
+ * If not, the function throw an Error.
+ * @Param operation The SCIM operation we want to check.
+ * @throws {InvalidScimPatchRequest} if the operation is not valid.
+ * @throws {NoPathInScimPatchOp} if the operation is a remove with no path.
+ */
+function validatePatchOperation(operation: ScimPatchOperation): void {
+    if (!operation.op || Array.isArray(operation.op) || !AUTHORIZED_OPERATION.includes(operation.op))
+        throw new InvalidScimPatchRequest(`Invalid op "${operation.op}" in the request.`);
 
-    validateOperation(patch);
+    if (operation.op === 'remove' && !operation.path)
+        throw new NoPathInScimPatchOp();
+
+    if (operation.op === 'add' && !('value' in operation))
+        throw new InvalidScimPatchRequest(`The operation ${operation.op} MUST contain a "value" member whose content specifies the value to be added`);
+
+    if (operation.path && typeof operation.path !== 'string')
+        throw new InvalidScimPatchRequest('Path is supposed to be a string');
+}
+
+function applyAddOperation(scimResource: ScimResource, patch: ScimPatchAddReplaceOperation): ScimResource {
+    // // We manipulate the object directly without knowing his property, that's why we use any.
+    let resource: Record<string, any> = scimResource;
+    validatePatchOperation(patch);
 
     if (!patch.path)
-        return applyPatchNoPath(scimResource, patch);
+        return addOrReplaceAttribute(scimResource, patch);
 
     // We navigate till the second to last of the path.
-    const pList = patch.path.split('.');
-    schema = navigate(schema, pList);
-
-    // Dealing with the last element of the path.
-    const lastSubPath = pList[pList.length - 1];
+    const paths = patch.path.split('.');
+    resource = navigate(resource, paths);
+    const lastSubPath = paths[paths.length - 1];
 
     if (!IS_ARRAY_SEARCH.test(lastSubPath)) {
-        // If the target location specifies a multi-valued attribute, a new value is added to the attribute.
-        if (Array.isArray(schema[pList[pList.length - 1]])) {
-            const a: Array<any> = schema[pList[pList.length - 1]];
-            if (!a.includes(patch.value))
-                a.push(patch.value);
-            return scimResource;
-        }
-
-        // If the target location specifies a single-valued attribute, the existing value is replaced.
-        schema[pList[pList.length - 1]] = patch.value;
+        // Not a query search request, we are setting the new value.
+        resource[lastSubPath] = addOrReplaceAttribute(resource[lastSubPath], patch);
         return scimResource;
     }
 
     // The last element is an Array request.
-    const matchRequest = extractValuePath(lastSubPath);
-    const arr = schema[matchRequest[1]];
-    let matchFilter;
-    try {
-        const f = filter(parse(matchRequest[2]));
-        matchFilter = arr.filter(f);
-    } catch (error) {
-        throw new InvalidScimPatchOp(error);
-    }
+    const {valuePath, array} = extractArray(lastSubPath, resource);
 
-    // We are going backward to don't have any problems when adding things in the array
-    for (let i = arr.length - 1; matchFilter.length > 0 && i >= 0; i--)
-        if (matchFilter.includes(arr[i])) {
-            if (typeof patch.value !== 'object')
-                throw new InvalidScimPatchOp(`Invalid value for patch query "${patch.value}".`);
-            arr[i] = {...arr[i], ...patch.value};
-        }
+    // Get the list of items who are successful for the search query.
+    const matchFilter = filterWithQuery<any>(array, valuePath);
 
-    // We remove all the empty item (<1 empty item>) from the array.
-    schema[matchRequest[1]] = arr.filter((e: any) => e);
+    const index = array.findIndex(item => matchFilter.includes(item));
+    if (index !== -1)
+        array[index] = addOrReplaceAttribute(array[index], patch);
+
     return scimResource;
 }
 
-function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: ScimPatchOperation): T {
+function applyRemoveOperation(scimResource: ScimResource, patch: ScimPatchRemoveOperation): ScimResource {
     // We manipulate the object directly without knowing his property, that's why we use any.
-    let schema: any = scimResource;
-
-    validateOperation(patch);
+    let resource: Record<string, any> = scimResource;
+    validatePatchOperation(patch);
 
     // Path is supposed to be set, there are a validation in the validateOperation function.
-    const pList = patch.path?.split('.') || [];
-
-    // We navigate till the second to last of the path.
-    schema = navigate(schema, pList);
+    const paths = patch.path?.split('.') || [];
+    resource = navigate(resource, paths);
 
     // Dealing with the last element of the path.
-    const lastSubPath = pList[pList.length - 1];
+    const lastSubPath = paths[paths.length - 1];
 
     if (!IS_ARRAY_SEARCH.test(lastSubPath)) {
-        delete schema[pList[pList.length - 1]];
+        // This is a mono valued property, we delete it.
+        delete resource[lastSubPath];
         return scimResource;
     }
 
     // The last element is an Array request.
-    const matchRequest = extractValuePath(lastSubPath);
-    const arr = schema[matchRequest[1]];
-    let matchFilter;
-    try {
-        const f = filter(parse(matchRequest[2]));
-        matchFilter = arr.filter(f);
-    } catch (error) {
-        throw new InvalidScimPatchOp(error);
-    }
+    const {attrName, valuePath, array} = extractArray(lastSubPath, resource);
 
-    // We are going backward to don't have any problems when adding things in the array
-    for (let i = arr.length - 1; matchFilter.length > 0 && i >= 0; i--)
-        if (matchFilter.includes(arr[i]))
-            delete arr[i];
-
-    // We remove all the empty item (<1 empty item>) from the array.
-    schema[matchRequest[1]] = arr.filter((e: any) => e);
+    // We keep only items who don't match the query.
+    resource[attrName] = array.filter((e: any) => !filterWithQuery<any>(array, valuePath).includes(e));
 
     // If the complex multi-valued attribute has no remaining records, the attribute SHALL be considered unassigned.
-    if (schema[matchRequest[1]].length === 0)
-        delete schema[matchRequest[1]];
+    if (resource[attrName].length === 0)
+        delete resource[attrName];
 
     return scimResource;
 }
 
-function applyReplaceOperation<T extends ScimResource>(scimResource: T, patch: ScimPatchOperation): T {
+function applyReplaceOperation(scimResource: ScimResource, patch: ScimPatchAddReplaceOperation): ScimResource {
     // We manipulate the object directly without knowing his property, that's why we use any.
-    let schema: any = scimResource;
-
-    validateOperation(patch);
+    let resource: Record<string, any> = scimResource;
+    validatePatchOperation(patch);
 
     if (!patch.path)
-        return applyPatchNoPath(scimResource, patch);
+        return addOrReplaceAttribute(scimResource, patch);
 
     // We navigate till the second to last of the path.
-    const pList = patch.path.split('.');
-    schema = navigate(schema, pList);
-
-    // Dealing with the last element of the path.
-    const lastSubPath = pList[pList.length - 1];
+    const paths = patch.path.split('.');
+    resource = navigate(resource, paths);
+    const lastSubPath = paths[paths.length - 1];
 
     if (!IS_ARRAY_SEARCH.test(lastSubPath)) {
-        delete schema[pList[pList.length - 1]];
-        schema[pList[pList.length - 1]] = patch.value;
+        resource[lastSubPath] = addOrReplaceAttribute(resource[lastSubPath], patch);
         return scimResource;
     }
 
     // The last element is an Array request.
-    const matchRequest = extractValuePath(lastSubPath);
-    const arr = schema[matchRequest[1]];
-    let matchFilter;
-    try {
-        const f = filter(parse(matchRequest[2]));
-        matchFilter = arr.filter(f);
-    } catch (error) {
-        throw new InvalidScimPatchOp(error);
-    }
+    const {valuePath, array} = extractArray(lastSubPath, resource);
 
-    // We are going backward to don't have any problems when adding things in the array
-    let hasMatch: boolean = false;
-    for (let i = arr.length - 1; matchFilter.length > 0 && i >= 0; i--)
-        if (matchFilter.includes(arr[i])) {
-            hasMatch = true;
-            delete arr[i];
-            arr.push(patch.value);
-        }
+    // Get the list of items who are successful for the search query.
+    const matchFilter = filterWithQuery<any>(array, valuePath);
 
     // If the target location specifies a complex attribute, a set of sub-attributes SHALL be specified in the "value"
     // parameter, which replaces any existing values or adds where an attribute did not previously exist.
-    if (!hasMatch)
-        arr.push(patch.value);
+    if (matchFilter.length === 0) {
+        array.push(patch.value);
+        return scimResource;
+    }
 
-    // We remove all the empty item (<1 empty item>) from the array.
-    schema[matchRequest[1]] = arr.filter((e: any) => e);
+    const index = array.findIndex(item => matchFilter.includes(item));
+    if (index !== -1)
+        array[index] = addOrReplaceAttribute(array[index], patch);
 
     return scimResource;
 }
 
-/*
- * extractValuePath extract the valuePath (ex: email[primary eq true]) of a subPath
+/**
+ * extractArray extract the valuePath (ex: email[primary eq true]) of a subPath
  * @param subPath The key we want to extract.
+ * @param schema The object which is supposed to contains the array.
  * @return an array with the array name and the filter path.
  */
-function extractValuePath(subPath: string): Array<string> {
+function extractArray(subPath: string, schema: any): ScimSearchQuery {
     // We extract the key of the table and what is inside [].
     const matchRequest = subPath.match(ARRAY_SEARCH);
     if (!matchRequest)
         throw new InvalidScimPatchOp(`This part of the path ${subPath} is invalid for SCIM patch request.`);
-    return matchRequest;
+
+    const [, attrName, valuePath] = matchRequest;
+    const element = schema[attrName];
+
+    if (!Array.isArray(element))
+        throw new InvalidScimPatchOp('Impossible to search on a mono valued attribute.');
+
+    return new ScimSearchQuery(attrName, valuePath, element);
 }
 
-function applyPatchNoPath<T extends ScimResource>(scimResource: T, patch: ScimPatchOperation): T {
-    if (typeof patch.value !== 'object')
-        throw new InvalidScimPatchOp('Invalid patch query.');
-
-    return {
-        ...scimResource,
-        ...patch.value
-    };
-}
-
-function navigate(inputSchema: any, pList: string[]): any {
+/**
+ * navigate allow to get the sub object who want to edit with the patch operation.
+ * @param inputSchema the initial ScimResource
+ * @param paths an Array who contains the path of the sub object
+ * @return the parent object of the element we want to edit
+ */
+function navigate(inputSchema: any, paths: string[]): any {
     let schema = inputSchema;
-    for (let i = 0; i < pList.length - 1; i++) {
-        const subPath = pList[i];
+    for (let i = 0; i < paths.length - 1; i++) {
+        const subPath = paths[i];
 
         // We check if the element is an array with query (ex: emails[primary eq true).
         if (IS_ARRAY_SEARCH.test(subPath)) {
-            const matchRequest = extractValuePath(subPath);
-            const arr = schema[matchRequest[1]];
-            const scimRequest = matchRequest[2];
+            const {valuePath, array} = extractArray(subPath, schema);
+
             try {
-                const f = filter(parse(scimRequest));
-                const matchFilter = arr.filter(f);
+                // Get the list of items who are successful for the search query.
+                const matchFilter = filterWithQuery<any>(array, valuePath);
 
                 // We iterate over the array to find the matching element.
-                for (let j = 0; j < arr.length && matchFilter.length > 0; j++)
-                    if (matchFilter.includes(arr[j]))
-                        schema = arr[j];
+                for (let j = 0; j < array.length && matchFilter.length > 0; j++)
+                    if (matchFilter.includes(array[j]))
+                        schema = array[j];
 
             } catch (error) {
                 throw new InvalidScimPatchOp(error);
@@ -313,4 +275,59 @@ function navigate(inputSchema: any, pList: string[]): any {
         }
     }
     return schema;
+}
+
+/**
+ * Add or Replace a property in the ScimResource
+ * @param property The property we want to replace
+ * @param patch The patch operation
+ * @return the patched property
+ */
+function addOrReplaceAttribute(property: any, patch: ScimPatchAddReplaceOperation): any {
+    if (Array.isArray(property)) {
+        const a = property;
+        if (!a.includes(patch.value))
+            a.push(patch.value);
+        return a;
+    }
+
+    if (typeof property === 'object') {
+        if (typeof patch.value !== 'object') {
+            if (patch.op === 'add')
+                throw new InvalidScimPatchOp('Invalid patch query.');
+
+            return patch.value;
+        }
+
+        return {
+            ...property,
+            ...patch.value
+        };
+    }
+
+    // If the target location specifies a single-valued attribute, the existing value is replaced.
+    return patch.value;
+}
+
+/**
+ * Return the items in the array who match the filter.
+ * @param arr the collection where we are searching.
+ * @param querySearch the search request.
+ * @return an array who contains the search results.
+ */
+function filterWithQuery<T>(arr: Array<T>, querySearch: string): Array<T> {
+    try {
+        return arr.filter(filter(parse(querySearch)));
+    } catch (error) {
+        throw new InvalidScimPatchOp(error);
+    }
+}
+
+class ScimSearchQuery {
+    constructor(
+      readonly attrName: string,
+      readonly valuePath: string,
+      readonly array: Array<any>
+    ) {
+    }
 }
