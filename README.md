@@ -5,12 +5,19 @@
 
 [RFC7644 SCIM(System for Cross-domain Identity Management) 2.0](https://tools.ietf.org/html/rfc7644#page-32) implementation of the "Modifying with PATCH" section 3.5.2.
 
-This library can :
+## TL;DR
+Important things to know, this library can :
  - Validate a SCIM Patch query.
  - Patch a SCIM resource from a SCIM Patch Query.
 
+Want to have an example on how it works, [check this example](./example/example.ts).
 
-## Validation of a SCIM Query.
+
+## More Details
+This library is implementing the `3.5.2.  Modifying with PATCH` chapter of the SCIM RFC https://tools.ietf.org/html/rfc7644#section-3.5.2.  
+It will allow you to create a SCIM resources and to patch them using the SCIM Query language.
+
+### Validation of a SCIM Query.
 
 ```typescript
 import {patchBodyValidation} from 'scim-patch';
@@ -30,11 +37,10 @@ try {
 }
 ```
 
-## Patch a SCIM resource from a SCIM Patch Query.
+### Patch a SCIM resource from a SCIM Patch Query.
 
 This implements the PATCH of a SCIM object from a SCIM Query.
-
-You should create a valid SCIM resource by extending the [ScimResource type](src/types.ts).
+You should create a valid SCIM resource by extending the [ScimResource interface](src/types.ts).
 
 ```typescript
 export interface ScimUser extends ScimResource {
@@ -62,49 +68,24 @@ After you have created your object you can patch it by calling the `scimPatch` o
 const scimUser: ScimUser = {
   schemas: ['urn:ietf:params:scim:schemas:core:2.0:User'],
   userName: 'user1@test.com',
-  name: {
-    familyName: 'user1',
-    givenName: 'user2'
-  },
+  name: { familyName: 'user1', givenName: 'user2' },
   active: true,
-  emails: [
-    {value: 'user1@test.com', primary: true}
-  ],
-  meta: {
-    resourceType: 'User',
-    created: new Date(),
-    lastModified: new Date()
-  }
+  emails: [{value: 'user1@test.com', primary: true}],
+  meta: { resourceType: 'User', created: new Date(), lastModified: new Date() }
 };
 
-const patch: ScimPatchOperation = {
-  op: 'replace',
-  value: {
-    active: false
-  }
-};
-
+const patch: ScimPatchOperation = { op: 'replace', value: { active: false } };
 const patchedUser = scimPatch(scimUser, patch);
 ```
 
 This particular operation will return : 
-
 ```json
 { 
   "schemas": [ "urn:ietf:params:scim:schemas:core:2.0:User" ],
   "userName": "user1@test.com",
-  "name": { 
-    "familyName": "user1", 
-    "givenName": "user2"
-  },
+  "name": { "familyName": "user1", "givenName": "user2" },
   "active": false,
-  "emails": [
-    {"value": "user1@test.com", "primary": true } 
-  ],
-  "meta": { 
-    "resourceType": "User",
-    "created": "2019-12-19T14:36:08.838Z",
-    "lastModified": "2019-12-19T14:36:08.838Z" 
-  }
+  "emails": [{"value": "user1@test.com", "primary": true }],
+  "meta": { "resourceType": "User", "created": "2019-12-19T14:36:08.838Z", "lastModified": "2019-12-19T14:36:08.838Z" }
 }
 ```
