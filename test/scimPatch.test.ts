@@ -1,4 +1,10 @@
-import {scimPatch} from '../src/scimPatch';
+import {
+    InvalidScimPatchOp,
+    InvalidScimPatchRequest,
+    NoPathInScimPatchOp,
+    scimPatch,
+    InvalidScimPatch
+} from '../src/scimPatch';
 import {ScimUser} from './types/types.test';
 import {expect} from 'chai';
 import {ScimPatchAddReplaceOperation, ScimPatchRemoveOperation} from '../src/types/types';
@@ -158,6 +164,22 @@ describe('SCIM PATCH', () => {
             const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch1]);
             expect(afterPatch.name.nestedArray && afterPatch.name.nestedArray[0].value).to.be.eq(expected);
             expect(afterPatch.name.nestedArray && afterPatch.name.nestedArray[0].primary).to.be.eq(true);
+            return done();
+        });
+
+        it('REPLACE: replace a non existent element', done => {
+            const expected = true;
+            const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: expected, path: 'unknown.toto'};
+            const afterPatch: any = scimPatch(scimUser, [patch]);
+            expect(afterPatch.unknown.toto).to.be.eq(expected);
+            return done();
+        });
+
+        it('ADD: add a non object value to an object key', done => {
+            const expected = 'BATMAN';
+            const patch: ScimPatchAddReplaceOperation = {op: 'replace', path: 'name', value: expected};
+            const afterPatch: any = scimPatch(scimUser, [patch]);
+            expect(afterPatch.name).to.be.eq(expected);
             return done();
         });
     });
@@ -326,15 +348,17 @@ describe('SCIM PATCH', () => {
             expect(afterPatch.name.surName2?.filter(s => s === 'titi').length).to.eq(1);
             return done();
         });
+
+        it('ADD: impossible to add a non object value to an object key', done => {
+            const patch: ScimPatchAddReplaceOperation = {op: 'add', path: 'name', value: 'titi'};
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp);
+            return done();
+        });
     });
     describe('remove', () => {
         it('REMOVE: with no path', done => {
             const patch = <ScimPatchRemoveOperation>{op: 'remove'};
-            try{
-                scimPatch(scimUser, [patch])
-            } catch(error) {
-                expect(error).to.exist;
-            }
+            expect(() => scimPatch(scimUser, [patch])).to.throw(NoPathInScimPatchOp);
             return done();
         });
 
@@ -394,32 +418,26 @@ describe('SCIM PATCH', () => {
     });
     describe('invalid requests', () => {
         it('INVALID: wrong operation name', done => {
-            const patch = ({op: 'delete', value: true, path: 'active'} as unknown as ScimPatchRemoveOperation);
-            try {
-                scimPatch(scimUser, [patch]);
-            } catch(error) {
-                expect(error).to.exist;
-            }
+            const patch: any = {op: 'delete', value: true, path: 'active'};
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchRequest);
             return done();
         });
 
         it('INVALID: path filter invalid', done => {
             const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: true, path: 'emails[name eq]'};
-            try {
-                scimPatch(scimUser, [patch]);
-            } catch(error) {
-                expect(error).to.exist;
-            }
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatch);
             return done();
         });
 
-        it('INVALID: path request missing ]', done => {
+        it('INVALID: path request missing', done => {
             const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: true, path: 'emails[name eq "toto"'};
-            try {
-                scimPatch(scimUser, [patch]);
-            } catch(error) {
-                expect(error).to.exist;
-            }
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp);
+            return done();
+        });
+
+        it('INVALID: search on a mono valued attribute', done => {
+            const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: true, path: 'username[name eq "toto"]'};
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp);
             return done();
         });
     });

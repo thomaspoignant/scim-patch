@@ -22,6 +22,7 @@ export interface ScimUser extends ScimResource {
         newProperty2?: string;
         surName2?: Array<string>;
         surName3?: string;
+        notMandatory?: boolean;
     };
     active: boolean;
     emails: Array<{
