@@ -2,7 +2,7 @@
 [![npm version](http://img.shields.io/npm/v/scim-patch.svg?style=flat&color=blue)](https://npmjs.org/package/scim-patch "View this project on npm")
 ![Build Status](https://travis-ci.com/thomaspoignant/scim-patch.svg?token=sVd5BLjwtrGWjxxeoYSx&branch=master)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fthomaspoignant%2Fscim-patch.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fthomaspoignant%2Fscim-patch?ref=badge_shield)
-[![Coverage Status](https://coveralls.io/repos/github/thomaspoignant/scim-patch/badge.svg?branch=master)](https://coveralls.io/github/thomaspoignant/scim-patch?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/thomaspoignant/scim-patch/badge.svg?branch=master&service=github)](https://coveralls.io/github/thomaspoignant/scim-patch?branch=master&service=github)
 
 [RFC7644 SCIM(System for Cross-domain Identity Management) 2.0](https://tools.ietf.org/html/rfc7644#section-3.5.2) implementation of the "Modifying with PATCH" section 3.5.2.
 
