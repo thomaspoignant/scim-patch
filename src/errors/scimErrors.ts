@@ -7,20 +7,6 @@ export abstract class ScimError extends Error {
   }
 }
 
-export class InvalidScimFilterError extends ScimError {
-  constructor(error: Error) {
-    super('invalidFilter');
-    this.message = `Invalid SCIM Filter parameter: ${error.message}`;
-  }
-}
-
-export class InvalidScimSortError extends ScimError {
-  constructor(error: Error) {
-    super('invalidSyntax');
-    this.message = `Invalid SCIM Sort parameter: ${error.message}`;
-  }
-}
-
 export abstract class InvalidScimPatch extends ScimError {
   protected constructor(message: string, scimCode: string = 'invalidSyntax') {
     super(scimCode);
@@ -43,18 +29,5 @@ export class NoPathInScimPatchOp extends InvalidScimPatch {
 export class InvalidScimPatchRequest extends InvalidScimPatch {
   constructor(message: string) {
     super(`The SCIM patch request is invalid: ${message}`);
-  }
-}
-
-export class InvalidScimPatchRemoveMandatory extends InvalidScimPatch {
-  constructor(message: string) {
-    super(message, 'mutability');
-  }
-}
-
-export class UnknownScimError extends ScimError {
-  constructor(error: Error) {
-    super();
-    this.message = `Unknown SCIM error: ${error.message}`;
   }
 }
