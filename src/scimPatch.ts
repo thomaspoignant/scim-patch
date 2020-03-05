@@ -1,13 +1,9 @@
 import {
     ScimError,
-    InvalidScimFilterError,
-    InvalidScimSortError,
     InvalidScimPatch,
     InvalidScimPatchOp,
     NoPathInScimPatchOp,
-    InvalidScimPatchRequest,
-    InvalidScimPatchRemoveMandatory,
-    UnknownScimError
+    InvalidScimPatchRequest
 } from './errors/scimErrors';
 import {
     ScimPatchSchema,
@@ -36,14 +32,10 @@ export {
     ScimResource,
     ScimMeta,
     ScimError,
-    InvalidScimFilterError,
-    InvalidScimSortError,
     InvalidScimPatch,
     InvalidScimPatchOp,
     NoPathInScimPatchOp,
-    InvalidScimPatchRequest,
-    InvalidScimPatchRemoveMandatory,
-    UnknownScimError
+    InvalidScimPatchRequest
 };
 /*
  * This file implement the SCIM PATCH specification.
