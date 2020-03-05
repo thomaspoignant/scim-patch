@@ -11,7 +11,8 @@ before_install:
 
 script:
   - npm run test
-  - npm run coveralls
+
+after_success: npm run coverage
 
 deploy:
   provider: npm
