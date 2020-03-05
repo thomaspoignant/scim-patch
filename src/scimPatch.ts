@@ -148,7 +148,7 @@ function applyRemoveOperation(scimResource: ScimResource, patch: ScimPatchRemove
     validatePatchOperation(patch);
 
     // Path is supposed to be set, there are a validation in the validateOperation function.
-    const paths = patch.path?.split('.') || [];
+    const paths = patch.path.split('.');
     resource = navigate(resource, paths);
 
     // Dealing with the last element of the path.
@@ -204,9 +204,9 @@ function applyReplaceOperation(scimResource: ScimResource, patch: ScimPatchAddRe
         return scimResource;
     }
 
+    // We are sure to find an index because matchFilter comes from array.
     const index = array.findIndex(item => matchFilter.includes(item));
-    if (index !== -1)
-        array[index] = addOrReplaceAttribute(array[index], patch);
+    array[index] = addOrReplaceAttribute(array[index], patch);
 
     return scimResource;
 }
@@ -248,14 +248,11 @@ function navigate(inputSchema: any, paths: string[]): any {
             const {valuePath, array} = extractArray(subPath, schema);
 
             try {
-                // Get the list of items who are successful for the search query.
+                // Get the item who is successful for the search query.
                 const matchFilter = filterWithQuery<any>(array, valuePath);
-
-                // We iterate over the array to find the matching element.
-                for (let j = 0; j < array.length && matchFilter.length > 0; j++)
-                    if (matchFilter.includes(array[j]))
-                        schema = array[j];
-
+                // We are sure to find an index because matchFilter comes from array.
+                const index = array.findIndex(item => matchFilter.includes(item));
+                schema = array[index];
             } catch (error) {
                 throw new InvalidScimPatchOp(error);
             }
