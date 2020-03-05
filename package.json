@@ -16,7 +16,8 @@
   "scripts": {
     "test": "npm run mocha && istanbul report text-summary lcov",
     "mocha": "npm run build && ./node_modules/.bin/mocha 'lib/test/**/*.test.js'",
-    "build": "tsc"
+    "build": "tsc",
+    "coveralls": "cat ./coverage/lcov.info | coveralls"
   },
   "author": "thomas.poignant@gmail.com",
   "license": "Unlicense",
