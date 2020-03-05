@@ -14,8 +14,9 @@
     "rfc7644"
   ],
   "scripts": {
-    "test": "npm run mocha && istanbul report text-summary lcov",
     "mocha": "npm run build && ./node_modules/.bin/mocha 'lib/test/**/*.test.js'",
+    "test": "nyc mocha 'lib/test/**/*.test.js'",
+    "coverage": "nyc report --reporter=text-lcov | coveralls",
     "build": "tsc"
   },
   "author": "thomas.poignant@gmail.com",
@@ -25,9 +26,8 @@
     "@types/mocha": "^5.2.7",
     "chai": "^4.2.0",
     "coveralls": "^3.0.9",
-    "istanbul": "^0.4.5",
     "mocha": "^6.2.2",
-    "mocha-lcov-reporter": "^1.3.0",
+    "nyc": "^15.0.0",
     "ts-node": "^8.5.0",
     "typescript": "^3.7.2"
   },
