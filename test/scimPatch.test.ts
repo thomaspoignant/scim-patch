@@ -175,11 +175,31 @@ describe('SCIM PATCH', () => {
             return done();
         });
 
-        it('ADD: add a non object value to an object key', done => {
+        it('REPLACE: add a non object value to an object key', done => {
             const expected = 'BATMAN';
             const patch: ScimPatchAddReplaceOperation = {op: 'replace', path: 'name', value: expected};
             const afterPatch: any = scimPatch(scimUser, [patch]);
             expect(afterPatch.name).to.be.eq(expected);
+            return done();
+        });
+
+        it('REPLACE: should not modify anything if element not found', done => {
+            scimUser.name.nestedArray = [{primary: true, value: 'value1'}];
+            const patch1: ScimPatchAddReplaceOperation = {
+                op: 'replace', value: {
+                    newProperty1: 'toto'
+                }, path: 'name.nestedArray[toto eq true]'
+            };
+            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch1]);
+            expect(afterPatch.name.nestedArray).to.be.eq(scimUser.name.nestedArray);
+            return done();
+        });
+
+        it('REPLACE: XXX', done => {
+            const patch1: ScimPatchRemoveOperation = {op: 'remove', path: 'emails[primary eq true].value'};
+            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch1]);
+            expect(afterPatch.emails[0].value).not.to.exist;
+            expect(afterPatch.emails[0].primary).to.eq(true);
             return done();
         });
     });
@@ -354,6 +374,18 @@ describe('SCIM PATCH', () => {
             expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp);
             return done();
         });
+
+        it('ADD: should not modify anything if element not found', done => {
+            scimUser.name.nestedArray = [{primary: true, value: 'value1'}];
+            const patch1: ScimPatchAddReplaceOperation = {
+                op: 'add', value: {
+                    newProperty1: 'toto'
+                }, path: 'name.nestedArray[toto eq true]'
+            };
+            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch1]);
+            expect(afterPatch.name.nestedArray).to.be.eq(scimUser.name.nestedArray);
+            return done();
+        });
     });
     describe('remove', () => {
         it('REMOVE: with no path', done => {
@@ -437,6 +469,16 @@ describe('SCIM PATCH', () => {
 
         it('INVALID: search on a mono valued attribute', done => {
             const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: true, path: 'username[name eq "toto"]'};
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp);
+            return done();
+        });
+
+        it('INVALID: invalid parameter in scim filter', done => {
+            const patch: ScimPatchAddReplaceOperation = {
+                op: 'replace',
+                value: true,
+                path: 'emails[\' eq true].value'
+            };
             expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp);
             return done();
         });
