@@ -46,8 +46,8 @@ export {
 const IS_ARRAY_SEARCH = /(\[|\])/;
 // Regex to extract key and search request (ex: emails[primary eq true).
 const ARRAY_SEARCH: RegExp = /^(.+)\[(.+)\]$/;
-
-const AUTHORIZED_OPERATION = ['remove', 'add', 'replace'] as const;
+// Valid patch operation, value needs to be in lowercase here.
+const AUTHORIZED_OPERATION = ['remove', 'add', 'replace'];
 
 export const PATCH_OPERATION_SCHEMA = 'urn:ietf:params:scim:api:messages:2.0:PatchOp';
 /*
@@ -78,10 +78,13 @@ export function scimPatch(scimResource: ScimResource, patchOperations: Array<Sci
     return patchOperations.reduce((patchedResource, patch) => {
         switch (patch.op) {
             case 'remove':
+            case 'Remove':
                 return applyRemoveOperation(patchedResource, patch);
             case 'add':
+            case 'Add':
                 return applyAddOperation(patchedResource, patch);
             case 'replace':
+            case 'Replace':
                 return applyReplaceOperation(patchedResource, patch);
             default:
                 throw new InvalidScimPatchRequest(`Operator is invalid for SCIM patch request. ${patch}`);
@@ -97,7 +100,7 @@ export function scimPatch(scimResource: ScimResource, patchOperations: Array<Sci
  * @throws {NoPathInScimPatchOp} if the operation is a remove with no path.
  */
 function validatePatchOperation(operation: ScimPatchOperation): void {
-    if (!operation.op || Array.isArray(operation.op) || !AUTHORIZED_OPERATION.includes(operation.op))
+    if (!operation.op || Array.isArray(operation.op) || !isValidOperation(operation.op))
         throw new InvalidScimPatchRequest(`Invalid op "${operation.op}" in the request.`);
 
     if (operation.op === 'remove' && !operation.path)
@@ -310,6 +313,10 @@ function filterWithQuery<T>(arr: Array<T>, querySearch: string): Array<T> {
     } catch (error) {
         throw new InvalidScimPatchOp(error);
     }
+}
+
+function isValidOperation(operation: String): boolean {
+    return operation && AUTHORIZED_OPERATION.includes(operation.toLowerCase());
 }
 
 class ScimSearchQuery {

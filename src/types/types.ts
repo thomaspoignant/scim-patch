@@ -13,12 +13,14 @@ export interface ScimResource {
 
 // Object to represent PATCH inputs (RFC-7644)
 export interface ScimPatchRemoveOperation {
-  readonly op: 'remove';
+  // We accept value with capital letter to be compliant with AzureAD
+  readonly op: 'remove' | 'Remove';
   readonly path: string;
 }
 
 export interface ScimPatchAddReplaceOperation {
-  readonly op: 'add' | 'replace';
+  // We accept value with capital letter to be compliant with AzureAD
+  readonly op: 'add' | 'Add' | 'replace' | 'Replace';
   readonly path?: string;
   readonly value?: any;
 }
