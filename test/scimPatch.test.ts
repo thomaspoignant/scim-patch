@@ -202,6 +202,14 @@ describe('SCIM PATCH', () => {
             expect(afterPatch.emails[0].primary).to.eq(true);
             return done();
         });
+
+        it('REPLACE: with capital first letter for operation', done => {
+            const expected = false;
+            const patch: ScimPatchAddReplaceOperation = {op: 'Replace', value: {active: expected}};
+            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            expect(afterPatch.active).to.be.eq(expected);
+            return done();
+        });
     });
 
     describe('add', () => {
@@ -386,6 +394,14 @@ describe('SCIM PATCH', () => {
             expect(afterPatch.name.nestedArray).to.be.eq(scimUser.name.nestedArray);
             return done();
         });
+
+        it('ADD: with capital first letter for operation', done => {
+            const expected = 'newValue';
+            const patch: ScimPatchAddReplaceOperation = {op: 'Add', value: {newProperty: expected}};
+            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            expect(afterPatch.newProperty).to.be.eq(expected);
+            return done();
+        });
     });
     describe('remove', () => {
         it('REMOVE: with no path', done => {
@@ -445,6 +461,13 @@ describe('SCIM PATCH', () => {
             const patch1: ScimPatchRemoveOperation = {op: 'remove', path: 'name.nestedArray[primary eq true]'};
             const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch1]);
             expect(afterPatch.name.nestedArray).not.to.exist;
+            return done();
+        });
+
+        it('REMOVE: with capital first letter for operation', done => {
+            const patch: ScimPatchRemoveOperation = {op: 'Remove', path: 'active'};
+            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            expect(afterPatch.active).not.to.exist;
             return done();
         });
     });
