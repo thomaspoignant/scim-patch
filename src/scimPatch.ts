@@ -316,7 +316,7 @@ function filterWithQuery<T>(arr: Array<T>, querySearch: string): Array<T> {
 }
 
 function isValidOperation(operation: string): boolean {
-    return operation && AUTHORIZED_OPERATION.includes(operation.toLowerCase());
+    return AUTHORIZED_OPERATION.includes(operation.toLowerCase());
 }
 
 class ScimSearchQuery {
