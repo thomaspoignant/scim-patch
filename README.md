@@ -3,6 +3,7 @@
 ![Build Status](https://travis-ci.com/thomaspoignant/scim-patch.svg?token=sVd5BLjwtrGWjxxeoYSx&branch=master)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fthomaspoignant%2Fscim-patch.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fthomaspoignant%2Fscim-patch?ref=badge_shield)
 [![Coverage Status](https://coveralls.io/repos/github/thomaspoignant/scim-patch/badge.svg?branch=master&service=github)](https://coveralls.io/github/thomaspoignant/scim-patch?branch=master&service=github)
+[![Sonarcloud Status](https://sonarcloud.io/api/project_badges/measure?project=thomaspoignant_scim-patch&metric=alert_status)](https://sonarcloud.io/dashboard?id=thomaspoignant_scim-patch)
 
 [RFC7644 SCIM(System for Cross-domain Identity Management) 2.0](https://tools.ietf.org/html/rfc7644#section-3.5.2) implementation of the "Modifying with PATCH" section 3.5.2.
 
