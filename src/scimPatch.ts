@@ -122,7 +122,7 @@ function applyAddOperation(scimResource: ScimResource, patch: ScimPatchAddReplac
         return addOrReplaceAttribute(scimResource, patch);
 
     // We navigate till the second to last of the path.
-    const paths = patch.path.split('.');
+    const paths = patch.path.split(/(?!\d)\.(?!\d)/g);
     resource = navigate(resource, paths);
     const lastSubPath = paths[paths.length - 1];
 
@@ -151,7 +151,7 @@ function applyRemoveOperation(scimResource: ScimResource, patch: ScimPatchRemove
     validatePatchOperation(patch);
 
     // Path is supposed to be set, there are a validation in the validateOperation function.
-    const paths = patch.path.split('.');
+    const paths = patch.path.split(/(?!\d)\.(?!\d)/g);
     resource = navigate(resource, paths);
 
     // Dealing with the last element of the path.
@@ -185,7 +185,7 @@ function applyReplaceOperation(scimResource: ScimResource, patch: ScimPatchAddRe
         return addOrReplaceAttribute(scimResource, patch);
 
     // We navigate till the second to last of the path.
-    const paths = patch.path.split('.');
+    const paths = patch.path.split(/(?!\d)\.(?!\d)/g);
     resource = navigate(resource, paths);
     const lastSubPath = paths[paths.length - 1];
 
