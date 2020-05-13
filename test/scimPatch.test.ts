@@ -210,6 +210,19 @@ describe('SCIM PATCH', () => {
             expect(afterPatch.active).to.be.eq(expected);
             return done();
         });
+
+        it('REPLACE: with version number in path', done => {
+            const expected = 'newValue';
+            const path = 'urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department';
+            const patch: ScimPatchAddReplaceOperation = {
+                op: 'replace',
+                value: expected,
+                path: path
+            };
+            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            expect(afterPatch[path]).to.be.eq(expected);
+            return done();
+        });
     });
 
     describe('add', () => {
@@ -402,6 +415,18 @@ describe('SCIM PATCH', () => {
             expect(afterPatch.newProperty).to.be.eq(expected);
             return done();
         });
+
+        it('ADD: with version number in path', done => {
+            const expected = 'newValue';
+            const path = 'urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department';
+            delete scimUser[path];
+            const patch: ScimPatchAddReplaceOperation = {
+                op: 'add', value: 'newValue', path: path
+            };
+            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            expect(afterPatch[path]).to.be.eq(expected);
+            return done();
+        });
     });
     describe('remove', () => {
         it('REMOVE: with no path', done => {
@@ -468,6 +493,14 @@ describe('SCIM PATCH', () => {
             const patch: ScimPatchRemoveOperation = {op: 'Remove', path: 'active'};
             const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
             expect(afterPatch.active).not.to.exist;
+            return done();
+        });
+
+        it('REMOVE: with version number in path', done => {
+            const path = 'urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department';
+            const patch: ScimPatchRemoveOperation = {op: 'remove', path: path};
+            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            expect(afterPatch[path]).not.to.exist;
             return done();
         });
     });
