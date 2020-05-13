@@ -46,6 +46,8 @@ export {
 const IS_ARRAY_SEARCH = /(\[|\])/;
 // Regex to extract key and search request (ex: emails[primary eq true).
 const ARRAY_SEARCH: RegExp = /^(.+)\[(.+)\]$/;
+// Regex to extract the path as an array.
+const PATH_SPLITTER: RegExp = /(?!\d)\.(?!\d)/g;
 // Valid patch operation, value needs to be in lowercase here.
 const AUTHORIZED_OPERATION = ['remove', 'add', 'replace'];
 
@@ -114,7 +116,7 @@ function validatePatchOperation(operation: ScimPatchOperation): void {
 }
 
 function applyAddOperation(scimResource: ScimResource, patch: ScimPatchAddReplaceOperation): ScimResource {
-    // // We manipulate the object directly without knowing his property, that's why we use any.
+    // We manipulate the object directly without knowing his property, that's why we use any.
     let resource: Record<string, any> = scimResource;
     validatePatchOperation(patch);
 
@@ -122,7 +124,7 @@ function applyAddOperation(scimResource: ScimResource, patch: ScimPatchAddReplac
         return addOrReplaceAttribute(scimResource, patch);
 
     // We navigate till the second to last of the path.
-    const paths = patch.path.split('.');
+    const paths = patch.path.split(PATH_SPLITTER);
     resource = navigate(resource, paths);
     const lastSubPath = paths[paths.length - 1];
 
@@ -151,7 +153,7 @@ function applyRemoveOperation(scimResource: ScimResource, patch: ScimPatchRemove
     validatePatchOperation(patch);
 
     // Path is supposed to be set, there are a validation in the validateOperation function.
-    const paths = patch.path.split('.');
+    const paths = patch.path.split(PATH_SPLITTER);
     resource = navigate(resource, paths);
 
     // Dealing with the last element of the path.
@@ -185,7 +187,7 @@ function applyReplaceOperation(scimResource: ScimResource, patch: ScimPatchAddRe
         return addOrReplaceAttribute(scimResource, patch);
 
     // We navigate till the second to last of the path.
-    const paths = patch.path.split('.');
+    const paths = patch.path.split(PATH_SPLITTER);
     resource = navigate(resource, paths);
     const lastSubPath = paths[paths.length - 1];
 
