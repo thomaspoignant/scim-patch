@@ -91,3 +91,5 @@ This particular operation will return :
   "meta": { "resourceType": "User", "created": "2019-12-19T14:36:08.838Z", "lastModified": "2019-12-19T14:36:08.838Z" }
 }
 ```
+# How can I contribute?
+See the [contributor's guide](CONTRIBUTING.md) for some helpful tips.
