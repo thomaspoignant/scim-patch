@@ -116,7 +116,7 @@ function validatePatchOperation(operation: ScimPatchOperation): void {
 }
 
 function applyAddOperation(scimResource: ScimResource, patch: ScimPatchAddReplaceOperation): ScimResource {
-    // // We manipulate the object directly without knowing his property, that's why we use any.
+    // We manipulate the object directly without knowing his property, that's why we use any.
     let resource: Record<string, any> = scimResource;
     validatePatchOperation(patch);
 
