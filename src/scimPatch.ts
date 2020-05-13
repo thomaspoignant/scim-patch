@@ -84,10 +84,9 @@ export function scimPatch(scimResource: ScimResource, patchOperations: Array<Sci
                 return applyRemoveOperation(patchedResource, patch);
             case 'add':
             case 'Add':
-                return applyAddOperation(patchedResource, patch);
             case 'replace':
             case 'Replace':
-                return applyReplaceOperation(patchedResource, patch);
+                return applyAddOrReplaceOperation(patchedResource, patch);
             default:
                 throw new InvalidScimPatchRequest(`Operator is invalid for SCIM patch request. ${patch}`);
         }
@@ -113,38 +112,6 @@ function validatePatchOperation(operation: ScimPatchOperation): void {
 
     if (operation.path && typeof operation.path !== 'string')
         throw new InvalidScimPatchRequest('Path is supposed to be a string');
-}
-
-function applyAddOperation(scimResource: ScimResource, patch: ScimPatchAddReplaceOperation): ScimResource {
-    // We manipulate the object directly without knowing his property, that's why we use any.
-    let resource: Record<string, any> = scimResource;
-    validatePatchOperation(patch);
-
-    if (!patch.path)
-        return addOrReplaceAttribute(scimResource, patch);
-
-    // We navigate till the second to last of the path.
-    const paths = patch.path.split(PATH_SPLITTER);
-    resource = navigate(resource, paths);
-    const lastSubPath = paths[paths.length - 1];
-
-    if (!IS_ARRAY_SEARCH.test(lastSubPath)) {
-        // Not a query search request, we are setting the new value.
-        resource[lastSubPath] = addOrReplaceAttribute(resource[lastSubPath], patch);
-        return scimResource;
-    }
-
-    // The last element is an Array request.
-    const {valuePath, array} = extractArray(lastSubPath, resource);
-
-    // Get the list of items who are successful for the search query.
-    const matchFilter = filterWithQuery<any>(array, valuePath);
-
-    const index = array.findIndex(item => matchFilter.includes(item));
-    if (index !== -1)
-        array[index] = addOrReplaceAttribute(array[index], patch);
-
-    return scimResource;
 }
 
 function applyRemoveOperation(scimResource: ScimResource, patch: ScimPatchRemoveOperation): ScimResource {
@@ -178,7 +145,7 @@ function applyRemoveOperation(scimResource: ScimResource, patch: ScimPatchRemove
     return scimResource;
 }
 
-function applyReplaceOperation(scimResource: ScimResource, patch: ScimPatchAddReplaceOperation): ScimResource {
+function applyAddOrReplaceOperation(scimResource: ScimResource, patch: ScimPatchAddReplaceOperation): ScimResource {
     // We manipulate the object directly without knowing his property, that's why we use any.
     let resource: Record<string, any> = scimResource;
     validatePatchOperation(patch);
@@ -204,7 +171,7 @@ function applyReplaceOperation(scimResource: ScimResource, patch: ScimPatchAddRe
 
     // If the target location specifies a complex attribute, a set of sub-attributes SHALL be specified in the "value"
     // parameter, which replaces any existing values or adds where an attribute did not previously exist.
-    if (matchFilter.length === 0) {
+    if (patch.op.toLowerCase() === 'replace' && matchFilter.length === 0) {
         array.push(patch.value);
         return scimResource;
     }
