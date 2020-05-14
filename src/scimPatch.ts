@@ -46,6 +46,8 @@ export {
 const IS_ARRAY_SEARCH = /(\[|\])/;
 // Regex to extract key and search request (ex: emails[primary eq true).
 const ARRAY_SEARCH: RegExp = /^(.+)\[(.+)\]$/;
+// Split path on all periods except e.g. "2.0"
+const SPLIT_PERIOD = /(?!\d)\.(?!\d)/g;
 // Valid patch operation, value needs to be in lowercase here.
 const AUTHORIZED_OPERATION = ['remove', 'add', 'replace'];
 
@@ -118,7 +120,7 @@ function applyRemoveOperation(scimResource: ScimResource, patch: ScimPatchRemove
     validatePatchOperation(patch);
 
     // Path is supposed to be set, there are a validation in the validateOperation function.
-    const paths = patch.path.split('.');
+    const paths = patch.path.split(SPLIT_PERIOD);
     resource = navigate(resource, paths);
 
     // Dealing with the last element of the path.
@@ -152,7 +154,7 @@ function applyAddOrReplaceOperation(scimResource: ScimResource, patch: ScimPatch
         return addOrReplaceAttribute(scimResource, patch);
 
     // We navigate till the second to last of the path.
-    const paths = patch.path.split('.');
+    const paths = patch.path.split(SPLIT_PERIOD);
     resource = navigate(resource, paths);
     const lastSubPath = paths[paths.length - 1];
 
