@@ -30,13 +30,14 @@ const scimUser = JSON.parse(`{
   }`);
 
 const suite = new Benchmark.Suite;
-suite.add("Replace query", ()=> {
-  const patch: ScimPatchAddReplaceOperation = {
-    op: 'replace',
-    value: {value: "expected@toto.fr", primary: true},
-    path: 'emails[primary eq true]'
-  };
-  scimPatch(scimUser, [patch]);
+suite
+  .add("Replace query", ()=> {
+    const patch: ScimPatchAddReplaceOperation = {
+      op: 'replace',
+      value: {value: "expected@toto.fr", primary: true},
+      path: 'emails[primary eq true]'
+    };
+    scimPatch(scimUser, [patch]);
   })
   .add("Add query", async ()=> {
     const patch1: ScimPatchAddReplaceOperation = {
@@ -46,7 +47,7 @@ suite.add("Replace query", ()=> {
       }, path: 'name'
     };
     const patch2: ScimPatchAddReplaceOperation = {op: 'add', value: {newProperty3: "newProperty3"}};
-    await setTimeout(()=>scimPatch(scimUser, [patch1, patch2]), 30000);
+    scimPatch(scimUser, [patch1, patch2]);
   })
   .on('cycle', (event: { target: any; }) => {
     console.log(String(event.target));

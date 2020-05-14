@@ -18,7 +18,7 @@
     "test": "nyc mocha 'lib/test/**/*.test.js'",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "build": "tsc",
-    "bench": "npm run build && node lib/test/perf/test.js"
+    "bench": "npm run build && node lib/test/perf/benchmark.js"
   },
   "author": "thomas.poignant@gmail.com",
   "license": "Unlicense",
