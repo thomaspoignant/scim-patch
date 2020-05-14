@@ -17,7 +17,8 @@
     "mocha": "npm run build && ./node_modules/.bin/mocha 'lib/test/**/*.test.js'",
     "test": "nyc mocha 'lib/test/**/*.test.js'",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "build": "tsc"
+    "build": "tsc",
+    "bench": "npm run build && node lib/test/perf/benchmark.js"
   },
   "author": "thomas.poignant@gmail.com",
   "license": "Unlicense",
@@ -32,6 +33,8 @@
     "typescript": "^3.7.2"
   },
   "dependencies": {
+    "@types/benchmark": "^1.0.32",
+    "benchmark": "^2.1.4",
     "scim2-parse-filter": "^0.1.1"
   },
   "publishConfig": {
