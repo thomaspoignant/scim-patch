@@ -427,7 +427,7 @@ describe('SCIM PATCH', () => {
             const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
             expect(afterPatch[path]).to.be.eq(expected);
             return done();
-        })
+        });
     });
     describe('remove', () => {
         it('REMOVE: with no path', done => {
