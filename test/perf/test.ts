@@ -31,14 +31,13 @@ const scimUser = JSON.parse(`{
 
 const suite = new Benchmark.Suite;
 suite.add("Replace query", ()=> {
-
   const patch: ScimPatchAddReplaceOperation = {
     op: 'replace',
     value: {value: "expected@toto.fr", primary: true},
     path: 'emails[primary eq true]'
   };
   scimPatch(scimUser, [patch]);
-})
+  })
   .add("Add query", ()=> {
     const patch1: ScimPatchAddReplaceOperation = {
       op: 'add', value: {
@@ -49,8 +48,8 @@ suite.add("Replace query", ()=> {
     const patch2: ScimPatchAddReplaceOperation = {op: 'add', value: {newProperty3: "newProperty3"}};
     scimPatch(scimUser, [patch1, patch2]);
   })
-.on('cycle', (event: { target: any; }) => {
-  console.log(String(event.target));
-})
-.run();
+  .on('cycle', (event: { target: any; }) => {
+    console.log(String(event.target));
+  })
+  .run();
 
