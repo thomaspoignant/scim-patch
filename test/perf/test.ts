@@ -38,7 +38,7 @@ suite.add("Replace query", ()=> {
   };
   scimPatch(scimUser, [patch]);
   })
-  .add("Add query", ()=> {
+  .add("Add query", async ()=> {
     const patch1: ScimPatchAddReplaceOperation = {
       op: 'add', value: {
         newProperty1: "newProperty1",
@@ -46,7 +46,7 @@ suite.add("Replace query", ()=> {
       }, path: 'name'
     };
     const patch2: ScimPatchAddReplaceOperation = {op: 'add', value: {newProperty3: "newProperty3"}};
-    setTimeout(()=>scimPatch(scimUser, [patch1, patch2]), 3000);
+    await setTimeout(()=>scimPatch(scimUser, [patch1, patch2]), 3000);
   })
   .on('cycle', (event: { target: any; }) => {
     console.log(String(event.target));
