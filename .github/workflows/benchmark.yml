@@ -6,7 +6,7 @@ on: push
 
 jobs:
   benchmark:
-    name: Benchmark for performance regeression.
+    name: Check performance regeression.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
