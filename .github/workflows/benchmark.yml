@@ -1,8 +1,5 @@
 name: Benchmark
 on: push
-#  push:
-#    branches:
-#      - master
 
 jobs:
   benchmark:
