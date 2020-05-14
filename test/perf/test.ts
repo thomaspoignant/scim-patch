@@ -30,7 +30,7 @@ const scimUser = JSON.parse(`{
   }`);
 
 const suite = new Benchmark.Suite;
-suite.add("Replace with query", ()=> {
+suite.add("Replace query", ()=> {
 
   const patch: ScimPatchAddReplaceOperation = {
     op: 'replace',
@@ -39,7 +39,7 @@ suite.add("Replace with query", ()=> {
   };
   scimPatch(scimUser, [patch]);
 })
-  .add("Replace with query", ()=> {
+  .add("Add query", ()=> {
     const patch1: ScimPatchAddReplaceOperation = {
       op: 'add', value: {
         newProperty1: "newProperty1",
