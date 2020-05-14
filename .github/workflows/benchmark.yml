@@ -23,4 +23,4 @@ jobs:
           alert-threshold: '130%'
           comment-on-alert: true
           fail-on-alert: true
-          alert-comment-cc-users: '@rhysd'
+          alert-comment-cc-users: '@thomaspoignant'
