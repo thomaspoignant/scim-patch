@@ -1,5 +1,5 @@
 name: Benchmark
-#on:
+on: push
 #  push:
 #    branches:
 #      - master
