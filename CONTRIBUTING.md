@@ -29,5 +29,5 @@ The CI is running:
 With this CI you will have feedbacks on your PR after opening your PR. Please review it if it fails.
 
 # Performance
-If you are doing something who can impact the performance, please add a new performance test.  
+If you are doing something who can impact the performance, please add a new [performance test](test/perf/benchmark.ts).  
 You can see the evolution of the performance on this page: https://thomaspoignant.github.io/scim-patch/dev/bench/index.html
