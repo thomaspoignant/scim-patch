@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1589532196002,
+  "lastUpdate": 1589542496752,
   "repoUrl": "https://github.com/thomaspoignant/scim-patch",
   "entries": {
     "Benchmark.js Benchmark": [
@@ -152,6 +152,44 @@ window.BENCHMARK_DATA = {
             "range": "±1.94%",
             "unit": "ops/sec",
             "extra": "90 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "thomas.poignant@gmail.com",
+            "name": "Thomas Poignant",
+            "username": "thomaspoignant"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6c60927f1721c4082ce463d81ec9ceade25ed6d5",
+          "message": "Resolve 1 low severity vulnerability (#29)\n\nUpgrade yargs-parser from 16.1.0 to 18.1.3\r\nUpgrade yarg from 15.1.0 to 15.3.1",
+          "timestamp": "2020-05-15T13:34:11+02:00",
+          "tree_id": "ea8721230b26a4cb2bb9b06be4da30c0c10f92e2",
+          "url": "https://github.com/thomaspoignant/scim-patch/commit/6c60927f1721c4082ce463d81ec9ceade25ed6d5"
+        },
+        "date": 1589542493458,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "Replace query",
+            "value": 318977,
+            "range": "±1.45%",
+            "unit": "ops/sec",
+            "extra": "92 samples"
+          },
+          {
+            "name": "Add query",
+            "value": 1051904,
+            "range": "±2.13%",
+            "unit": "ops/sec",
+            "extra": "87 samples"
           }
         ]
       }
