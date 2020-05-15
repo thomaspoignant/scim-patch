@@ -39,7 +39,7 @@ suite
     };
     scimPatch(scimUser, [patch]);
   })
-  .add("Add query", async ()=> {
+  .add("Add query", ()=> {
     const patch1: ScimPatchAddReplaceOperation = {
       op: 'add', value: {
         newProperty1: "newProperty1",
