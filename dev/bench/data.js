@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1589532064078,
+  "lastUpdate": 1589532196002,
   "repoUrl": "https://github.com/thomaspoignant/scim-patch",
   "entries": {
     "Benchmark.js Benchmark": [
@@ -114,6 +114,44 @@ window.BENCHMARK_DATA = {
             "range": "±2.77%",
             "unit": "ops/sec",
             "extra": "82 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "thomas.poignant@gmail.com",
+            "name": "Thomas Poignant",
+            "username": "thomaspoignant"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e4a40cb18cc7ea65f87a0157c8631cb01d273cf1",
+          "message": "Adding link to the performance suite (#28)",
+          "timestamp": "2020-05-15T10:42:38+02:00",
+          "tree_id": "23517beb7c8534f14255f3387f1b17ecc4302214",
+          "url": "https://github.com/thomaspoignant/scim-patch/commit/e4a40cb18cc7ea65f87a0157c8631cb01d273cf1"
+        },
+        "date": 1589532195066,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "Replace query",
+            "value": 316947,
+            "range": "±1.63%",
+            "unit": "ops/sec",
+            "extra": "90 samples"
+          },
+          {
+            "name": "Add query",
+            "value": 1030187,
+            "range": "±1.94%",
+            "unit": "ops/sec",
+            "extra": "90 samples"
           }
         ]
       }
