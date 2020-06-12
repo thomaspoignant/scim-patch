@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1591257823722,
+  "lastUpdate": 1591975002694,
   "repoUrl": "https://github.com/thomaspoignant/scim-patch",
   "entries": {
     "Benchmark.js Benchmark": [
@@ -228,6 +228,44 @@ window.BENCHMARK_DATA = {
             "range": "±1.67%",
             "unit": "ops/sec",
             "extra": "91 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "thomas.poignant@gmail.com",
+            "name": "Thomas Poignant",
+            "username": "thomaspoignant"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "8b729e5ef20e8713afb827f5c78d039f2f9a0968",
+          "message": "Create CODE_OF_CONDUCT.md (#30)",
+          "timestamp": "2020-06-12T17:16:00+02:00",
+          "tree_id": "435c4b05c06ff918493f09e83e793d848524a94b",
+          "url": "https://github.com/thomaspoignant/scim-patch/commit/8b729e5ef20e8713afb827f5c78d039f2f9a0968"
+        },
+        "date": 1591975000671,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "Replace query",
+            "value": 341835,
+            "range": "±1.94%",
+            "unit": "ops/sec",
+            "extra": "90 samples"
+          },
+          {
+            "name": "Add query",
+            "value": 1192083,
+            "range": "±2.46%",
+            "unit": "ops/sec",
+            "extra": "84 samples"
           }
         ]
       }
