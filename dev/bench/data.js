@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1592046064109,
+  "lastUpdate": 1595178473566,
   "repoUrl": "https://github.com/thomaspoignant/scim-patch",
   "entries": {
     "Benchmark.js Benchmark": [
@@ -342,6 +342,44 @@ window.BENCHMARK_DATA = {
             "range": "±1.92%",
             "unit": "ops/sec",
             "extra": "85 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "thomas.poignant@gmail.com",
+            "name": "Thomas Poignant",
+            "username": "thomaspoignant"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9fd01225e6f2911a40974611e3d4813b7f469ce6",
+          "message": "Update depedencies to resolve low vunelrability (#31)",
+          "timestamp": "2020-07-19T19:07:16+02:00",
+          "tree_id": "4c0ba614487ed1a50d69b90c830f01ef364196c7",
+          "url": "https://github.com/thomaspoignant/scim-patch/commit/9fd01225e6f2911a40974611e3d4813b7f469ce6"
+        },
+        "date": 1595178472976,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "Replace query",
+            "value": 397227,
+            "range": "±1.77%",
+            "unit": "ops/sec",
+            "extra": "90 samples"
+          },
+          {
+            "name": "Add query",
+            "value": 1245123,
+            "range": "±1.58%",
+            "unit": "ops/sec",
+            "extra": "95 samples"
           }
         ]
       }
