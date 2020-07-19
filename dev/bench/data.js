@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1595178473566,
+  "lastUpdate": 1595179280301,
   "repoUrl": "https://github.com/thomaspoignant/scim-patch",
   "entries": {
     "Benchmark.js Benchmark": [
@@ -380,6 +380,44 @@ window.BENCHMARK_DATA = {
             "range": "±1.58%",
             "unit": "ops/sec",
             "extra": "95 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "thomas.poignant@gmail.com",
+            "name": "Thomas Poignant",
+            "username": "thomaspoignant"
+          },
+          "committer": {
+            "email": "thomas.poignant@gmail.com",
+            "name": "Thomas Poignant",
+            "username": "thomaspoignant"
+          },
+          "distinct": true,
+          "id": "1847946ba6aab378a4dfb96bce5d4cbbc3acd57f",
+          "message": "Revert \"Move benchmark into dev dependencies (#32)\"\n\nThis reverts commit b1dce73a6e303f293bb4c0c56b621f2bab0c3ea8.",
+          "timestamp": "2020-07-19T19:20:31+02:00",
+          "tree_id": "4c0ba614487ed1a50d69b90c830f01ef364196c7",
+          "url": "https://github.com/thomaspoignant/scim-patch/commit/1847946ba6aab378a4dfb96bce5d4cbbc3acd57f"
+        },
+        "date": 1595179279876,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "Replace query",
+            "value": 326444,
+            "range": "±1.60%",
+            "unit": "ops/sec",
+            "extra": "93 samples"
+          },
+          {
+            "name": "Add query",
+            "value": 1040643,
+            "range": "±1.84%",
+            "unit": "ops/sec",
+            "extra": "91 samples"
           }
         ]
       }
