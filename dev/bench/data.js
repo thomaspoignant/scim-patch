@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1595180010231,
+  "lastUpdate": 1595763084845,
   "repoUrl": "https://github.com/thomaspoignant/scim-patch",
   "entries": {
     "Benchmark.js Benchmark": [
@@ -456,6 +456,44 @@ window.BENCHMARK_DATA = {
             "range": "±2.40%",
             "unit": "ops/sec",
             "extra": "84 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "thomas.poignant@gmail.com",
+            "name": "Thomas Poignant",
+            "username": "thomaspoignant"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6ba4cbec8ed2d2c1cb94e10f23bee9adb7e921fb",
+          "message": "Bump to v1 because this version is stable (#34)\n\nAfter running this code for a long time in production, I move to v1 to have a better naming.\r\nNo change in this version, this is purely for naming purpose.",
+          "timestamp": "2020-07-26T13:30:48+02:00",
+          "tree_id": "dd5a0354cba1198453f3b8ecbc3434be20eb710a",
+          "url": "https://github.com/thomaspoignant/scim-patch/commit/6ba4cbec8ed2d2c1cb94e10f23bee9adb7e921fb"
+        },
+        "date": 1595763084420,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "Replace query",
+            "value": 329398,
+            "range": "±1.80%",
+            "unit": "ops/sec",
+            "extra": "87 samples"
+          },
+          {
+            "name": "Add query",
+            "value": 1097580,
+            "range": "±2.04%",
+            "unit": "ops/sec",
+            "extra": "88 samples"
           }
         ]
       }
