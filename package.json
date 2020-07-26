@@ -1,6 +1,6 @@
 {
   "name": "scim-patch",
-  "version": "0.2.4",
+  "version": "1.0.0",
   "description": "SCIM Patch operation (rfc7644).",
   "main": "lib/src/scimPatch.js",
   "types": "lib/src/scimPatch.d.ts",
