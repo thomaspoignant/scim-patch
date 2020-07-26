@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1595763084845,
+  "lastUpdate": 1595763843915,
   "repoUrl": "https://github.com/thomaspoignant/scim-patch",
   "entries": {
     "Benchmark.js Benchmark": [
@@ -494,6 +494,44 @@ window.BENCHMARK_DATA = {
             "range": "±2.04%",
             "unit": "ops/sec",
             "extra": "88 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "thomas.poignant@gmail.com",
+            "name": "Thomas Poignant",
+            "username": "thomaspoignant"
+          },
+          "committer": {
+            "email": "thomas.poignant@gmail.com",
+            "name": "Thomas Poignant",
+            "username": "thomaspoignant"
+          },
+          "distinct": true,
+          "id": "a0ce30a458187c382e16f88f3ac541f96265db52",
+          "message": "Upgrade dure to CI problems",
+          "timestamp": "2020-07-26T13:43:17+02:00",
+          "tree_id": "91502d6a5972efde72b625ecaa5f86c39e0a2036",
+          "url": "https://github.com/thomaspoignant/scim-patch/commit/a0ce30a458187c382e16f88f3ac541f96265db52"
+        },
+        "date": 1595763843367,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "Replace query",
+            "value": 370809,
+            "range": "±1.60%",
+            "unit": "ops/sec",
+            "extra": "86 samples"
+          },
+          {
+            "name": "Add query",
+            "value": 1262866,
+            "range": "±2.11%",
+            "unit": "ops/sec",
+            "extra": "85 samples"
           }
         ]
       }
