@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1595763843915,
+  "lastUpdate": 1595764206963,
   "repoUrl": "https://github.com/thomaspoignant/scim-patch",
   "entries": {
     "Benchmark.js Benchmark": [
@@ -532,6 +532,44 @@ window.BENCHMARK_DATA = {
             "range": "±2.11%",
             "unit": "ops/sec",
             "extra": "85 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "87247512ad3861680bb2267f4ce24c715efcc89f",
+          "message": "Bump lodash from 4.17.15 to 4.17.19 (#33)\n\nBumps [lodash](https://github.com/lodash/lodash) from 4.17.15 to 4.17.19.\n- [Release notes](https://github.com/lodash/lodash/releases)\n- [Commits](https://github.com/lodash/lodash/compare/4.17.15...4.17.19)\n\nSigned-off-by: dependabot[bot] <support@github.com>\n\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2020-07-19T19:32:53+02:00",
+          "tree_id": "4c0ba614487ed1a50d69b90c830f01ef364196c7",
+          "url": "https://github.com/thomaspoignant/scim-patch/commit/87247512ad3861680bb2267f4ce24c715efcc89f"
+        },
+        "date": 1595764206623,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "Replace query",
+            "value": 352436,
+            "range": "±2.50%",
+            "unit": "ops/sec",
+            "extra": "81 samples"
+          },
+          {
+            "name": "Add query",
+            "value": 1371170,
+            "range": "±2.53%",
+            "unit": "ops/sec",
+            "extra": "87 samples"
           }
         ]
       }
