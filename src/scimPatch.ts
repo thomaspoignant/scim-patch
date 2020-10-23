@@ -159,9 +159,6 @@ function applyAddOrReplaceOperation(scimResource: ScimResource, patch: ScimPatch
     const lastSubPath = paths[paths.length - 1];
 
     if (!IS_ARRAY_SEARCH.test(lastSubPath)) {
-
-
-
         resource[lastSubPath] = addOrReplaceAttribute(resource[lastSubPath], patch);
         return scimResource;
     }
