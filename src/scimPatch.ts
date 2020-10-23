@@ -247,6 +247,10 @@ function navigate(inputSchema: any, paths: string[]): any {
  */
 function addOrReplaceAttribute(property: any, patch: ScimPatchAddReplaceOperation): any {
     if (Array.isArray(property)) {
+        const isReplace = patch.op.toLowerCase() === 'replace';
+        if(isReplace && Array.isArray(patch.value))
+            return patch.value;
+
         const a = property;
         if (!a.includes(patch.value))
             a.push(patch.value);
