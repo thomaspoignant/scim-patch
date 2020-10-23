@@ -223,7 +223,20 @@ describe('SCIM PATCH', () => {
             const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
             expect(afterPatch[path]).to.be.eq(expected);
             return done();
-        })
+        });
+
+        it('REPLACE: array by another array', done => {
+            const expected = [ { value: 'test2' } ];
+            const path = 'emails';
+            const patch: ScimPatchAddReplaceOperation = {
+                op: 'replace',
+                value: expected,
+                path: path
+            };
+            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            expect(afterPatch[path]).to.be.eq(expected);
+            return done();
+        });
     });
 
     describe('add', () => {
