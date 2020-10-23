@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1595764206963,
+  "lastUpdate": 1603452253127,
   "repoUrl": "https://github.com/thomaspoignant/scim-patch",
   "entries": {
     "Benchmark.js Benchmark": [
@@ -570,6 +570,44 @@ window.BENCHMARK_DATA = {
             "range": "±2.53%",
             "unit": "ops/sec",
             "extra": "87 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "thomas.poignant@gmail.com",
+            "name": "Thomas Poignant",
+            "username": "thomaspoignant"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "598137aa1fffb4e2654d72065c4945fc5b3d0dcb",
+          "message": "Fix: replace array by array (#37)",
+          "timestamp": "2020-10-23T13:23:32+02:00",
+          "tree_id": "07018bd739048be065ad9db938211b98f50b6421",
+          "url": "https://github.com/thomaspoignant/scim-patch/commit/598137aa1fffb4e2654d72065c4945fc5b3d0dcb"
+        },
+        "date": 1603452252726,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "Replace query",
+            "value": 305784,
+            "range": "±1.89%",
+            "unit": "ops/sec",
+            "extra": "90 samples"
+          },
+          {
+            "name": "Add query",
+            "value": 903582,
+            "range": "±1.75%",
+            "unit": "ops/sec",
+            "extra": "92 samples"
           }
         ]
       }
