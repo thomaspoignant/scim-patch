@@ -247,9 +247,16 @@ function navigate(inputSchema: any, paths: string[]): any {
  */
 function addOrReplaceAttribute(property: any, patch: ScimPatchAddReplaceOperation): any {
     if (Array.isArray(property)) {
-        const isReplace = patch.op.toLowerCase() === 'replace';
-        if(isReplace && Array.isArray(patch.value))
+        if (Array.isArray(patch.value)) {
+            // if we're adding an array, we need to remove duplicated values from existing array
+            if (patch.op.toLowerCase() === "add") {
+                const existingItemValues = property.map(item => item.value)
+                const valuesToAdd = patch.value.filter(item => !existingItemValues.includes(item.value))
+                return property.concat(valuesToAdd);
+            }
+            // else this is a replace operation
             return patch.value;
+        }
 
         const a = property;
         if (!a.includes(patch.value))

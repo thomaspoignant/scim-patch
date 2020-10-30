@@ -441,6 +441,45 @@ describe('SCIM PATCH', () => {
             expect(afterPatch[path]).to.be.eq(expected);
             return done();
         });
+
+        it("ADD: array", (done) => {
+            const newValue = { value: "test2" };
+            const newArray = [newValue];
+            const path = "emails";
+            const initialArrayLength = scimUser[path].length;
+            const patch: ScimPatchAddReplaceOperation = {
+              op: "Add",
+              value: newArray,
+              path,
+            };
+            const afterPatch: ScimUser = <ScimUser>(
+                scimPatch(scimUser, [patch])
+            );
+            expect(afterPatch[path].length).to.be.eq(
+                initialArrayLength + newArray.length
+            );
+            expect(
+                afterPatch[path].find((val) => val.value === newValue.value)
+            ).to.eq(newValue);
+
+            return done();
+        });
+
+        it("ADD: array ignores existing values", (done) => {
+            const path = "emails";
+            const initialArrayLength = scimUser[path].length;
+            const patch: ScimPatchAddReplaceOperation = {
+              op: "Add",
+              value: scimUser[path],
+              path,
+            };
+            const afterPatch: ScimUser = <ScimUser>(
+                scimPatch(scimUser, [patch])
+            );
+            expect(afterPatch[path].length).to.be.eq(initialArrayLength);
+
+            return done();
+        });
     });
     describe('remove', () => {
         it('REMOVE: with no path', done => {
