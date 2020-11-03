@@ -250,8 +250,7 @@ function addOrReplaceAttribute(property: any, patch: ScimPatchAddReplaceOperatio
         if (Array.isArray(patch.value)) {
             // if we're adding an array, we need to remove duplicated values from existing array
             if (patch.op.toLowerCase() === "add") {
-                const existingItemValues = property.map(item => item.value)
-                const valuesToAdd = patch.value.filter(item => !existingItemValues.includes(item.value))
+                const valuesToAdd = patch.value.filter(item => !property.includes(item))
                 return property.concat(valuesToAdd);
             }
             // else this is a replace operation
