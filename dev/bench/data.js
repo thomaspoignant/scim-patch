@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1603468661846,
+  "lastUpdate": 1604403425381,
   "repoUrl": "https://github.com/thomaspoignant/scim-patch",
   "entries": {
     "Benchmark.js Benchmark": [
@@ -646,6 +646,44 @@ window.BENCHMARK_DATA = {
             "range": "±3.93%",
             "unit": "ops/sec",
             "extra": "81 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "alicial@users.noreply.github.com",
+            "name": "Alicia Liu",
+            "username": "alicial"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2318bb08d4f7bf47066068a2b5f0ae027b0c0c8f",
+          "message": "Fix: add array (#39)\n\n* Fix https://github.com/thomaspoignant/scim-patch/issues/38\r\n\r\n* Update src/scimPatch.ts\r\n\r\nCo-authored-by: Thomas Poignant <thomas.poignant@gmail.com>",
+          "timestamp": "2020-11-03T12:36:27+01:00",
+          "tree_id": "17fb702f06599ec4e26a661765d3e4aa2b9d78c9",
+          "url": "https://github.com/thomaspoignant/scim-patch/commit/2318bb08d4f7bf47066068a2b5f0ae027b0c0c8f"
+        },
+        "date": 1604403424834,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "Replace query",
+            "value": 354256,
+            "range": "±2.31%",
+            "unit": "ops/sec",
+            "extra": "85 samples"
+          },
+          {
+            "name": "Add query",
+            "value": 1208555,
+            "range": "±2.10%",
+            "unit": "ops/sec",
+            "extra": "84 samples"
           }
         ]
       }
