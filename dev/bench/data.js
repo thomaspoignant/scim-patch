@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1605459113417,
+  "lastUpdate": 1605460419617,
   "repoUrl": "https://github.com/thomaspoignant/scim-patch",
   "entries": {
     "Benchmark.js Benchmark": [
@@ -798,6 +798,44 @@ window.BENCHMARK_DATA = {
             "range": "±1.84%",
             "unit": "ops/sec",
             "extra": "87 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "thomas.poignant@gmail.com",
+            "name": "Thomas Poignant",
+            "username": "thomaspoignant"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9426e4dd63ee4ff99d0db870843dd31c234dfeda",
+          "message": "Missing export for NoTarget exception (#46)",
+          "timestamp": "2020-11-15T18:13:00+01:00",
+          "tree_id": "b468121aa9f142afe0ab557444aacb3388db0a70",
+          "url": "https://github.com/thomaspoignant/scim-patch/commit/9426e4dd63ee4ff99d0db870843dd31c234dfeda"
+        },
+        "date": 1605460419003,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "Replace query",
+            "value": 306908,
+            "range": "±1.85%",
+            "unit": "ops/sec",
+            "extra": "96 samples"
+          },
+          {
+            "name": "Add query",
+            "value": 938670,
+            "range": "±1.66%",
+            "unit": "ops/sec",
+            "extra": "92 samples"
           }
         ]
       }
