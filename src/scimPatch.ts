@@ -36,7 +36,8 @@ export {
     InvalidScimPatch,
     InvalidScimPatchOp,
     NoPathInScimPatchOp,
-    InvalidScimPatchRequest
+    InvalidScimPatchRequest,
+    NoTarget
 };
 /*
  * This file implement the SCIM PATCH specification.
