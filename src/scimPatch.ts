@@ -57,7 +57,7 @@ export const PATCH_OPERATION_SCHEMA = 'urn:ietf:params:scim:api:messages:2.0:Pat
 /*
  * PatchBodyValidation validate if the request body of the SCIM Patch is valid.
  * If the body is not valid the function throw an error.
- * @Param body data from the patch request.
+ * @param body data from the patch request.
  * @throws {InvalidScimPatchRequest} if one operation is not valid.
  * @throws {NoPathInScimPatchOp} if one operation is a remove with no path.
  */
@@ -78,7 +78,7 @@ export function patchBodyValidation(body: ScimPatch): void {
  * @return the scimResource patched.
  * @throws {InvalidScimPatchOp} if the patch could not happen.
  */
-export function scimPatch(scimResource: ScimResource, patchOperations: Array<ScimPatchOperation>): ScimResource {
+export function scimPatch<T extends ScimResource>(scimResource: T, patchOperations: Array<ScimPatchOperation>): T {
     return patchOperations.reduce((patchedResource, patch) => {
         switch (patch.op) {
             case 'remove':
@@ -116,7 +116,7 @@ function validatePatchOperation(operation: ScimPatchOperation): void {
         throw new InvalidScimPatchRequest('Path is supposed to be a string');
 }
 
-function applyRemoveOperation(scimResource: ScimResource, patch: ScimPatchRemoveOperation): ScimResource {
+function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: ScimPatchRemoveOperation): T {
     // We manipulate the object directly without knowing his property, that's why we use any.
     let resource: Record<string, any> = scimResource;
     validatePatchOperation(patch);
@@ -147,7 +147,7 @@ function applyRemoveOperation(scimResource: ScimResource, patch: ScimPatchRemove
     return scimResource;
 }
 
-function applyAddOrReplaceOperation(scimResource: ScimResource, patch: ScimPatchAddReplaceOperation): ScimResource {
+function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, patch: ScimPatchAddReplaceOperation): T {
     // We manipulate the object directly without knowing his property, that's why we use any.
     let resource: Record<string, any> = scimResource;
     validatePatchOperation(patch);
