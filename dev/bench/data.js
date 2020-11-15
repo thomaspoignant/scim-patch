@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1605461849526,
+  "lastUpdate": 1605462667965,
   "repoUrl": "https://github.com/thomaspoignant/scim-patch",
   "entries": {
     "Benchmark.js Benchmark": [
@@ -912,6 +912,44 @@ window.BENCHMARK_DATA = {
             "range": "±2.43%",
             "unit": "ops/sec",
             "extra": "83 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "thomas.poignant@gmail.com",
+            "name": "Thomas Poignant",
+            "username": "thomaspoignant"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7f1b116b5e25c1e6274b6528fbfcf4ed11f421b4",
+          "message": "Update example to explicitely explain we need the try/catch (#48)",
+          "timestamp": "2020-11-15T18:50:26+01:00",
+          "tree_id": "f9b7e9b46ba840a7982310b267a917b7ccf76ccc",
+          "url": "https://github.com/thomaspoignant/scim-patch/commit/7f1b116b5e25c1e6274b6528fbfcf4ed11f421b4"
+        },
+        "date": 1605462667396,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "Replace query",
+            "value": 313298,
+            "range": "±1.68%",
+            "unit": "ops/sec",
+            "extra": "92 samples"
+          },
+          {
+            "name": "Add query",
+            "value": 897900,
+            "range": "±1.87%",
+            "unit": "ops/sec",
+            "extra": "85 samples"
           }
         ]
       }
