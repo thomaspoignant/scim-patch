@@ -46,7 +46,7 @@ describe('SCIM PATCH', () => {
         it('REPLACE: first level property with path', done => {
             const expected = false;
             const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: expected, path: 'active'};
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch.active).to.be.eq(expected);
             return done();
         });
@@ -54,7 +54,7 @@ describe('SCIM PATCH', () => {
         it('REPLACE: first level property without path', done => {
             const expected = false;
             const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: {active: expected}};
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch.active).to.be.eq(expected);
             return done();
         });
@@ -62,7 +62,7 @@ describe('SCIM PATCH', () => {
         it('REPLACE: 2 level property with path', done => {
             const expected = 'toto';
             const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: expected, path: 'name.familyName'};
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch.name.familyName).to.be.eq(expected);
             return done();
         });
@@ -70,7 +70,7 @@ describe('SCIM PATCH', () => {
         it('REPLACE: 2 level property without complete path', done => {
             const expected = 'toto';
             const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: {familyName: expected}, path: 'name'};
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch.name.familyName).to.be.eq(expected);
             return done();
         });
@@ -86,7 +86,7 @@ describe('SCIM PATCH', () => {
                 }, path: 'name'
             };
             const patch2: ScimPatchAddReplaceOperation = {op: 'replace', value: {active: expectedActive}};
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch1, patch2]);
+            const afterPatch = scimPatch(scimUser, [patch1, patch2]);
             expect(afterPatch.name.familyName).to.be.eq(expectedFamilyName);
             expect(afterPatch.name.givenName).to.be.eq(expectedGivenName);
             expect(afterPatch.active).to.be.eq(expectedActive);
@@ -108,7 +108,7 @@ describe('SCIM PATCH', () => {
                 value: expectedFamilyName,
                 path: 'name.familyName'
             };
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch1, patch2, patch3]);
+            const afterPatch = scimPatch(scimUser, [patch1, patch2, patch3]);
             expect(afterPatch.name.familyName).to.be.eq(expectedFamilyName);
             expect(afterPatch.name.givenName).to.be.eq(expectedGivenName);
             expect(afterPatch.active).to.be.eq(expectedActive);
@@ -122,7 +122,7 @@ describe('SCIM PATCH', () => {
                 value: {value: expected, primary: true},
                 path: 'emails[primary eq true]'
             };
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch1]);
+            const afterPatch = scimPatch(scimUser, [patch1]);
             expect(afterPatch.emails[0].value).to.be.eq(expected);
             expect(afterPatch.emails[0].primary).to.be.eq(true);
             return done();
@@ -136,7 +136,7 @@ describe('SCIM PATCH', () => {
                 value: {value: expected, primary: false},
                 path: 'surName[primary eq false]'
             };
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch1]);
+            const afterPatch = scimPatch(scimUser, [patch1]);
             expect(afterPatch.surName?.length).to.be.eq(2);
             return done();
         });
@@ -148,7 +148,7 @@ describe('SCIM PATCH', () => {
                 value: expected,
                 path: 'emails[primary eq true].value'
             };
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch1]);
+            const afterPatch = scimPatch(scimUser, [patch1]);
             expect(afterPatch.emails[0].value).to.be.eq(expected);
             expect(afterPatch.emails[0].primary).to.be.eq(true);
             return done();
@@ -163,7 +163,7 @@ describe('SCIM PATCH', () => {
                     primary: true
                 }, path: 'name.nestedArray[primary eq true]'
             };
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch1]);
+            const afterPatch = scimPatch(scimUser, [patch1]);
             expect(afterPatch.name.nestedArray && afterPatch.name.nestedArray[0].value).to.be.eq(expected);
             expect(afterPatch.name.nestedArray && afterPatch.name.nestedArray[0].primary).to.be.eq(true);
             return done();
@@ -192,14 +192,14 @@ describe('SCIM PATCH', () => {
                     newProperty1: 'toto'
                 }, path: 'name.nestedArray[toto eq true]'
             };
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch1]);
+            const afterPatch = scimPatch(scimUser, [patch1]);
             expect(afterPatch.name.nestedArray).to.be.eq(scimUser.name.nestedArray);
             return done();
         });
 
         it('REPLACE: XXX', done => {
             const patch1: ScimPatchRemoveOperation = {op: 'remove', path: 'emails[primary eq true].value'};
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch1]);
+            const afterPatch = scimPatch(scimUser, [patch1]);
             expect(afterPatch.emails[0].value).not.to.exist;
             expect(afterPatch.emails[0].primary).to.eq(true);
             return done();
@@ -208,7 +208,7 @@ describe('SCIM PATCH', () => {
         it('REPLACE: with capital first letter for operation', done => {
             const expected = false;
             const patch: ScimPatchAddReplaceOperation = {op: 'Replace', value: {active: expected}};
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch.active).to.be.eq(expected);
             return done();
         });
@@ -221,7 +221,7 @@ describe('SCIM PATCH', () => {
                 value: expected,
                 path: path
             };
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch[path]).to.be.eq(expected);
             return done();
         });
@@ -234,7 +234,7 @@ describe('SCIM PATCH', () => {
                 value: expected,
                 path: path
             };
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch[path]).to.be.eq(expected);
             return done();
         });
@@ -257,7 +257,7 @@ describe('SCIM PATCH', () => {
         it('ADD: first level property without path', done => {
             const expected = 'newValue';
             const patch: ScimPatchAddReplaceOperation = {op: 'add', value: {newProperty: expected}};
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch.newProperty).to.be.eq(expected);
             return done();
         });
@@ -265,7 +265,7 @@ describe('SCIM PATCH', () => {
         it('ADD: first level property with path', done => {
             const expected = 'newValue';
             const patch: ScimPatchAddReplaceOperation = {op: 'add', value: expected, path: 'newProperty'};
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch.newProperty).to.be.eq(expected);
             return done();
         });
@@ -273,7 +273,7 @@ describe('SCIM PATCH', () => {
         it('ADD: 2 level property with path', done => {
             const expected = 'toto';
             const patch: ScimPatchAddReplaceOperation = {op: 'add', value: expected, path: 'name.newProperty'};
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch.name.newProperty).to.be.eq(expected);
             return done();
         });
@@ -281,7 +281,7 @@ describe('SCIM PATCH', () => {
         it('ADD: 2 level property without complete path', done => {
             const expected = 'toto';
             const patch: ScimPatchAddReplaceOperation = {op: 'add', value: {newProperty: expected}, path: 'name'};
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch.name.newProperty).to.be.eq(expected);
             return done();
         });
@@ -297,7 +297,7 @@ describe('SCIM PATCH', () => {
                 }, path: 'name'
             };
             const patch2: ScimPatchAddReplaceOperation = {op: 'add', value: {newProperty3: expectedNewProperty3}};
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch1, patch2]);
+            const afterPatch = scimPatch(scimUser, [patch1, patch2]);
             expect(afterPatch.name.newProperty1).to.be.eq(expectedNewProperty1);
             expect(afterPatch.name.newProperty2).to.be.eq(expectedNewProperty2);
             expect(afterPatch.newProperty3).to.be.eq(expectedNewProperty3);
@@ -319,7 +319,7 @@ describe('SCIM PATCH', () => {
                 value: expectedNewProperty2,
                 path: 'name.newProperty2'
             };
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch1, patch2, patch3]);
+            const afterPatch = scimPatch(scimUser, [patch1, patch2, patch3]);
             expect(afterPatch.name.newProperty1).to.be.eq(expectedNewProperty1);
             expect(afterPatch.name.newProperty2).to.be.eq(expectedNewProperty2);
             expect(afterPatch.newProperty3).to.be.eq(expectedNewProperty3);
@@ -335,7 +335,7 @@ describe('SCIM PATCH', () => {
                     newProperty2: expectedNewProperty2
                 }, path: 'emails[primary eq true]'
             };
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch1]);
+            const afterPatch = scimPatch(scimUser, [patch1]);
             expect(afterPatch.emails[0].newProperty1).to.be.eq(expectedNewProperty1);
             expect(afterPatch.emails[0].newProperty2).to.be.eq(expectedNewProperty2);
             expect(afterPatch.emails[0].value).to.be.eq(scimUser.emails[0].value);
@@ -349,7 +349,7 @@ describe('SCIM PATCH', () => {
                 value: expected,
                 path: 'emails[primary eq true].newProperty'
             };
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch.emails[0].newProperty).to.be.eq(expected);
             expect(afterPatch.emails[0].primary).to.be.eq(true);
             return done();
@@ -365,7 +365,7 @@ describe('SCIM PATCH', () => {
                     newProperty2: expectedNewProperty2
                 }, path: 'name.nestedArray[primary eq true]'
             };
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch1]);
+            const afterPatch = scimPatch(scimUser, [patch1]);
             expect(afterPatch.name.nestedArray && afterPatch.name.nestedArray[0].newProperty1).to.be.eq(expectedNewProperty1);
             expect(afterPatch.name.nestedArray && afterPatch.name.nestedArray[0].newProperty2).to.be.eq(expectedNewProperty2);
             return done();
@@ -376,7 +376,7 @@ describe('SCIM PATCH', () => {
             const patch: ScimPatchAddReplaceOperation = {
                 op: 'add', value: newSurname, path: 'name.surName2'
             };
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch.name.surName2).to.contains('toto');
             expect(afterPatch.name.surName2).to.contains(newSurname);
             return done();
@@ -388,7 +388,7 @@ describe('SCIM PATCH', () => {
             const patch: ScimPatchAddReplaceOperation = {
                 op: 'add', value: newSurname, path: 'name.surName3'
             };
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch.name.surName3).to.be.eq(newSurname);
             return done();
         });
@@ -399,7 +399,7 @@ describe('SCIM PATCH', () => {
             const patch: ScimPatchAddReplaceOperation = {
                 op: 'add', value: newSurname, path: 'name.surName2'
             };
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch.name.surName2).to.contains('toto');
             expect(afterPatch.name.surName2).to.contains('titi');
             expect(afterPatch.name.surName2).to.contains(newSurname);
@@ -412,7 +412,7 @@ describe('SCIM PATCH', () => {
             const patch: ScimPatchAddReplaceOperation = {
                 op: 'add', value: newSurname, path: 'name.surName2'
             };
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch.name.surName2).to.contains('toto');
             expect(afterPatch.name.surName2?.filter(s => s === 'titi').length).to.eq(1);
             return done();
@@ -431,7 +431,7 @@ describe('SCIM PATCH', () => {
                     newProperty1: 'toto'
                 }, path: 'name.nestedArray[toto eq true]'
             };
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch1]);
+            const afterPatch = scimPatch(scimUser, [patch1]);
             expect(afterPatch.name.nestedArray).to.be.eq(scimUser.name.nestedArray);
             return done();
         });
@@ -439,7 +439,7 @@ describe('SCIM PATCH', () => {
         it('ADD: with capital first letter for operation', done => {
             const expected = 'newValue';
             const patch: ScimPatchAddReplaceOperation = {op: 'Add', value: {newProperty: expected}};
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch.newProperty).to.be.eq(expected);
             return done();
         });
@@ -451,7 +451,7 @@ describe('SCIM PATCH', () => {
             const patch: ScimPatchAddReplaceOperation = {
                 op: 'add', value: 'newValue', path: path
             };
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch[path]).to.be.eq(expected);
             return done();
         });
@@ -504,21 +504,21 @@ describe('SCIM PATCH', () => {
 
         it('REMOVE: first level property with path', done => {
             const patch: ScimPatchRemoveOperation = {op: 'remove', path: 'active'};
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch.active).not.to.exist;
             return done();
         });
 
         it('REMOVE: 2 level property with path', done => {
             const patch: ScimPatchRemoveOperation = {op: 'remove', path: 'name.familyName'};
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch.name.familyName).not.to.exist;
             return done();
         });
 
         it('REMOVE: full object', done => {
             const patch: ScimPatchRemoveOperation = {op: 'remove', path: 'name'};
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch.name).not.to.exist;
             return done();
         });
@@ -526,7 +526,7 @@ describe('SCIM PATCH', () => {
         it('REMOVE: multiple property at once with path', done => {
             const patch1: ScimPatchRemoveOperation = {op: 'remove', path: 'name'};
             const patch2: ScimPatchRemoveOperation = {op: 'remove', path: 'active'};
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch1, patch2]);
+            const afterPatch = scimPatch(scimUser, [patch1, patch2]);
             expect(afterPatch.name).not.to.exist;
             expect(afterPatch.active).not.to.exist;
             return done();
@@ -534,7 +534,7 @@ describe('SCIM PATCH', () => {
 
         it('REMOVE: primary email value', done => {
             const patch1: ScimPatchRemoveOperation = {op: 'remove', path: 'emails[primary eq true].value'};
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch1]);
+            const afterPatch = scimPatch(scimUser, [patch1]);
             expect(afterPatch.emails[0].value).not.to.exist;
             expect(afterPatch.emails[0].primary).to.eq(true);
             return done();
@@ -543,7 +543,7 @@ describe('SCIM PATCH', () => {
         it('REMOVE: nested array element', done => {
             scimUser.name.nestedArray = [{primary: true, value: 'value1'}, {primary: false, value: 'value2'}];
             const patch1: ScimPatchRemoveOperation = {op: 'remove', path: 'name.nestedArray[primary eq true]'};
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch1]);
+            const afterPatch = scimPatch(scimUser, [patch1]);
             expect(afterPatch.name.nestedArray && afterPatch.name.nestedArray.length).to.eq(1);
             return done();
         });
@@ -551,14 +551,14 @@ describe('SCIM PATCH', () => {
         it('REMOVE: empty array should be unassigned', done => {
             scimUser.name.nestedArray = [{primary: true, value: 'value1'}];
             const patch1: ScimPatchRemoveOperation = {op: 'remove', path: 'name.nestedArray[primary eq true]'};
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch1]);
+            const afterPatch = scimPatch(scimUser, [patch1]);
             expect(afterPatch.name.nestedArray).not.to.exist;
             return done();
         });
 
         it('REMOVE: with capital first letter for operation', done => {
             const patch: ScimPatchRemoveOperation = {op: 'Remove', path: 'active'};
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch.active).not.to.exist;
             return done();
         });
@@ -566,7 +566,7 @@ describe('SCIM PATCH', () => {
         it('REMOVE: with version number in path', done => {
             const path = 'urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department';
             const patch: ScimPatchRemoveOperation = {op: 'remove', path: path};
-            const afterPatch: ScimUser = <ScimUser>scimPatch(scimUser, [patch]);
+            const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch[path]).not.to.exist;
             return done();
         })
