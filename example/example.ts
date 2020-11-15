@@ -55,11 +55,15 @@ const patchs: Array<ScimPatchOperation> = [{
 try {
   patchBodyValidation(patchs[0]);
 } catch (error) {
-  // Here if there are an error in you SCIM request.
+  // Here if there is an error in your SCIM patch request.
 }
 
 // PATCH
-const patchedScimUser = scimPatch(scimUser, patchs);
+try{
+  const patchedScimUser = scimPatch(scimUser, patchs);
+} catch (error) {
+  // Here if there is an error during the patch.
+}
 
 /*
 ___________________________
