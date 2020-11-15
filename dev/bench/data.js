@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1605462667965,
+  "lastUpdate": 1605463534472,
   "repoUrl": "https://github.com/thomaspoignant/scim-patch",
   "entries": {
     "Benchmark.js Benchmark": [
@@ -950,6 +950,42 @@ window.BENCHMARK_DATA = {
             "range": "±1.87%",
             "unit": "ops/sec",
             "extra": "85 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "thomas.poignant@adevinta.com",
+            "name": "Thomas Poignant"
+          },
+          "committer": {
+            "email": "thomas.poignant@adevinta.com",
+            "name": "Thomas Poignant"
+          },
+          "distinct": true,
+          "id": "e03db7939ef4c0166d2bda7ed78e407cd9d906bf",
+          "message": "Add PR template",
+          "timestamp": "2020-11-15T19:04:47+01:00",
+          "tree_id": "4c66ddc7214f014e6087ba2c0bd001f6a89c1d20",
+          "url": "https://github.com/thomaspoignant/scim-patch/commit/e03db7939ef4c0166d2bda7ed78e407cd9d906bf"
+        },
+        "date": 1605463532108,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "Replace query",
+            "value": 323691,
+            "range": "±1.54%",
+            "unit": "ops/sec",
+            "extra": "93 samples"
+          },
+          {
+            "name": "Add query",
+            "value": 982235,
+            "range": "±1.66%",
+            "unit": "ops/sec",
+            "extra": "91 samples"
           }
         ]
       }
