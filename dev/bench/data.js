@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1605460419617,
+  "lastUpdate": 1605461317178,
   "repoUrl": "https://github.com/thomaspoignant/scim-patch",
   "entries": {
     "Benchmark.js Benchmark": [
@@ -836,6 +836,44 @@ window.BENCHMARK_DATA = {
             "range": "±1.66%",
             "unit": "ops/sec",
             "extra": "92 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "markwongsk@gmail.com",
+            "name": "Mark Wong Siang Kai",
+            "username": "markwongsk"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "7c7090e2dc0b6e82b9f4572d5da299f96be2fac5",
+          "message": "Add generics to scimPatch (#43)",
+          "timestamp": "2020-11-15T18:27:56+01:00",
+          "tree_id": "3d4bb1f8f390d4f6f25955404d5ee06b3c6c64e7",
+          "url": "https://github.com/thomaspoignant/scim-patch/commit/7c7090e2dc0b6e82b9f4572d5da299f96be2fac5"
+        },
+        "date": 1605461316588,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "Replace query",
+            "value": 325925,
+            "range": "±1.81%",
+            "unit": "ops/sec",
+            "extra": "94 samples"
+          },
+          {
+            "name": "Add query",
+            "value": 906768,
+            "range": "±1.53%",
+            "unit": "ops/sec",
+            "extra": "91 samples"
           }
         ]
       }
