@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1604403873820,
+  "lastUpdate": 1605454462518,
   "repoUrl": "https://github.com/thomaspoignant/scim-patch",
   "entries": {
     "Benchmark.js Benchmark": [
@@ -720,6 +720,44 @@ window.BENCHMARK_DATA = {
             "name": "Add query",
             "value": 955510,
             "range": "±3.78%",
+            "unit": "ops/sec",
+            "extra": "87 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "thomas.poignant@gmail.com",
+            "name": "Thomas Poignant",
+            "username": "thomaspoignant"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "edc77d1cfb88bef9e215ca548a48cec7cbe79441",
+          "message": "Return noTarget if the valuePath target a non existing object in a replace (#44)\n\nCo-authored-by: Thomas Poignant <thomas.poignant@adevinta.com>",
+          "timestamp": "2020-11-15T16:33:37+01:00",
+          "tree_id": "040d18ecc893dd5b622978f42dd80a9a3bc28640",
+          "url": "https://github.com/thomaspoignant/scim-patch/commit/edc77d1cfb88bef9e215ca548a48cec7cbe79441"
+        },
+        "date": 1605454459303,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "Replace query",
+            "value": 347003,
+            "range": "±1.68%",
+            "unit": "ops/sec",
+            "extra": "89 samples"
+          },
+          {
+            "name": "Add query",
+            "value": 1053208,
+            "range": "±1.88%",
             "unit": "ops/sec",
             "extra": "87 samples"
           }
