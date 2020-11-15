@@ -31,3 +31,12 @@ export class InvalidScimPatchRequest extends InvalidScimPatch {
     super(`The SCIM patch request is invalid: ${message}`);
   }
 }
+
+export class NoTarget extends InvalidScimPatch {
+ constructor(valuePath: string) {
+   super(
+     `Target location is a multi-valued attribute for which a value selection filter (${valuePath}) has been supplied and no record match was made.`,
+     'noTarget'
+   );
+ }
+}
