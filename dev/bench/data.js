@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1605461317178,
+  "lastUpdate": 1605461849526,
   "repoUrl": "https://github.com/thomaspoignant/scim-patch",
   "entries": {
     "Benchmark.js Benchmark": [
@@ -874,6 +874,44 @@ window.BENCHMARK_DATA = {
             "range": "±1.53%",
             "unit": "ops/sec",
             "extra": "91 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "thomas.poignant@gmail.com",
+            "name": "Thomas Poignant",
+            "username": "thomaspoignant"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e510fb2074a141275d392e76505575c2288b1823",
+          "message": "Update test with generics signature (#47)\n\n* Remove cast since we are using generics now\r\n* bump to 0.3.0",
+          "timestamp": "2020-11-15T18:36:51+01:00",
+          "tree_id": "597eaf7ba0f64d0b183147c9b9e32b4fa4bd2055",
+          "url": "https://github.com/thomaspoignant/scim-patch/commit/e510fb2074a141275d392e76505575c2288b1823"
+        },
+        "date": 1605461848953,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "Replace query",
+            "value": 332055,
+            "range": "±1.88%",
+            "unit": "ops/sec",
+            "extra": "77 samples"
+          },
+          {
+            "name": "Add query",
+            "value": 1211032,
+            "range": "±2.43%",
+            "unit": "ops/sec",
+            "extra": "83 samples"
           }
         ]
       }
