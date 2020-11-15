@@ -8,6 +8,7 @@ import {
 import {ScimUser} from './types/types.test';
 import {expect} from 'chai';
 import {ScimPatchAddReplaceOperation, ScimPatchRemoveOperation} from '../src/types/types';
+import {NoTarget} from "../src/errors/scimErrors";
 
 describe('SCIM PATCH', () => {
     let scimUser: ScimUser;
@@ -237,6 +238,19 @@ describe('SCIM PATCH', () => {
             expect(afterPatch[path]).to.be.eq(expected);
             return done();
         });
+
+        it("REPLACE: no record match was made", (done) => {
+            // empty the surName fields.
+            scimUser.surName = [];
+            const patch: ScimPatchAddReplaceOperation = {
+                op: "replace",
+                path: "surName[primary eq true].value",
+                value: "surname"
+            };
+            expect(() => scimPatch(scimUser, [patch])).to.throw(NoTarget);
+            return done();
+        });
+
     });
 
     describe('add', () => {

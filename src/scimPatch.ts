@@ -3,7 +3,8 @@ import {
     InvalidScimPatch,
     InvalidScimPatchOp,
     NoPathInScimPatchOp,
-    InvalidScimPatchRequest
+    InvalidScimPatchRequest,
+    NoTarget
 } from './errors/scimErrors';
 import {
     ScimPatchSchema,
@@ -159,6 +160,9 @@ function applyAddOrReplaceOperation(scimResource: ScimResource, patch: ScimPatch
     const lastSubPath = paths[paths.length - 1];
 
     if (!IS_ARRAY_SEARCH.test(lastSubPath)) {
+        if (resource === undefined) {
+            throw new NoTarget(patch.value)
+        }
         resource[lastSubPath] = addOrReplaceAttribute(resource[lastSubPath], patch);
         return scimResource;
     }
