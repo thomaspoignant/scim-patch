@@ -1,5 +1,5 @@
 import Benchmark = require('benchmark');
-import { ScimPatchAddReplaceOperation } from '../../src/types/types';
+import { ScimPatchAddReplaceOperation, ScimPatchRemoveOperation } from '../../src/types/types';
 import { scimPatch } from '../../src/scimPatch';
 
 const scimUser = JSON.parse(`{
@@ -48,6 +48,12 @@ suite
     };
     const patch2: ScimPatchAddReplaceOperation = {op: 'add', value: {newProperty3: "newProperty3"}};
     scimPatch(scimUser, [patch1, patch2]);
+  })
+  .add("Remove query", ()=> {
+    const patch: ScimPatchRemoveOperation = {
+      op: 'remove', path: 'name.givenName'
+    };
+    scimPatch(scimUser, [patch]);
   })
   .on('cycle', (event: { target: any; }) => {
     console.log(String(event.target));
