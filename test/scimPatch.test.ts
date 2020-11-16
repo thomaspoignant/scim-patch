@@ -466,9 +466,7 @@ describe('SCIM PATCH', () => {
               value: newArray,
               path,
             };
-            const afterPatch: ScimUser = <ScimUser>(
-                scimPatch(scimUser, [patch])
-            );
+            const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch[path].length).to.be.eq(
                 initialArrayLength + newArray.length
             );
@@ -487,9 +485,7 @@ describe('SCIM PATCH', () => {
               value: scimUser[path],
               path,
             };
-            const afterPatch: ScimUser = <ScimUser>(
-                scimPatch(scimUser, [patch])
-            );
+            const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch[path].length).to.be.eq(initialArrayLength);
 
             return done();
