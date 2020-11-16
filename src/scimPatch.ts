@@ -98,7 +98,7 @@ export function scimPatch<T extends ScimResource>(scimResource: T, patchOperatio
 /*
  * validateOperation is validating that the SCIM Patch Operation follow the RFC.
  * If not, the function throw an Error.
- * @Param operation The SCIM operation we want to check.
+ * @param operation The SCIM operation we want to check.
  * @throws {InvalidScimPatchRequest} if the operation is not valid.
  * @throws {NoPathInScimPatchOp} if the operation is a remove with no path.
  */
