@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1605465968113,
+  "lastUpdate": 1605514961013,
   "repoUrl": "https://github.com/thomaspoignant/scim-patch",
   "entries": {
     "Benchmark.js Benchmark": [
@@ -1076,6 +1076,51 @@ window.BENCHMARK_DATA = {
             "range": "±1.29%",
             "unit": "ops/sec",
             "extra": "95 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "thomas.poignant@gmail.com",
+            "name": "Thomas Poignant",
+            "username": "thomaspoignant"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "311d51c42009116e4455aca6ab2bc4e841185dfc",
+          "message": "Remove use of generics (#52)",
+          "timestamp": "2020-11-16T09:21:48+01:00",
+          "tree_id": "c2f7aa128d6dd8fef3c811d515e31a7a7e353687",
+          "url": "https://github.com/thomaspoignant/scim-patch/commit/311d51c42009116e4455aca6ab2bc4e841185dfc"
+        },
+        "date": 1605514960411,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "Replace query",
+            "value": 363037,
+            "range": "±2.10%",
+            "unit": "ops/sec",
+            "extra": "84 samples"
+          },
+          {
+            "name": "Add query",
+            "value": 1146685,
+            "range": "±2.11%",
+            "unit": "ops/sec",
+            "extra": "84 samples"
+          },
+          {
+            "name": "Remove query",
+            "value": 1874344,
+            "range": "±1.61%",
+            "unit": "ops/sec",
+            "extra": "90 samples"
           }
         ]
       }
