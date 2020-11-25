@@ -329,7 +329,7 @@ function filterWithArray<T>(arr: T[], itemsToRemove: T[]): T[] {
             if (Array.isArray(itemToRemove)) {
                 throw new Error('Array inside array values to remove not supported for now');
             }
-            const isItemComplexStructure = typeof itemToRemove === 'object';
+            const isItemComplexStructure = isObject(itemToRemove);
 
             if (!isItemComplexStructure) {
                 const index = arr.findIndex((mainItem) => itemToRemove === mainItem);
