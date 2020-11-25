@@ -123,29 +123,41 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
 
     // Path is supposed to be set, there are a validation in the validateOperation function.
     const paths = patch.path.split(SPLIT_PERIOD);
+    const value = patch.value;
+
+
     resource = navigate(resource, paths);
 
     // Dealing with the last element of the path.
     const lastSubPath = paths[paths.length - 1];
 
-    if (!IS_ARRAY_SEARCH.test(lastSubPath)) {
+    if (!IS_ARRAY_SEARCH.test(lastSubPath) && !value) {
         // This is a mono valued property, we delete it.
         delete resource[lastSubPath];
         return scimResource;
     }
 
     // The last element is an Array request.
+
+    if (!IS_ARRAY_SEARCH.test(lastSubPath) && value) {
+        // this is a mono values property that can possibly have children, we need to remove children by value
+        resource[lastSubPath] = filterWithArray(resource[lastSubPath], value);
+
+        return scimResource;
+    }
     const {attrName, valuePath, array} = extractArray(lastSubPath, resource);
 
-    // We keep only items who don't match the query.
+    // We keep only items who don't match the query if supplied.
     resource[attrName] = array.filter((e: any) => !filterWithQuery<any>(array, valuePath).includes(e));
 
     // If the complex multi-valued attribute has no remaining records, the attribute SHALL be considered unassigned.
-    if (resource[attrName].length === 0)
+    if (resource[attrName].length === 0) { 
         delete resource[attrName];
+    }
 
     return scimResource;
 }
+
 
 function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, patch: ScimPatchAddReplaceOperation): T {
     // We manipulate the object directly without knowing his property, that's why we use any.
@@ -209,6 +221,8 @@ function extractArray(subPath: string, schema: any): ScimSearchQuery {
 
     return new ScimSearchQuery(attrName, valuePath, element);
 }
+
+
 
 /**
  * navigate allow to get the sub object who want to edit with the patch operation.
@@ -299,6 +313,73 @@ function filterWithQuery<T>(arr: Array<T>, querySearch: string): Array<T> {
         throw new InvalidScimPatchOp(error);
     }
 }
+
+/**
+ * Return the items in the array who match the filter.
+ * @param arr the collection where we are searching.
+ * @param querySearch the search request.
+ * @return an array who contains the search results.
+ */
+function filterWithArray<T>(arr: T[], arraySearch: T[]): T[] {
+    if (!Array.isArray(arr)) {
+        throw new Error('Can`t remove item from non array like property');
+    }
+    try {
+        arraySearch.forEach((itemToRemove) => {
+            if (Array.isArray(itemToRemove)) {
+                throw new Error('Array inside array values to remove not supported for now');
+            }
+            const isItemComplexStructure = typeof itemToRemove === 'object';
+
+            if (!isItemComplexStructure) {
+                const index = arr.findIndex((mainItem) => itemToRemove === mainItem);
+                return dropItemFromArray(arr, index)
+            }
+
+            const index = arr.findIndex((mainItem) => deepEqual(itemToRemove, mainItem));
+            return dropItemFromArray(arr, index);
+        })
+        return arr;
+    } catch (error) {
+        throw new InvalidScimPatchOp(error);
+    }
+}
+function dropItemFromArray<T>(arr: T[], index: number) {
+    if (index === -1) {
+        return;
+    }
+    const mainArrMaxIndex = arr.length - 1;
+    [arr[index], arr[mainArrMaxIndex]] = [arr[mainArrMaxIndex], arr[index]]
+    arr.pop()
+    return;
+}
+
+function deepEqual(object1: Record<string, any>, object2: Record<string, any>): boolean {
+    const keys1 = Object.keys(object1);
+    const keys2 = Object.keys(object2);
+  
+    if (keys1.length !== keys2.length) {
+      return false;
+    }
+  
+    for (const key of keys1) {
+      const val1 = object1[key];
+      const val2 = object2[key];
+      const areObjects = isObject(val1) && isObject(val2);
+      if (
+        areObjects && !deepEqual(val1, val2) ||
+        !areObjects && val1 !== val2
+      ) {
+        return false;
+      }
+    }
+  
+    return true;
+  }
+  
+  function isObject(object: Record<string, any>): boolean {
+    return object != null && typeof object === 'object';
+  }
 
 function isValidOperation(operation: string): boolean {
     return AUTHORIZED_OPERATION.includes(operation.toLowerCase());
