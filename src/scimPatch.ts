@@ -315,17 +315,17 @@ function filterWithQuery<T>(arr: Array<T>, querySearch: string): Array<T> {
 }
 
 /**
- * Return the items in the array who match the filter.
+ * Return the array without items supplied in .
  * @param arr the collection where we are searching.
- * @param querySearch the search request.
- * @return an array who contains the search results.
+ * @param itemsToRemove array with items to remove from original.
+ * @return an array which contains the search results.
  */
-function filterWithArray<T>(arr: T[], arraySearch: T[]): T[] {
+function filterWithArray<T>(arr: T[], itemsToRemove: T[]): T[] {
     if (!Array.isArray(arr)) {
         throw new Error('Can`t remove item from non array like property');
     }
     try {
-        arraySearch.forEach((itemToRemove) => {
+        itemsToRemove.forEach((itemToRemove) => {
             if (Array.isArray(itemToRemove)) {
                 throw new Error('Array inside array values to remove not supported for now');
             }
@@ -344,6 +344,7 @@ function filterWithArray<T>(arr: T[], arraySearch: T[]): T[] {
         throw new InvalidScimPatchOp(error);
     }
 }
+
 function dropItemFromArray<T>(arr: T[], index: number) {
     if (index === -1) {
         return;
