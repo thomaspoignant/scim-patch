@@ -353,8 +353,7 @@ function dropItemFromArray<T>(arr: T[], index: number) {
     
     const mainArrMaxIndex = arr.length - 1;
     [arr[index], arr[mainArrMaxIndex]] = [arr[mainArrMaxIndex], arr[index]]
-    arr.pop()
-    return;
+    arr.pop();
 }
 
 function isObject(object: Record<string, any>): boolean {
