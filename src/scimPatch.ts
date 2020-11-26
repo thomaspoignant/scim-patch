@@ -130,7 +130,6 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
 
     // Path is supposed to be set, there are a validation in the validateOperation function.
     const paths = patch.path.split(SPLIT_PERIOD);
-
     resource = navigate(resource, paths);
 
     // Dealing with the last element of the path.
