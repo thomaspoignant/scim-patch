@@ -319,9 +319,9 @@ function filterWithQuery<T>(arr: Array<T>, querySearch: string): Array<T> {
  * @param itemsToRemove array with items to remove from original.
  * @return an array which contains the search results.
  */
-function filterWithArray<T>(arr: T[], itemsToRemove: T[] | Record<string, any>): T[] {
+function filterWithArray<T>(arr: T[], itemsToRemove: T[] | Record<string, any> | string | number): T[] {
     if (!Array.isArray(arr)) throw new UnsupportedBlueprintEntities();
-    if (isObject(itemsToRemove)) {
+    if (isValidToRemoveNonArray(itemsToRemove)) {
         let shouldResume = true;
         while (shouldResume) {
             const index = arr.findIndex((mainItem) => deepEqual(itemsToRemove, mainItem));
@@ -356,8 +356,8 @@ function dropItemFromArray<T>(arr: T[], index: number) {
     arr.pop();
 }
 
-function isObject(object: Record<string, any>): boolean {
-  return object != null && typeof object === 'object' && !Array.isArray(object);
+function isValidToRemoveNonArray(object: Record<string, any> | string | number): boolean {
+  return !Array.isArray(object);
 }
 
 function isValidOperation(operation: string): boolean {

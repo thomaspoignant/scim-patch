@@ -607,6 +607,14 @@ describe('SCIM PATCH', () => {
             return done();
         });
 
+        it('REMOVE: simple nested array elements with value supplied', done => {
+            scimUser.name.surName2  = ['value1', 'value2'];
+            const patch1: ScimPatchRemoveOperation = {op: 'remove', path: 'name.surName2', value: 'value2'};
+            const afterPatch = scimPatch(scimUser, [patch1]);
+            expect(afterPatch.name.surName2 && afterPatch.name.surName2.length).to.eq(1);
+            return done();
+        });
+
         it('REMOVE: simple nested array elements with non-existing in scope value supplied', done => {
             scimUser.name.surName2  = ['value1', 'value2'];
             const patch1: ScimPatchRemoveOperation = {op: 'remove', path: 'name.surName2', value: ['value3']};
