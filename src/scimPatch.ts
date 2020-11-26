@@ -154,10 +154,8 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
     resource[attrName] = array.filter((e: any) => !filterWithQuery<any>(array, valuePath).includes(e));
 
     // If the complex multi-valued attribute has no remaining records, the attribute SHALL be considered unassigned.
-    if (resource[attrName].length === 0) { 
-        delete resource[attrName];
-    }
-
+    if (resource[attrName].length === 0) delete resource[attrName];
+    
     return scimResource;
 }
 
@@ -324,14 +322,13 @@ function filterWithQuery<T>(arr: Array<T>, querySearch: string): Array<T> {
  * @return an array which contains the search results.
  */
 function filterWithArray<T>(arr: T[], itemsToRemove: T[]): T[] {
-    if (!Array.isArray(arr)) {
+    if (!Array.isArray(arr)) 
         throw new UnsupportedBlueprintEntities('Can`t remove item from non array like property');
-    }
 
     itemsToRemove.forEach((itemToRemove) => {
-        if (Array.isArray(itemToRemove)) {
+        if (Array.isArray(itemToRemove)) 
             throw new DeepArrayRemovalNotSupported('Array inside array values to remove not supported for now');
-        }
+
         const isItemComplexStructure = isObject(itemToRemove);
 
         if (!isItemComplexStructure) {
@@ -346,9 +343,8 @@ function filterWithArray<T>(arr: T[], itemsToRemove: T[]): T[] {
 }
 
 function dropItemFromArray<T>(arr: T[], index: number) {
-    if (index === -1) {
-        return;
-    }
+    if (index === -1) return;
+    
     const mainArrMaxIndex = arr.length - 1;
     [arr[index], arr[mainArrMaxIndex]] = [arr[mainArrMaxIndex], arr[index]]
     arr.pop()
