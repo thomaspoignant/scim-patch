@@ -550,12 +550,30 @@ describe('SCIM PATCH', () => {
             return done();
         });
 
-        it('REMOVE: with path and value but no value is array of arrays', done => {
+        it('REMOVE: with path and value but value is array of arrays', done => {
             scimUser.name.nestedArray = [{primary: true, value: 'value1'}, {primary: false, value: 'value2'}];
             const patch = <ScimPatchRemoveOperation>{op: 'remove', 'path': 'name.nestedArray', value: [[]]};
             expect(() => scimPatch(scimUser, [patch])).to.throw(DeepArrayRemovalNotSupported);
             return done();
         });
+
+        it('REMOVE: nested array element with value supplied', done => {
+            scimUser.name.nestedArray = [{primary: true, value: 'value1'}, {primary: false, value: 'value2'}];
+            const patch1: ScimPatchRemoveOperation = {op: 'remove', path: 'name.nestedArray', value: [{value: 'value2', primary: false}]};
+            const afterPatch = scimPatch(scimUser, [patch1]);
+            expect(afterPatch.name.nestedArray && afterPatch.name.nestedArray.length).to.eq(1);
+            return done();
+        });
+
+
+        it('REMOVE: nested array element with value supplied for multiple entries', done => {
+            scimUser.name.nestedArray = [{primary: true, value: 'value1'}, {primary: false, value: 'value2'}, {primary: false, value: 'value2'}, {primary: false, value: 'value2'}, {primary: false, value: 'value3'}, {primary: false, value: 'value3'}];
+            const patch1: ScimPatchRemoveOperation = {op: 'remove', path: 'name.nestedArray', value: [{value: 'value2', primary: false}, {value: 'value3', primary: false}]};
+            const afterPatch = scimPatch(scimUser, [patch1]);
+            expect(afterPatch.name.nestedArray && afterPatch.name.nestedArray.length).to.eq(1);
+            return done();
+        });
+
 
         it('REMOVE: nested array element with value supplied', done => {
             scimUser.name.nestedArray = [{primary: true, value: 'value1'}, {primary: false, value: 'value2'}];
@@ -573,6 +591,13 @@ describe('SCIM PATCH', () => {
             return done();
         });
 
+        it('REMOVE: nested array element with value as object supplied with multiple entries', done => {
+            scimUser.name.nestedArray = [{primary: true, value: 'value1'}, {primary: false, value: 'value2'},  {primary: false, value: 'value2'},  {primary: false, value: 'value2'}];
+            const patch1: ScimPatchRemoveOperation = {op: 'remove', path: 'name.nestedArray', value: {value: 'value2', primary: false}};
+            const afterPatch = scimPatch(scimUser, [patch1]);
+            expect(afterPatch.name.nestedArray && afterPatch.name.nestedArray.length).to.eq(1);
+            return done();
+        });
 
         it('REMOVE: simple nested array elements with value supplied', done => {
             scimUser.name.surName2  = ['value1', 'value2'];

@@ -325,18 +325,29 @@ function filterWithQuery<T>(arr: Array<T>, querySearch: string): Array<T> {
  */
 function filterWithArray<T>(arr: T[], itemsToRemove: T[] | Record<string, any>): T[] {
     if (!Array.isArray(arr)) throw new UnsupportedBlueprintEntities();
-
     if (isObject(itemsToRemove)) {
-        const index = arr.findIndex((mainItem) => deepEqual(itemsToRemove, mainItem));
-        dropItemFromArray(arr, index);
+    let shouldResume = true;
+        while (shouldResume) {
+            const index = arr.findIndex((mainItem) => deepEqual(itemsToRemove, mainItem));
+            dropItemFromArray(arr, index);
+            if (index === -1) {
+                shouldResume = false;
+            }
+        }
         return arr;
     }
 
     (itemsToRemove as T[]).forEach((itemToRemove) => {
         if (Array.isArray(itemToRemove)) throw new DeepArrayRemovalNotSupported();
 
-        const index = arr.findIndex((mainItem) => deepEqual(itemToRemove, mainItem));
-        return dropItemFromArray(arr, index);
+        let shouldResume = true;
+        while (shouldResume) {
+            const index = arr.findIndex((mainItem) => deepEqual(itemToRemove, mainItem));
+            dropItemFromArray(arr, index);
+            if (index === -1) {
+                shouldResume = false;
+            }
+        }
     })
     return arr;
 }
