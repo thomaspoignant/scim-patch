@@ -326,7 +326,7 @@ function filterWithQuery<T>(arr: Array<T>, querySearch: string): Array<T> {
 function filterWithArray<T>(arr: T[], itemsToRemove: T[] | Record<string, any>): T[] {
     if (!Array.isArray(arr)) throw new UnsupportedBlueprintEntities();
     if (isObject(itemsToRemove)) {
-    let shouldResume = true;
+        let shouldResume = true;
         while (shouldResume) {
             const index = arr.findIndex((mainItem) => deepEqual(itemsToRemove, mainItem));
             dropItemFromArray(arr, index);
