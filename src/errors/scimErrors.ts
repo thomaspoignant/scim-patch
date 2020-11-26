@@ -14,6 +14,24 @@ export abstract class InvalidScimPatch extends ScimError {
   }
 }
 
+export abstract class InvalidScimRemoveValue extends ScimError {
+  protected constructor(message: string, scimCode: string = 'invalidSyntax') {
+    super(scimCode);
+    this.message = `Invalid SCIM Remove Operation: ${message}`;
+  }
+}
+
+export class RemoveValueNestedArrayNotSupported extends InvalidScimRemoveValue {
+  constructor() {
+    super('Invalid patch value, remove does not support arrays inside arrays.');
+  }
+}
+
+export class RemoveValueNotArray extends InvalidScimRemoveValue {
+  constructor() {
+    super('Remove with patch value is supported only for array properties.');
+  }
+}
 export class InvalidScimPatchOp extends InvalidScimPatch {
   constructor(message: string) {
     super(`${message}`, 'invalidSyntax');

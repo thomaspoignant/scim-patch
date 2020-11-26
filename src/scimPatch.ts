@@ -4,7 +4,10 @@ import {
     InvalidScimPatchOp,
     NoPathInScimPatchOp,
     InvalidScimPatchRequest,
-    NoTarget
+    NoTarget,
+    RemoveValueNestedArrayNotSupported,
+    RemoveValueNotArray,
+    InvalidScimRemoveValue
 } from './errors/scimErrors';
 import {
     ScimPatchSchema,
@@ -18,6 +21,7 @@ import {
     ScimMeta
 } from './types/types';
 import {parse, filter} from 'scim2-parse-filter';
+import deepEqual = require('fast-deep-equal');
 
 /*
  * Export types
@@ -37,7 +41,10 @@ export {
     InvalidScimPatchOp,
     NoPathInScimPatchOp,
     InvalidScimPatchRequest,
-    NoTarget
+    NoTarget,
+    RemoveValueNestedArrayNotSupported,
+    RemoveValueNotArray,
+    InvalidScimRemoveValue
 };
 /*
  * This file implement the SCIM PATCH specification.
@@ -129,15 +136,22 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
     const lastSubPath = paths[paths.length - 1];
 
     if (!IS_ARRAY_SEARCH.test(lastSubPath)) {
-        // This is a mono valued property, we delete it.
-        delete resource[lastSubPath];
+        // This is a mono valued property
+        if (!patch.value) {
+            // No value in the remove operation, we delete it.
+            delete resource[lastSubPath];
+            return scimResource;
+        }
+
+        // Value in the remove operation, we remove the children by value.
+        resource[lastSubPath] = removeWithPatchValue(resource[lastSubPath], patch.value);
         return scimResource;
     }
 
     // The last element is an Array request.
     const {attrName, valuePath, array} = extractArray(lastSubPath, resource);
 
-    // We keep only items who don't match the query.
+    // We keep only items who don't match the query if supplied.
     resource[attrName] = array.filter((e: any) => !filterWithQuery<any>(array, valuePath).includes(e));
 
     // If the complex multi-valued attribute has no remaining records, the attribute SHALL be considered unassigned.
@@ -298,6 +312,32 @@ function filterWithQuery<T>(arr: Array<T>, querySearch: string): Array<T> {
     } catch (error) {
         throw new InvalidScimPatchOp(error);
     }
+}
+
+/**
+ * Return the array without items supplied in .
+ * @param arr the collection where we are searching.
+ * @param itemsToRemove array with items to remove from original.
+ * @return an array which contains the search results.
+ */
+function removeWithPatchValue<T>(arr: Array<T>, itemsToRemove: Array<T> | Record<string, any> | string | number): T[] {
+    if (!Array.isArray(arr))
+        throw new RemoveValueNotArray();
+
+    // patch value is a single item, we remove from the array all the similar items.
+    if (!Array.isArray(itemsToRemove))
+        return arr.filter(item => !deepEqual(itemsToRemove, item));
+
+    // Sometimes the patch value is an array (this is how it works with one-login, ex: [{"test":true}])
+    // We iterate on all the values in the array to delete them all.
+    itemsToRemove.forEach(toRemove => {
+       if (Array.isArray(toRemove))
+           throw new RemoveValueNestedArrayNotSupported();
+
+       arr = arr.filter(item => !deepEqual(toRemove, item));
+    });
+
+    return arr;
 }
 
 function isValidOperation(operation: string): boolean {

@@ -16,6 +16,7 @@ export interface ScimPatchRemoveOperation {
   // We accept value with capital letter to be compliant with AzureAD
   readonly op: 'remove' | 'Remove';
   readonly path: string;
+  readonly value?: any;
 }
 
 export interface ScimPatchAddReplaceOperation {
