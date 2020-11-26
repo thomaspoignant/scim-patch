@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1605515121058,
+  "lastUpdate": 1606424699680,
   "repoUrl": "https://github.com/thomaspoignant/scim-patch",
   "entries": {
     "Benchmark.js Benchmark": [
@@ -1166,6 +1166,51 @@ window.BENCHMARK_DATA = {
             "range": "±1.32%",
             "unit": "ops/sec",
             "extra": "91 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "61245342+randomhash@users.noreply.github.com",
+            "name": "Andrii Klubuk",
+            "username": "randomhash"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d9fb8ecc2108b3922876852c04fdb2eae50ef530",
+          "message": "Add support for valued removals (#55)\n\nCo-authored-by: Thomas Poignant <thomas.poignant@gmail.com>",
+          "timestamp": "2020-11-26T22:04:12+01:00",
+          "tree_id": "5b1b793b4ca3f66d6e80808d3b48130e26226a27",
+          "url": "https://github.com/thomaspoignant/scim-patch/commit/d9fb8ecc2108b3922876852c04fdb2eae50ef530"
+        },
+        "date": 1606424698344,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "Replace query",
+            "value": 361389,
+            "range": "±1.83%",
+            "unit": "ops/sec",
+            "extra": "85 samples"
+          },
+          {
+            "name": "Add query",
+            "value": 1291748,
+            "range": "±1.97%",
+            "unit": "ops/sec",
+            "extra": "88 samples"
+          },
+          {
+            "name": "Remove query",
+            "value": 1887403,
+            "range": "±2.46%",
+            "unit": "ops/sec",
+            "extra": "84 samples"
           }
         ]
       }
