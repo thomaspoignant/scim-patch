@@ -155,7 +155,9 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
     resource[attrName] = array.filter((e: any) => !filterWithQuery<any>(array, valuePath).includes(e));
 
     // If the complex multi-valued attribute has no remaining records, the attribute SHALL be considered unassigned.
-    if (resource[attrName].length === 0) delete resource[attrName];
+    if (resource[attrName].length === 0)
+        delete resource[attrName];
+
     return scimResource;
 }
 
@@ -331,6 +333,7 @@ function removeWithPatchValue<T>(arr: Array<T>, itemsToRemove: Array<T> | Record
     itemsToRemove.forEach(toRemove => {
        if (Array.isArray(toRemove))
            throw new RemoveValueNestedArrayNotSupported();
+
        arr = arr.filter(item => !deepEqual(toRemove, item));
     });
 
