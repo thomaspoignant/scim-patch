@@ -160,7 +160,6 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
     return scimResource;
 }
 
-
 function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, patch: ScimPatchAddReplaceOperation): T {
     // We manipulate the object directly without knowing his property, that's why we use any.
     let resource: Record<string, any> = scimResource;
