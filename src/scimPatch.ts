@@ -225,8 +225,6 @@ function extractArray(subPath: string, schema: any): ScimSearchQuery {
     return new ScimSearchQuery(attrName, valuePath, element);
 }
 
-
-
 /**
  * navigate allow to get the sub object who want to edit with the patch operation.
  * @param inputSchema the initial ScimResource
