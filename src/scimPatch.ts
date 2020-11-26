@@ -40,7 +40,9 @@ export {
     InvalidScimPatchOp,
     NoPathInScimPatchOp,
     InvalidScimPatchRequest,
-    NoTarget
+    NoTarget,
+    DeepArrayRemovalNotSupported,
+    UnsupportedBlueprintEntities
 };
 /*
  * This file implement the SCIM PATCH specification.
@@ -323,11 +325,11 @@ function filterWithQuery<T>(arr: Array<T>, querySearch: string): Array<T> {
  */
 function filterWithArray<T>(arr: T[], itemsToRemove: T[]): T[] {
     if (!Array.isArray(arr)) 
-        throw new UnsupportedBlueprintEntities('Can`t remove item from non array like property');
+        throw new UnsupportedBlueprintEntities();
 
     itemsToRemove.forEach((itemToRemove) => {
         if (Array.isArray(itemToRemove)) 
-            throw new DeepArrayRemovalNotSupported('Array inside array values to remove not supported for now');
+            throw new DeepArrayRemovalNotSupported();
 
         const isItemComplexStructure = isObject(itemToRemove);
 

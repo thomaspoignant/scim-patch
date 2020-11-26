@@ -21,15 +21,15 @@ export abstract class InvalidScimValueRemoval extends ScimError {
   }
 }
 
-export class DeepArrayRemovalNotSupported extends InvalidScimPatch {
-  constructor(message: string) {
-    super(`${message}`, 'Array inside array values to remove not supported for now');
+export class DeepArrayRemovalNotSupported extends InvalidScimValueRemoval {
+  constructor() {
+    super('Array inside array values to remove not supported for now');
   }
 }
 
-export class UnsupportedBlueprintEntities extends InvalidScimPatch {
-  constructor(message: string) {
-    super(`${message}`, 'Can`t remove item from non array like property');
+export class UnsupportedBlueprintEntities extends InvalidScimValueRemoval {
+  constructor() {
+    super('Can`t remove item from non array like property');
   }
 }
 export class InvalidScimPatchOp extends InvalidScimPatch {
