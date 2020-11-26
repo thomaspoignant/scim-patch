@@ -357,7 +357,6 @@ function dropItemFromArray<T>(arr: T[], index: number) {
     return;
 }
 
-
 function isObject(object: Record<string, any>): boolean {
   return object != null && typeof object === 'object' && !Array.isArray(object);
 }
