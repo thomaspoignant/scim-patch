@@ -8,7 +8,7 @@ import {
 import {ScimUser} from './types/types.test';
 import {expect} from 'chai';
 import {ScimPatchAddReplaceOperation, ScimPatchRemoveOperation} from '../src/types/types';
-import {DeepArrayRemovalNotSupported, NoTarget, UnsupportedBlueprintEntities} from "../src/errors/scimErrors";
+import {RemoveValueNestedArrayNotSupported, NoTarget, RemoveValueNotArray} from "../src/errors/scimErrors";
 
 describe('SCIM PATCH', () => {
     let scimUser: ScimUser;
@@ -546,54 +546,91 @@ describe('SCIM PATCH', () => {
 
         it('REMOVE: with path and value but no array-field like exists', done => {
             const patch = <ScimPatchRemoveOperation>{op: 'remove', 'path': 'name.randomField', value: []};
-            expect(() => scimPatch(scimUser, [patch])).to.throw(UnsupportedBlueprintEntities);
+            expect(() => scimPatch(scimUser, [patch])).to.throw(RemoveValueNotArray);
             return done();
         });
 
         it('REMOVE: with path and value but value is array of arrays', done => {
-            scimUser.name.nestedArray = [{primary: true, value: 'value1'}, {primary: false, value: 'value2'}];
+            scimUser.name.nestedArray = [
+                {primary: true, value: 'value1'},
+                {primary: false, value: 'value2'}
+            ];
             const patch = <ScimPatchRemoveOperation>{op: 'remove', 'path': 'name.nestedArray', value: [[]]};
-            expect(() => scimPatch(scimUser, [patch])).to.throw(DeepArrayRemovalNotSupported);
+            expect(() => scimPatch(scimUser, [patch])).to.throw(RemoveValueNestedArrayNotSupported);
             return done();
         });
 
-        it('REMOVE: nested array element with value supplied', done => {
-            scimUser.name.nestedArray = [{primary: true, value: 'value1'}, {primary: false, value: 'value2'}];
-            const patch1: ScimPatchRemoveOperation = {op: 'remove', path: 'name.nestedArray', value: [{value: 'value2', primary: false}]};
+        it('REMOVE: nested array element with patch value as array with single value', done => {
+            scimUser.name.nestedArray = [
+                {primary: true, value: 'value1'},
+                {primary: false, value: 'value2'}
+            ];
+            const patch1: ScimPatchRemoveOperation = {
+                op: 'remove',
+                path: 'name.nestedArray',
+                value: [{value: 'value2', primary: false}]
+            };
             const afterPatch = scimPatch(scimUser, [patch1]);
             expect(afterPatch.name.nestedArray && afterPatch.name.nestedArray.length).to.eq(1);
             return done();
         });
 
-
-        it('REMOVE: nested array element with value supplied for multiple entries', done => {
-            scimUser.name.nestedArray = [{primary: true, value: 'value1'}, {primary: false, value: 'value2'}, {primary: false, value: 'value2'}, {primary: false, value: 'value2'}, {primary: false, value: 'value3'}, {primary: false, value: 'value3'}];
+        it('REMOVE: nested array element with patch value as array with multiple values', done => {
+            scimUser.name.nestedArray = [
+                {primary: true, value: 'value1'},
+                {primary: false, value: 'value2'},
+                {primary: false, value: 'value2'},
+                {primary: false, value: 'value2'},
+                {primary: false, value: 'value3'},
+                {primary: false, value: 'value3'}
+            ];
             const patch1: ScimPatchRemoveOperation = {op: 'remove', path: 'name.nestedArray', value: [{value: 'value2', primary: false}, {value: 'value3', primary: false}]};
             const afterPatch = scimPatch(scimUser, [patch1]);
             expect(afterPatch.name.nestedArray && afterPatch.name.nestedArray.length).to.eq(1);
             return done();
         });
 
-
-        it('REMOVE: nested array element with value supplied', done => {
-            scimUser.name.nestedArray = [{primary: true, value: 'value1'}, {primary: false, value: 'value2'}];
-            const patch1: ScimPatchRemoveOperation = {op: 'remove', path: 'name.nestedArray', value: [{value: 'value2', primary: false}]};
+        it('REMOVE: nested array element with patch value as array with unknown value', done => {
+            scimUser.name.nestedArray = [
+                {primary: true, value: 'value1'},
+                {primary: false, value: 'value2'},
+                {primary: false, value: 'value3'}
+            ];
+            const patch1: ScimPatchRemoveOperation = {
+                op: 'remove',
+                path: 'name.nestedArray',
+                value: [{value: 'value4', primary: false}]
+            };
             const afterPatch = scimPatch(scimUser, [patch1]);
-            expect(afterPatch.name.nestedArray && afterPatch.name.nestedArray.length).to.eq(1);
+            expect(afterPatch.name.nestedArray && afterPatch.name.nestedArray.length).to.eq(3);
             return done();
         });
 
-        it('REMOVE: nested array element with value as object supplied', done => {
+
+        it('REMOVE: nested array element with value supplied', done => {
             scimUser.name.nestedArray = [{primary: true, value: 'value1'}, {primary: false, value: 'value2'}];
-            const patch1: ScimPatchRemoveOperation = {op: 'remove', path: 'name.nestedArray', value: {value: 'value2', primary: false}};
-            const afterPatch = scimPatch(scimUser, [patch1]);
+            const patch: ScimPatchRemoveOperation = {
+                op: 'remove',
+                path: 'name.nestedArray',
+                value: [{value: 'value2', primary: false}]
+            };
+            const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch.name.nestedArray && afterPatch.name.nestedArray.length).to.eq(1);
             return done();
         });
 
         it('REMOVE: nested array element with value as object supplied with multiple entries', done => {
-            scimUser.name.nestedArray = [{primary: true, value: 'value1'}, {primary: false, value: 'value2'},  {primary: false, value: 'value2'},  {primary: false, value: 'value2'}];
-            const patch1: ScimPatchRemoveOperation = {op: 'remove', path: 'name.nestedArray', value: {value: 'value2', primary: false}};
+            scimUser.name.nestedArray = [
+                {primary: true, value: 'value1'},
+                {primary: false, value: 'value2'},
+                {primary: false, value: 'value2'},
+                {primary: false, value: 'value2'}
+            ];
+            const patch1: ScimPatchRemoveOperation = {
+                op: 'remove',
+                path: 'name.nestedArray',
+                value: {value: 'value2', primary: false}
+            };
             const afterPatch = scimPatch(scimUser, [patch1]);
             expect(afterPatch.name.nestedArray && afterPatch.name.nestedArray.length).to.eq(1);
             return done();

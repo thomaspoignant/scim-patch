@@ -5,8 +5,9 @@ import {
     NoPathInScimPatchOp,
     InvalidScimPatchRequest,
     NoTarget,
-    DeepArrayRemovalNotSupported,
-    UnsupportedBlueprintEntities
+    RemoveValueNestedArrayNotSupported,
+    RemoveValueNotArray,
+    InvalidScimRemoveValue
 } from './errors/scimErrors';
 import {
     ScimPatchSchema,
@@ -41,8 +42,9 @@ export {
     NoPathInScimPatchOp,
     InvalidScimPatchRequest,
     NoTarget,
-    DeepArrayRemovalNotSupported,
-    UnsupportedBlueprintEntities
+    RemoveValueNestedArrayNotSupported,
+    RemoveValueNotArray,
+    InvalidScimRemoveValue
 };
 /*
  * This file implement the SCIM PATCH specification.
@@ -128,8 +130,6 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
 
     // Path is supposed to be set, there are a validation in the validateOperation function.
     const paths = patch.path.split(SPLIT_PERIOD);
-    const value = patch.value;
-
 
     resource = navigate(resource, paths);
 
@@ -138,14 +138,14 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
 
     if (!IS_ARRAY_SEARCH.test(lastSubPath)) {
         // This is a mono valued property
-        if (!value) {
+        if (!patch.value) {
             // No value in the remove operation, we delete it.
             delete resource[lastSubPath];
             return scimResource;
         }
 
         // Value in the remove operation, we remove the children by value.
-        resource[lastSubPath] = filterWithArray(resource[lastSubPath], value);
+        resource[lastSubPath] = filterWithArray(resource[lastSubPath], patch.value);
         return scimResource;
     }
 
@@ -319,45 +319,23 @@ function filterWithQuery<T>(arr: Array<T>, querySearch: string): Array<T> {
  * @param itemsToRemove array with items to remove from original.
  * @return an array which contains the search results.
  */
-function filterWithArray<T>(arr: T[], itemsToRemove: T[] | Record<string, any> | string | number): T[] {
-    if (!Array.isArray(arr)) throw new UnsupportedBlueprintEntities();
-    if (isValidToRemoveNonArray(itemsToRemove)) {
-        let shouldResume = true;
-        while (shouldResume) {
-            const index = arr.findIndex((mainItem) => deepEqual(itemsToRemove, mainItem));
-            dropItemFromArray(arr, index);
-            if (index === -1) {
-                shouldResume = false;
-            }
-        }
-        return arr;
-    }
+function filterWithArray<T>(arr: Array<T>, itemsToRemove: Array<T> | Record<string, any> | string | number): T[] {
+    if (!Array.isArray(arr))
+        throw new RemoveValueNotArray();
 
-    (itemsToRemove as T[]).forEach((itemToRemove) => {
-        if (Array.isArray(itemToRemove)) throw new DeepArrayRemovalNotSupported();
+    // patch value is a single item, we remove from the array all the similar items.
+    if (!Array.isArray(itemsToRemove))
+        return arr.filter(item => !deepEqual(itemsToRemove, item));
 
-        let shouldResume = true;
-        while (shouldResume) {
-            const index = arr.findIndex((mainItem) => deepEqual(itemToRemove, mainItem));
-            dropItemFromArray(arr, index);
-            if (index === -1) {
-                shouldResume = false;
-            }
-        }
-    })
+    // Sometimes the patch value is an array (this is how it works with one-login, ex: [{"test":true}])
+    // We iterate on all the values in the array to delete them all.
+    itemsToRemove.forEach(toRemove => {
+       if (Array.isArray(toRemove))
+           throw new RemoveValueNestedArrayNotSupported();
+       arr = arr.filter(item => !deepEqual(toRemove, item));
+    });
+
     return arr;
-}
-
-function dropItemFromArray<T>(arr: T[], index: number) {
-    if (index === -1) return;
-    
-    const mainArrMaxIndex = arr.length - 1;
-    [arr[index], arr[mainArrMaxIndex]] = [arr[mainArrMaxIndex], arr[index]]
-    arr.pop();
-}
-
-function isValidToRemoveNonArray(object: Record<string, any> | string | number): boolean {
-  return !Array.isArray(object);
 }
 
 function isValidOperation(operation: string): boolean {
