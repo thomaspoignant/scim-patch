@@ -323,20 +323,17 @@ function filterWithQuery<T>(arr: Array<T>, querySearch: string): Array<T> {
  * @param itemsToRemove array with items to remove from original.
  * @return an array which contains the search results.
  */
-function filterWithArray<T>(arr: T[], itemsToRemove: T[]): T[] {
-    if (!Array.isArray(arr)) 
-        throw new UnsupportedBlueprintEntities();
+function filterWithArray<T>(arr: T[], itemsToRemove: T[] | Record<string, any>): T[] {
+    if (!Array.isArray(arr)) throw new UnsupportedBlueprintEntities();
 
-    itemsToRemove.forEach((itemToRemove) => {
-        if (Array.isArray(itemToRemove)) 
-            throw new DeepArrayRemovalNotSupported();
+    if (isObject(itemsToRemove)) {
+        const index = arr.findIndex((mainItem) => deepEqual(itemsToRemove, mainItem));
+        dropItemFromArray(arr, index);
+        return arr;
+    }
 
-        const isItemComplexStructure = isObject(itemToRemove);
-
-        if (!isItemComplexStructure) {
-            const index = arr.findIndex((mainItem) => itemToRemove === mainItem);
-            return dropItemFromArray(arr, index)
-        }
+    (itemsToRemove as T[]).forEach((itemToRemove) => {
+        if (Array.isArray(itemToRemove)) throw new DeepArrayRemovalNotSupported();
 
         const index = arr.findIndex((mainItem) => deepEqual(itemToRemove, mainItem));
         return dropItemFromArray(arr, index);
@@ -355,7 +352,7 @@ function dropItemFromArray<T>(arr: T[], index: number) {
 
 
 function isObject(object: Record<string, any>): boolean {
-  return object != null && typeof object === 'object';
+  return object != null && typeof object === 'object' && !Array.isArray(object);
 }
 
 function isValidOperation(operation: string): boolean {
