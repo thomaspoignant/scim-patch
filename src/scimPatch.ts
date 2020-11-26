@@ -131,20 +131,20 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
     // Dealing with the last element of the path.
     const lastSubPath = paths[paths.length - 1];
 
-    if (!IS_ARRAY_SEARCH.test(lastSubPath) && !value) {
-        // This is a mono valued property, we delete it.
-        delete resource[lastSubPath];
+    if (!IS_ARRAY_SEARCH.test(lastSubPath)) {
+        // This is a mono valued property
+        if (!value) {
+            // No value in the remove operation, we delete it.
+            delete resource[lastSubPath];
+            return scimResource;
+        }
+
+        // Value in the remove operation, we remove the children by value.
+        resource[lastSubPath] = filterWithArray(resource[lastSubPath], value);
         return scimResource;
     }
 
     // The last element is an Array request.
-
-    if (!IS_ARRAY_SEARCH.test(lastSubPath) && value) {
-        // this is a mono values property that can possibly have children, we need to remove children by value
-        resource[lastSubPath] = filterWithArray(resource[lastSubPath], value);
-
-        return scimResource;
-    }
     const {attrName, valuePath, array} = extractArray(lastSubPath, resource);
 
     // We keep only items who don't match the query if supplied.
