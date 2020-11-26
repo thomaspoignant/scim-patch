@@ -157,7 +157,6 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
 
     // If the complex multi-valued attribute has no remaining records, the attribute SHALL be considered unassigned.
     if (resource[attrName].length === 0) delete resource[attrName];
-    
     return scimResource;
 }
 
