@@ -144,7 +144,7 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
         }
 
         // Value in the remove operation, we remove the children by value.
-        resource[lastSubPath] = filterWithArray(resource[lastSubPath], patch.value);
+        resource[lastSubPath] = removeWithPatchValue(resource[lastSubPath], patch.value);
         return scimResource;
     }
 
@@ -318,7 +318,7 @@ function filterWithQuery<T>(arr: Array<T>, querySearch: string): Array<T> {
  * @param itemsToRemove array with items to remove from original.
  * @return an array which contains the search results.
  */
-function filterWithArray<T>(arr: Array<T>, itemsToRemove: Array<T> | Record<string, any> | string | number): T[] {
+function removeWithPatchValue<T>(arr: Array<T>, itemsToRemove: Array<T> | Record<string, any> | string | number): T[] {
     if (!Array.isArray(arr))
         throw new RemoveValueNotArray();
 
