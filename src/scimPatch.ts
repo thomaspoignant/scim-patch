@@ -4,7 +4,9 @@ import {
     InvalidScimPatchOp,
     NoPathInScimPatchOp,
     InvalidScimPatchRequest,
-    NoTarget
+    NoTarget,
+    DeepArrayRemovalNotSupported,
+    UnsupportedBlueprintEntities
 } from './errors/scimErrors';
 import {
     ScimPatchSchema,
@@ -18,6 +20,7 @@ import {
     ScimMeta
 } from './types/types';
 import {parse, filter} from 'scim2-parse-filter';
+import deepEqual = require('fast-deep-equal');
 
 /*
  * Export types
@@ -322,27 +325,24 @@ function filterWithQuery<T>(arr: Array<T>, querySearch: string): Array<T> {
  */
 function filterWithArray<T>(arr: T[], itemsToRemove: T[]): T[] {
     if (!Array.isArray(arr)) {
-        throw new Error('Can`t remove item from non array like property');
+        throw new UnsupportedBlueprintEntities('Can`t remove item from non array like property');
     }
-    try {
-        itemsToRemove.forEach((itemToRemove) => {
-            if (Array.isArray(itemToRemove)) {
-                throw new Error('Array inside array values to remove not supported for now');
-            }
-            const isItemComplexStructure = isObject(itemToRemove);
 
-            if (!isItemComplexStructure) {
-                const index = arr.findIndex((mainItem) => itemToRemove === mainItem);
-                return dropItemFromArray(arr, index)
-            }
+    itemsToRemove.forEach((itemToRemove) => {
+        if (Array.isArray(itemToRemove)) {
+            throw new DeepArrayRemovalNotSupported('Array inside array values to remove not supported for now');
+        }
+        const isItemComplexStructure = isObject(itemToRemove);
 
-            const index = arr.findIndex((mainItem) => deepEqual(itemToRemove, mainItem));
-            return dropItemFromArray(arr, index);
-        })
-        return arr;
-    } catch (error) {
-        throw new InvalidScimPatchOp(error);
-    }
+        if (!isItemComplexStructure) {
+            const index = arr.findIndex((mainItem) => itemToRemove === mainItem);
+            return dropItemFromArray(arr, index)
+        }
+
+        const index = arr.findIndex((mainItem) => deepEqual(itemToRemove, mainItem));
+        return dropItemFromArray(arr, index);
+    })
+    return arr;
 }
 
 function dropItemFromArray<T>(arr: T[], index: number) {
@@ -355,32 +355,10 @@ function dropItemFromArray<T>(arr: T[], index: number) {
     return;
 }
 
-function deepEqual(object1: Record<string, any>, object2: Record<string, any>): boolean {
-    const keys1 = Object.keys(object1);
-    const keys2 = Object.keys(object2);
-  
-    if (keys1.length !== keys2.length) {
-      return false;
-    }
-  
-    for (const key of keys1) {
-      const val1 = object1[key];
-      const val2 = object2[key];
-      const areObjects = isObject(val1) && isObject(val2);
-      if (
-        areObjects && !deepEqual(val1, val2) ||
-        !areObjects && val1 !== val2
-      ) {
-        return false;
-      }
-    }
-  
-    return true;
-  }
-  
-  function isObject(object: Record<string, any>): boolean {
-    return object != null && typeof object === 'object';
-  }
+
+function isObject(object: Record<string, any>): boolean {
+  return object != null && typeof object === 'object';
+}
 
 function isValidOperation(operation: string): boolean {
     return AUTHORIZED_OPERATION.includes(operation.toLowerCase());

@@ -14,6 +14,24 @@ export abstract class InvalidScimPatch extends ScimError {
   }
 }
 
+export abstract class InvalidScimValueRemoval extends ScimError {
+  protected constructor(message: string, scimCode: string = 'invalidSyntax') {
+    super(scimCode);
+    this.message = `Invalid SCIM Remove Operation: ${message}`;
+  }
+}
+
+export class DeepArrayRemovalNotSupported extends InvalidScimPatch {
+  constructor(message: string) {
+    super(`${message}`, 'Array inside array values to remove not supported for now');
+  }
+}
+
+export class UnsupportedBlueprintEntities extends InvalidScimPatch {
+  constructor(message: string) {
+    super(`${message}`, 'Can`t remove item from non array like property');
+  }
+}
 export class InvalidScimPatchOp extends InvalidScimPatch {
   constructor(message: string) {
     super(`${message}`, 'invalidSyntax');

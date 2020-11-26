@@ -8,7 +8,7 @@ import {
 import {ScimUser} from './types/types.test';
 import {expect} from 'chai';
 import {ScimPatchAddReplaceOperation, ScimPatchRemoveOperation} from '../src/types/types';
-import {NoTarget} from "../src/errors/scimErrors";
+import {DeepArrayRemovalNotSupported, NoTarget, UnsupportedBlueprintEntities} from "../src/errors/scimErrors";
 
 describe('SCIM PATCH', () => {
     let scimUser: ScimUser;
@@ -544,6 +544,19 @@ describe('SCIM PATCH', () => {
             return done();
         });
 
+        it('REMOVE: with path and value but no array-field like exists', done => {
+            const patch = <ScimPatchRemoveOperation>{op: 'remove', 'path': 'name.randomField', value: []};
+            expect(() => scimPatch(scimUser, [patch])).to.throw(UnsupportedBlueprintEntities);
+            return done();
+        });
+
+        it('REMOVE: with path and value but no value is array of arrays', done => {
+            scimUser.name.nestedArray = [{primary: true, value: 'value1'}, {primary: false, value: 'value2'}];
+            const patch = <ScimPatchRemoveOperation>{op: 'remove', 'path': 'name.nestedArray', value: [[]]};
+            expect(() => scimPatch(scimUser, [patch])).to.throw(DeepArrayRemovalNotSupported);
+            return done();
+        });
+
         it('REMOVE: nested array element with value supplied', done => {
             scimUser.name.nestedArray = [{primary: true, value: 'value1'}, {primary: false, value: 'value2'}];
             const patch1: ScimPatchRemoveOperation = {op: 'remove', path: 'name.nestedArray', value: [{value: 'value2', primary: false}]};
@@ -551,7 +564,6 @@ describe('SCIM PATCH', () => {
             expect(afterPatch.name.nestedArray && afterPatch.name.nestedArray.length).to.eq(1);
             return done();
         });
-
 
         it('REMOVE: empty array should be unassigned', done => {
             scimUser.name.nestedArray = [{primary: true, value: 'value1'}];
