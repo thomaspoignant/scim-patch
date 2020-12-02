@@ -18,21 +18,26 @@
     "test": "nyc mocha 'lib/test/**/*.test.js'",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "build": "tsc",
-    "bench": "npm run build && node lib/test/perf/benchmark.js"
+    "bench": "npm run build && node lib/test/perf/benchmark.js",
+    "lint": "eslint . --ext .ts"
   },
   "author": "thomas.poignant@gmail.com",
   "license": "Unlicense",
   "devDependencies": {
+    "@types/benchmark": "^1.0.33",
     "@types/chai": "^4.2.12",
     "@types/mocha": "^8.0.3",
+    "@typescript-eslint/eslint-plugin": "^4.9.0",
+    "@typescript-eslint/parser": "^4.9.0",
+    "benchmark": "^2.1.4",
     "chai": "^4.2.0",
     "coveralls": "^3.1.0",
+    "eslint": "^7.14.0",
+    "eslint-plugin-mocha": "^8.0.0",
     "mocha": "^8.0.3",
     "nyc": "^15.1.0",
     "ts-node": "^9.0.0",
-    "typescript": "^4.0.2",
-    "@types/benchmark": "^1.0.33",
-    "benchmark": "^2.1.4"
+    "typescript": "^4.1.2"
   },
   "dependencies": {
     "fast-deep-equal": "^3.1.3",

@@ -54,7 +54,7 @@ export {
 // Regex to check if this is search into array request.
 const IS_ARRAY_SEARCH = /(\[|\])/;
 // Regex to extract key and search request (ex: emails[primary eq true).
-const ARRAY_SEARCH: RegExp = /^(.+)\[(.+)\]$/;
+const ARRAY_SEARCH = /^(.+)\[(.+)\]$/;
 // Split path on all periods except e.g. "2.0"
 const SPLIT_PERIOD = /(?!\d)\.(?!\d)/g;
 // Valid patch operation, value needs to be in lowercase here.
