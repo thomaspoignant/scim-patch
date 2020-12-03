@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1606425300073,
+  "lastUpdate": 1607025636429,
   "repoUrl": "https://github.com/thomaspoignant/scim-patch",
   "entries": {
     "Benchmark.js Benchmark": [
@@ -1256,6 +1256,51 @@ window.BENCHMARK_DATA = {
             "range": "±2.79%",
             "unit": "ops/sec",
             "extra": "87 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "thomas.poignant@gmail.com",
+            "name": "Thomas Poignant",
+            "username": "thomaspoignant"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6511128f2971a358199b842289c80cd2128c4980",
+          "message": "Add linter + fix issue (#57)",
+          "timestamp": "2020-12-03T20:59:40+01:00",
+          "tree_id": "4714850535a5b4d4697ee3f6142f5fffa840009e",
+          "url": "https://github.com/thomaspoignant/scim-patch/commit/6511128f2971a358199b842289c80cd2128c4980"
+        },
+        "date": 1607025635798,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "Replace query",
+            "value": 275733,
+            "range": "±2.63%",
+            "unit": "ops/sec",
+            "extra": "82 samples"
+          },
+          {
+            "name": "Add query",
+            "value": 787218,
+            "range": "±2.97%",
+            "unit": "ops/sec",
+            "extra": "80 samples"
+          },
+          {
+            "name": "Remove query",
+            "value": 1287065,
+            "range": "±2.11%",
+            "unit": "ops/sec",
+            "extra": "79 samples"
           }
         ]
       }
