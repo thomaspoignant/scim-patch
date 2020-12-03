@@ -8,14 +8,14 @@ export abstract class ScimError extends Error {
 }
 
 export abstract class InvalidScimPatch extends ScimError {
-  protected constructor(message: string, scimCode: string = 'invalidSyntax') {
+  protected constructor(message: string, scimCode = 'invalidSyntax') {
     super(scimCode);
     this.message = `Invalid SCIM Patch: ${message}`;
   }
 }
 
 export abstract class InvalidScimRemoveValue extends ScimError {
-  protected constructor(message: string, scimCode: string = 'invalidSyntax') {
+  protected constructor(message: string, scimCode = 'invalidSyntax') {
     super(scimCode);
     this.message = `Invalid SCIM Remove Operation: ${message}`;
   }
