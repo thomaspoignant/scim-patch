@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1607025636429,
+  "lastUpdate": 1608126292532,
   "repoUrl": "https://github.com/thomaspoignant/scim-patch",
   "entries": {
     "Benchmark.js Benchmark": [
@@ -1301,6 +1301,51 @@ window.BENCHMARK_DATA = {
             "range": "±2.11%",
             "unit": "ops/sec",
             "extra": "79 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "27856297+dependabot-preview[bot]@users.noreply.github.com",
+            "name": "dependabot-preview[bot]",
+            "username": "dependabot-preview[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "286034eb7373aeaee1bb25dd4187871d259bc8bb",
+          "message": "Bump @types/chai from 4.2.12 to 4.2.14 (#62)",
+          "timestamp": "2020-12-16T13:44:00Z",
+          "tree_id": "7a5e0fc831eb9358dc4106e7c3f7b0494932eac2",
+          "url": "https://github.com/thomaspoignant/scim-patch/commit/286034eb7373aeaee1bb25dd4187871d259bc8bb"
+        },
+        "date": 1608126291626,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "Replace query",
+            "value": 352303,
+            "range": "±1.96%",
+            "unit": "ops/sec",
+            "extra": "86 samples"
+          },
+          {
+            "name": "Add query",
+            "value": 1192564,
+            "range": "±1.98%",
+            "unit": "ops/sec",
+            "extra": "86 samples"
+          },
+          {
+            "name": "Remove query",
+            "value": 1784285,
+            "range": "±1.73%",
+            "unit": "ops/sec",
+            "extra": "88 samples"
           }
         ]
       }
