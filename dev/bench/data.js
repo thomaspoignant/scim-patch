@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1608193628901,
+  "lastUpdate": 1608193660292,
   "repoUrl": "https://github.com/thomaspoignant/scim-patch",
   "entries": {
     "Benchmark.js Benchmark": [
@@ -1481,6 +1481,51 @@ window.BENCHMARK_DATA = {
             "range": "±1.36%",
             "unit": "ops/sec",
             "extra": "92 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "27856297+dependabot-preview[bot]@users.noreply.github.com",
+            "name": "dependabot-preview[bot]",
+            "username": "dependabot-preview[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9b249ea0120fc8b3989cfe4ad5c776df56fe7208",
+          "message": "Bump mocha from 8.1.1 to 8.2.1 (#65)",
+          "timestamp": "2020-12-17T08:26:52Z",
+          "tree_id": "ac6b40c2fb44a99454f0a82bb6bc207de17067bc",
+          "url": "https://github.com/thomaspoignant/scim-patch/commit/9b249ea0120fc8b3989cfe4ad5c776df56fe7208"
+        },
+        "date": 1608193659668,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "Replace query",
+            "value": 326243,
+            "range": "±1.73%",
+            "unit": "ops/sec",
+            "extra": "94 samples"
+          },
+          {
+            "name": "Add query",
+            "value": 951255,
+            "range": "±1.45%",
+            "unit": "ops/sec",
+            "extra": "91 samples"
+          },
+          {
+            "name": "Remove query",
+            "value": 1496091,
+            "range": "±1.61%",
+            "unit": "ops/sec",
+            "extra": "82 samples"
           }
         ]
       }
