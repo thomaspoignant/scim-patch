@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1608630800185,
+  "lastUpdate": 1608631306243,
   "repoUrl": "https://github.com/thomaspoignant/scim-patch",
   "entries": {
     "Benchmark.js Benchmark": [
@@ -1751,6 +1751,51 @@ window.BENCHMARK_DATA = {
             "range": "±1.29%",
             "unit": "ops/sec",
             "extra": "95 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "68fe120156f80fe0c39d21dc534093e696e56a24",
+          "message": "Bump @typescript-eslint/parser from 4.10.0 to 4.11.0 (#70)",
+          "timestamp": "2020-12-22T10:00:58Z",
+          "tree_id": "14b653f72fe072174a9b1c795b09ad6c76d234c7",
+          "url": "https://github.com/thomaspoignant/scim-patch/commit/68fe120156f80fe0c39d21dc534093e696e56a24"
+        },
+        "date": 1608631305525,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "Replace query",
+            "value": 325079,
+            "range": "±1.73%",
+            "unit": "ops/sec",
+            "extra": "88 samples"
+          },
+          {
+            "name": "Add query",
+            "value": 1032218,
+            "range": "±1.91%",
+            "unit": "ops/sec",
+            "extra": "84 samples"
+          },
+          {
+            "name": "Remove query",
+            "value": 1633347,
+            "range": "±1.82%",
+            "unit": "ops/sec",
+            "extra": "86 samples"
           }
         ]
       }
