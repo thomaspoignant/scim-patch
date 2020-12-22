@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1608630703854,
+  "lastUpdate": 1608630800185,
   "repoUrl": "https://github.com/thomaspoignant/scim-patch",
   "entries": {
     "Benchmark.js Benchmark": [
@@ -1706,6 +1706,51 @@ window.BENCHMARK_DATA = {
             "range": "±1.28%",
             "unit": "ops/sec",
             "extra": "94 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "thomas.poignant@gmail.com",
+            "name": "Thomas Poignant",
+            "username": "thomaspoignant"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e70193dd7546bc737b4f4618ad6ab8d478f0e3fe",
+          "message": "Create dependabot.yml",
+          "timestamp": "2020-12-22T10:52:24+01:00",
+          "tree_id": "547104c1098eb5f32249d0f67809fa841caf1875",
+          "url": "https://github.com/thomaspoignant/scim-patch/commit/e70193dd7546bc737b4f4618ad6ab8d478f0e3fe"
+        },
+        "date": 1608630796868,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "Replace query",
+            "value": 310903,
+            "range": "±1.50%",
+            "unit": "ops/sec",
+            "extra": "95 samples"
+          },
+          {
+            "name": "Add query",
+            "value": 920492,
+            "range": "±1.62%",
+            "unit": "ops/sec",
+            "extra": "92 samples"
+          },
+          {
+            "name": "Remove query",
+            "value": 1326375,
+            "range": "±1.29%",
+            "unit": "ops/sec",
+            "extra": "95 samples"
           }
         ]
       }
