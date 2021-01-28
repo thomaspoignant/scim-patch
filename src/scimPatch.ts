@@ -188,12 +188,12 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
     // Get the list of items who are successful for the search query.
     const matchFilter = filterWithQuery<any>(array, valuePath);
 
-    // If the target location specifies a complex attribute, a set of sub-attributes SHALL be specified in the "value"
-    // parameter, which replaces any existing values or adds where an attribute did not previously exist.
+    // If the target location is a multi-valued attribute for which a value selection filter ("valuePath") has been
+    // supplied and no record match was made, the service provider SHALL indicate failure by returning HTTP status
+    // code 400 and a "scimType" error code of "noTarget".
     const isReplace = patch.op.toLowerCase() === 'replace';
     if (isReplace && matchFilter.length === 0) {
-        array.push(patch.value);
-        return scimResource;
+        throw new NoTarget(patch.value)
     }
 
     // We are sure to find an index because matchFilter comes from array.
