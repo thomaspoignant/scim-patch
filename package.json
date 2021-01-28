@@ -16,7 +16,7 @@
   "scripts": {
     "mocha": "npm run build && ./node_modules/.bin/mocha 'lib/test/**/*.test.js'",
     "test": "nyc mocha 'lib/test/**/*.test.js'",
-    "coverage": "nyc report --reporter=text-lcov | coveralls",
+    "coverage": "nyc report --reporter=text-lcov",
     "build": "tsc",
     "bench": "npm run build && node lib/test/perf/benchmark.js",
     "lint": "eslint . --ext .ts"
