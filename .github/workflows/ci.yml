@@ -8,7 +8,7 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@v2.1.4
       - run: sudo npm install -g typescript nyc coveralls mocha
-      - run: sudo npm install
+      - run: npm install
       - run: npm run build
       - run: npm run lint
       - run: npm run test
