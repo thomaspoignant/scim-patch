@@ -129,15 +129,14 @@ describe('SCIM PATCH', () => {
         });
 
         it('REPLACE: nested object do not exists', done => {
-            scimUser.surName = [{value: 'toto', primary: true}];
-            const expected = 'toto@toto.com';
-            const patch1: ScimPatchAddReplaceOperation = {
+            // empty the surName fields.
+            scimUser.surName = [];
+            const patch: ScimPatchAddReplaceOperation = {
                 op: 'replace',
-                value: {value: expected, primary: false},
-                path: 'surName[primary eq false]'
+                path: 'surName[value eq "bogus"]',
+                value: 'this value should not be added',
             };
-            const afterPatch = scimPatch(scimUser, [patch1]);
-            expect(afterPatch.surName?.length).to.be.eq(2);
+            expect(() => scimPatch(scimUser, [patch])).to.throw(NoTarget);
             return done();
         });
 
@@ -185,18 +184,6 @@ describe('SCIM PATCH', () => {
             return done();
         });
 
-        it('REPLACE: should not modify anything if element not found', done => {
-            scimUser.name.nestedArray = [{primary: true, value: 'value1'}];
-            const patch1: ScimPatchAddReplaceOperation = {
-                op: 'replace', value: {
-                    newProperty1: 'toto'
-                }, path: 'name.nestedArray[toto eq true]'
-            };
-            const afterPatch = scimPatch(scimUser, [patch1]);
-            expect(afterPatch.name.nestedArray).to.be.eq(scimUser.name.nestedArray);
-            return done();
-        });
-
         it('REPLACE: with capital first letter for operation', done => {
             const expected = false;
             const patch: ScimPatchAddReplaceOperation = {op: 'Replace', value: {active: expected}};
@@ -238,19 +225,6 @@ describe('SCIM PATCH', () => {
                 op: "replace",
                 path: "surName[primary eq true].value",
                 value: "surname"
-            };
-            expect(() => scimPatch(scimUser, [patch])).to.throw(NoTarget);
-            return done();
-        });
-
-        // Test for https://github.com/thomaspoignant/scim-patch/issues/74
-        it("REPLACE: replace empty multivalued attribute", (done) => {
-            // empty the surName fields.
-            scimUser.surName = [];
-            const patch: ScimPatchAddReplaceOperation = {
-                op: 'replace',
-                path: 'surName[value eq "bogus"]',
-                value: 'this value should not be added',
             };
             expect(() => scimPatch(scimUser, [patch])).to.throw(NoTarget);
             return done();
