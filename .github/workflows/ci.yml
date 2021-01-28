@@ -12,7 +12,7 @@ jobs:
       - run: npm run build
       - run: npm run lint
       - run: npm run test
-      - run: npm run coverage > ./coverage/lcov.info
+      - run: mkdir ./coverage && npm run coverage > ./coverage/lcov.info
       - name: Coveralls
         uses: coverallsapp/github-action@master
         with:
