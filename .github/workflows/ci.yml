@@ -7,7 +7,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Setup Node.js environment
         uses: actions/setup-node@v2.1.4
-      - run: npm install -g typescript nyc coveralls mocha && npm i
+      - run: npm install --no-optional -g typescript nyc coveralls mocha && npm install --no-optional
       - run: npm run build
       - run: npm run lint
       - run: npm run test
