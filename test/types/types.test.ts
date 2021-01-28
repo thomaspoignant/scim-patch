@@ -7,6 +7,7 @@ export interface ScimUser extends ScimResource {
     surName?: Array<{
         value: string;
         primary: boolean;
+        additional?: string;
     }>;
     name: {
         familyName: string;

@@ -197,14 +197,6 @@ describe('SCIM PATCH', () => {
             return done();
         });
 
-        it('REPLACE: XXX', done => {
-            const patch1: ScimPatchRemoveOperation = {op: 'remove', path: 'emails[primary eq true].value'};
-            const afterPatch = scimPatch(scimUser, [patch1]);
-            expect(afterPatch.emails[0].value).not.to.exist;
-            expect(afterPatch.emails[0].primary).to.eq(true);
-            return done();
-        });
-
         it('REPLACE: with capital first letter for operation', done => {
             const expected = false;
             const patch: ScimPatchAddReplaceOperation = {op: 'Replace', value: {active: expected}};
@@ -251,6 +243,48 @@ describe('SCIM PATCH', () => {
             return done();
         });
 
+        // Test for https://github.com/thomaspoignant/scim-patch/issues/74
+        it("REPLACE: replace empty multivalued attribute", (done) => {
+            // empty the surName fields.
+            scimUser.surName = [];
+            const patch: ScimPatchAddReplaceOperation = {
+                op: 'replace',
+                path: 'surName[value eq "bogus"]',
+                value: 'this value should not be added',
+            };
+            expect(() => scimPatch(scimUser, [patch])).to.throw(NoTarget);
+            return done();
+        });
+
+        it("REPLACE: replace add fields in complex object", (done) => {
+            const expected = [ {primary: true, value: "bogus", additional:"additional"} ];
+            // empty the surName fields.
+            scimUser.surName = [{primary: true, value: "bogus"}];
+            const patch: ScimPatchAddReplaceOperation = {
+                op: 'replace',
+                path: 'surName[value eq "bogus"]',
+                value: {additional:"additional"},
+            };
+
+            const afterPatch = scimPatch(scimUser, [patch]);
+            expect(afterPatch.surName).to.be.deep.eq(expected);
+            return done();
+        });
+
+        it("REPLACE: replace add and update fields in complex object", (done) => {
+            const expected = [ {primary: true, value: "bogus2", additional:"additional"} ];
+            // empty the surName fields.
+            scimUser.surName = [{primary: true, value: "bogus"}];
+            const patch: ScimPatchAddReplaceOperation = {
+                op: 'replace',
+                path: 'surName[value eq "bogus"]',
+                value: {additional:"additional", value: "bogus2"},
+            };
+
+            const afterPatch = scimPatch(scimUser, [patch]);
+            expect(afterPatch.surName).to.be.deep.eq(expected);
+            return done();
+        });
     });
 
     describe('add', () => {
