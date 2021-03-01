@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1612168879987,
+  "lastUpdate": 1614603859157,
   "repoUrl": "https://github.com/thomaspoignant/scim-patch",
   "entries": {
     "Benchmark.js Benchmark": [
@@ -2246,6 +2246,51 @@ window.BENCHMARK_DATA = {
             "range": "±1.77%",
             "unit": "ops/sec",
             "extra": "88 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2a127f0f4721e12dbb298ff63fea2ad978ca22d5",
+          "message": "Bump typescript from 4.1.3 to 4.2.2 (#88)",
+          "timestamp": "2021-03-01T13:03:17Z",
+          "tree_id": "3c2b316be649dd5bcf4d3b159ca3ab0ead1bd9a2",
+          "url": "https://github.com/thomaspoignant/scim-patch/commit/2a127f0f4721e12dbb298ff63fea2ad978ca22d5"
+        },
+        "date": 1614603858366,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "Replace query",
+            "value": 338932,
+            "range": "±1.53%",
+            "unit": "ops/sec",
+            "extra": "91 samples"
+          },
+          {
+            "name": "Add query",
+            "value": 1025026,
+            "range": "±1.76%",
+            "unit": "ops/sec",
+            "extra": "92 samples"
+          },
+          {
+            "name": "Remove query",
+            "value": 1498670,
+            "range": "±1.48%",
+            "unit": "ops/sec",
+            "extra": "90 samples"
           }
         ]
       }
