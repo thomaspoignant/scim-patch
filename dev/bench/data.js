@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1614603932664,
+  "lastUpdate": 1614604186492,
   "repoUrl": "https://github.com/thomaspoignant/scim-patch",
   "entries": {
     "Benchmark.js Benchmark": [
@@ -2426,6 +2426,51 @@ window.BENCHMARK_DATA = {
             "range": "±2.12%",
             "unit": "ops/sec",
             "extra": "86 samples"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f2f048543095304d9051e0442b460e4bb8e68e4c",
+          "message": "Bump eslint from 7.19.0 to 7.21.0 (#84)",
+          "timestamp": "2021-03-01T13:08:52Z",
+          "tree_id": "bbd78d3992b318ef4ccefa14d16a54ca5366d8d6",
+          "url": "https://github.com/thomaspoignant/scim-patch/commit/f2f048543095304d9051e0442b460e4bb8e68e4c"
+        },
+        "date": 1614604185977,
+        "tool": "benchmarkjs",
+        "benches": [
+          {
+            "name": "Replace query",
+            "value": 310639,
+            "range": "±1.91%",
+            "unit": "ops/sec",
+            "extra": "90 samples"
+          },
+          {
+            "name": "Add query",
+            "value": 871380,
+            "range": "±2.80%",
+            "unit": "ops/sec",
+            "extra": "85 samples"
+          },
+          {
+            "name": "Remove query",
+            "value": 1370457,
+            "range": "±1.43%",
+            "unit": "ops/sec",
+            "extra": "92 samples"
           }
         ]
       }
