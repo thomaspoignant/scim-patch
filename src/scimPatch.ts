@@ -269,12 +269,8 @@ function navigate(inputSchema: any, paths: string[]): any {
             } catch (error) {
                 if(error instanceof FilterOnEmptyArray){
                     error.schema = schema;
-                    throw error
-                } else if (error instanceof InvalidScimPatchOp){
-                    throw error
-                } else {
-                    throw new InvalidScimPatchOp(error);
                 }
+                throw error;
             }
         } else {
             // The element is not an array.
