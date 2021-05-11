@@ -542,7 +542,7 @@ describe('SCIM PATCH', () => {
             const patch: ScimPatchAddReplaceOperation = {
                 op: "Add",
                 value: "1111 Street Rd",
-                path: "addresses[type eq \"work\.formatted"
+                path: "addresses[type eq \"work.formatted"
             };
             expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp);
             return done();
