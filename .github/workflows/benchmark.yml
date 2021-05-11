@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
       - name: Run benchmark
-        run: npm i -g benchmark && npm install && npm run bench && git status | tee output.txt
+        run: npm i -g benchmark && npm install && npm run bench && ls | tee output.txt
       - name: Store benchmark result
         uses: rhysd/github-action-benchmark@v1
         with:
