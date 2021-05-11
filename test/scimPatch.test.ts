@@ -259,6 +259,16 @@ describe('SCIM PATCH', () => {
             expect(afterPatch.surName).to.be.deep.eq(expected);
             return done();
         });
+
+        it("REPLACE: empty array add filter type + field (Azure AD)", (done) => {
+            const patch: ScimPatchAddReplaceOperation = {
+                op: "Replace",
+                value: "1111 Street Rd",
+                path: "addresses[type eq \"work\"].formatted"
+            };
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp);
+            return done();
+        });
     });
 
     describe('add', () => {
@@ -496,6 +506,54 @@ describe('SCIM PATCH', () => {
             const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch[path].length).to.be.eq(initialArrayLength);
 
+            return done();
+        });
+
+        // Check issue https://github.com/thomaspoignant/scim-patch/issues/42 to understand this usecase
+        it("ADD: empty array add filter type + field (Azure AD)", (done) => {
+            const patch: ScimPatchAddReplaceOperation = {
+                op: "Add",
+                value: "1111 Street Rd",
+                path: "addresses[type eq \"work\"].formatted"
+            };
+            expect(scimUser.addresses).to.be.undefined;
+            const afterPatch = scimPatch(scimUser, [patch]);
+            expect(afterPatch.addresses).to.not.be.undefined;
+            expect(afterPatch.addresses?.length).to.be.eq(1);
+            if (afterPatch.addresses !== undefined){
+                const address = afterPatch.addresses[0];
+                expect(address.type).to.be.eq("work")
+                expect(address.formatted).to.be.eq("1111 Street Rd")
+            }
+            return done();
+        });
+
+        it("ADD: empty array multiple filter should throw an error", (done) => {
+            const patch: ScimPatchAddReplaceOperation = {
+                op: "Add",
+                value: "1111 Street Rd",
+                path: "addresses[type eq \"work\" or type eq \"home\"].formatted"
+            };
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp);
+            return done();
+        });
+
+        // Check issue https://github.com/thomaspoignant/scim-patch/issues/42 to understand this usecase
+        it("ADD: empty array add filter type + field 2nd level", (done) => {
+            const patch: ScimPatchAddReplaceOperation = {
+                op: "Add",
+                value: "1111 Street Rd",
+                path: "name.nestedArray[primary eq true].newProperty1"
+            };
+            expect(scimUser.name.nestedArray).to.be.undefined;
+            const afterPatch = scimPatch(scimUser, [patch]);
+            expect(afterPatch.name.nestedArray).to.not.be.undefined;
+            expect(afterPatch.name.nestedArray?.length).to.be.eq(1);
+            if (afterPatch.name.nestedArray !== undefined){
+                const address = afterPatch.name.nestedArray[0];
+                expect(address.primary).to.be.eq(true)
+                expect(address.newProperty1).to.be.eq("1111 Street Rd")
+            }
             return done();
         });
     });

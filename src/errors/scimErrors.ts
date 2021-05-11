@@ -38,6 +38,18 @@ export class InvalidScimPatchOp extends InvalidScimPatch {
   }
 }
 
+export class FilterOnEmptyArray extends InvalidScimPatchOp {
+  schema: any;
+  attrName: string;
+  valuePath: string;
+
+  constructor(message: string, attrName: string, valuePath: string) {
+    super(`${message}`);
+    this.attrName = attrName;
+    this.valuePath = valuePath;
+  }
+}
+
 export class NoPathInScimPatchOp extends InvalidScimPatch {
   constructor() {
     super('Missing path in "remove" patch operation', 'noTarget');
