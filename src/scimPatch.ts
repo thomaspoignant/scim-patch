@@ -259,26 +259,22 @@ function navigate(inputSchema: any, paths: string[]): any {
 
         // We check if the element is an array with query (ex: emails[primary eq true).
         if (IS_ARRAY_SEARCH.test(subPath)) {
-            let valuePath, array;
-            try{
-                const extracted = extractArray(subPath, schema);
-                valuePath = extracted.valuePath;
-                array = extracted.array;
-            } catch (e) {
-                if(e instanceof FilterOnEmptyArray){
-                    e.schema = schema;
-                }
-                throw e
-            }
-
             try {
+                const {valuePath, array} = extractArray(subPath, schema);
                 // Get the item who is successful for the search query.
                 const matchFilter = filterWithQuery<any>(array, valuePath);
                 // We are sure to find an index because matchFilter comes from array.
                 const index = array.findIndex(item => matchFilter.includes(item));
                 schema = array[index];
             } catch (error) {
-                throw new InvalidScimPatchOp(error);
+                if(error instanceof FilterOnEmptyArray){
+                    error.schema = schema;
+                    throw error
+                } else if (error instanceof InvalidScimPatchOp){
+                    throw error
+                } else {
+                    throw new InvalidScimPatchOp(error);
+                }
             }
         } else {
             // The element is not an array.
