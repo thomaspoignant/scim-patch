@@ -33,6 +33,10 @@ export interface ScimUser extends ScimResource {
         newProperty1?: string;
         newProperty2?: string;
     }>;
+    addresses?: Array<{
+       type: string;
+       formatted: string;
+    }>;
     roles?: Array<{
         value: string;
         type?: string;

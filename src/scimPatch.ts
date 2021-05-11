@@ -7,7 +7,7 @@ import {
     NoTarget,
     RemoveValueNestedArrayNotSupported,
     RemoveValueNotArray,
-    InvalidScimRemoveValue
+    InvalidScimRemoveValue, FilterOnEmptyArray
 } from './errors/scimErrors';
 import {
     ScimPatchSchema,
@@ -161,6 +161,7 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
     return scimResource;
 }
 
+
 function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, patch: ScimPatchAddReplaceOperation): T {
     // We manipulate the object directly without knowing his property, that's why we use any.
     let resource: Record<string, any> = scimResource;
@@ -171,8 +172,29 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
 
     // We navigate till the second to last of the path.
     const paths = patch.path.split(SPLIT_PERIOD);
-    resource = navigate(resource, paths);
     const lastSubPath = paths[paths.length - 1];
+
+    try {
+        resource = navigate(resource, paths);
+    } catch(e) {
+        if (e instanceof FilterOnEmptyArray) {
+            resource = e.schema;
+            // check issue https://github.com/thomaspoignant/scim-patch/issues/42 to see why we should add this
+            const parsedPath = (parse(e.valuePath))
+            if (patch.op.toLowerCase() === "add" &&
+              "compValue" in parsedPath &&
+              parsedPath.compValue !== undefined &&
+              parsedPath.op === "eq"
+            ) {
+                const result: any = {}
+                result[parsedPath.attrPath] = parsedPath.compValue;
+                result[lastSubPath] = addOrReplaceAttribute(resource, patch);
+                resource[e.attrName] = [result];
+                return scimResource;
+            }
+        }
+        throw e;
+    }
 
     if (!IS_ARRAY_SEARCH.test(lastSubPath)) {
         if (resource === undefined) {
@@ -219,7 +241,7 @@ function extractArray(subPath: string, schema: any): ScimSearchQuery {
     const element = schema[attrName];
 
     if (!Array.isArray(element))
-        throw new InvalidScimPatchOp('Impossible to search on a mono valued attribute.');
+        throw new FilterOnEmptyArray('Impossible to search on a mono valued attribute.', attrName, valuePath);
 
     return new ScimSearchQuery(attrName, valuePath, element);
 }
@@ -237,16 +259,18 @@ function navigate(inputSchema: any, paths: string[]): any {
 
         // We check if the element is an array with query (ex: emails[primary eq true).
         if (IS_ARRAY_SEARCH.test(subPath)) {
-            const {valuePath, array} = extractArray(subPath, schema);
-
             try {
+                const {valuePath, array} = extractArray(subPath, schema);
                 // Get the item who is successful for the search query.
                 const matchFilter = filterWithQuery<any>(array, valuePath);
                 // We are sure to find an index because matchFilter comes from array.
                 const index = array.findIndex(item => matchFilter.includes(item));
                 schema = array[index];
             } catch (error) {
-                throw new InvalidScimPatchOp(error);
+                if(error instanceof FilterOnEmptyArray){
+                    error.schema = schema;
+                }
+                throw error;
             }
         } else {
             // The element is not an array.
