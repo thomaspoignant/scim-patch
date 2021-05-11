@@ -538,6 +538,16 @@ describe('SCIM PATCH', () => {
             return done();
         });
 
+        it("ADD: Invalid filter operation", (done) => {
+            const patch: ScimPatchAddReplaceOperation = {
+                op: "Add",
+                value: "1111 Street Rd",
+                path: "addresses[type eq \"work\.formatted"
+            };
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp);
+            return done();
+        });
+
         // Check issue https://github.com/thomaspoignant/scim-patch/issues/42 to understand this usecase
         it("ADD: empty array add filter type + field 2nd level", (done) => {
             const patch: ScimPatchAddReplaceOperation = {
