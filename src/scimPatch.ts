@@ -186,7 +186,7 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
               parsedPath.compValue !== undefined &&
               parsedPath.op === "eq"
             ) {
-                let result: any = {}
+                const result: any = {}
                 result[parsedPath.attrPath] = parsedPath.compValue;
                 result[lastSubPath] = addOrReplaceAttribute(resource, patch);
                 resource[e.attrName] = [result];
