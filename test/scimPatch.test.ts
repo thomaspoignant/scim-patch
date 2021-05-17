@@ -522,8 +522,8 @@ describe('SCIM PATCH', () => {
             expect(afterPatch.addresses?.length).to.be.eq(1);
             if (afterPatch.addresses !== undefined){
                 const address = afterPatch.addresses[0];
-                expect(address.type).to.be.eq("work")
-                expect(address.formatted).to.be.eq("1111 Street Rd")
+                expect(address.type).to.be.eq("work");
+                expect(address.formatted).to.be.eq("1111 Street Rd");
             }
             return done();
         });
@@ -561,8 +561,8 @@ describe('SCIM PATCH', () => {
             expect(afterPatch.name.nestedArray?.length).to.be.eq(1);
             if (afterPatch.name.nestedArray !== undefined){
                 const address = afterPatch.name.nestedArray[0];
-                expect(address.primary).to.be.eq(true)
-                expect(address.newProperty1).to.be.eq("1111 Street Rd")
+                expect(address.primary).to.be.eq(true);
+                expect(address.newProperty1).to.be.eq("1111 Street Rd");
             }
             return done();
         });
@@ -757,7 +757,7 @@ describe('SCIM PATCH', () => {
             const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch[path]).not.to.exist;
             return done();
-        })
+        });
     });
     describe('invalid requests', () => {
         it('INVALID: wrong operation name', done => {

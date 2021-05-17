@@ -180,13 +180,13 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
         if (e instanceof FilterOnEmptyArray) {
             resource = e.schema;
             // check issue https://github.com/thomaspoignant/scim-patch/issues/42 to see why we should add this
-            const parsedPath = (parse(e.valuePath))
+            const parsedPath = parse(e.valuePath);
             if (patch.op.toLowerCase() === "add" &&
               "compValue" in parsedPath &&
               parsedPath.compValue !== undefined &&
               parsedPath.op === "eq"
             ) {
-                const result: any = {}
+                const result: any = {};
                 result[parsedPath.attrPath] = parsedPath.compValue;
                 result[lastSubPath] = addOrReplaceAttribute(resource, patch);
                 resource[e.attrName] = [result];
@@ -198,7 +198,7 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
 
     if (!IS_ARRAY_SEARCH.test(lastSubPath)) {
         if (resource === undefined) {
-            throw new NoTarget(patch.value)
+            throw new NoTarget(patch.value);
         }
         resource[lastSubPath] = addOrReplaceAttribute(resource[lastSubPath], patch);
         return scimResource;
@@ -215,7 +215,7 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
     // code 400 and a "scimType" error code of "noTarget".
     const isReplace = patch.op.toLowerCase() === 'replace';
     if (isReplace && matchFilter.length === 0) {
-        throw new NoTarget(patch.value)
+        throw new NoTarget(patch.value);
     }
 
     // We are sure to find an index because matchFilter comes from array.
@@ -293,7 +293,7 @@ function addOrReplaceAttribute(property: any, patch: ScimPatchAddReplaceOperatio
         if (Array.isArray(patch.value)) {
             // if we're adding an array, we need to remove duplicated values from existing array
             if (patch.op.toLowerCase() === "add") {
-                const valuesToAdd = patch.value.filter(item => !property.includes(item))
+                const valuesToAdd = patch.value.filter(item => !property.includes(item));
                 return property.concat(valuesToAdd);
             }
             // else this is a replace operation
