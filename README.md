@@ -1,5 +1,6 @@
 # SCIM-PATCH
 [![npm version](http://img.shields.io/npm/v/scim-patch.svg?style=flat&color=blue)](https://npmjs.org/package/scim-patch "View this project on npm")
+[![Downloads](https://img.shields.io/npm/dt/scim-patch.svg?style=flat&color=blue)](https://npmjs.com/package/scim-patch)
 ![Build Status](https://github.com/thomaspoignant/scim-patch/actions/workflows/ci.yml/badge.svg)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fthomaspoignant%2Fscim-patch.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fthomaspoignant%2Fscim-patch?ref=badge_shield)
 [![Coverage Status](https://coveralls.io/repos/github/thomaspoignant/scim-patch/badge.svg?branch=master&service=github)](https://coveralls.io/github/thomaspoignant/scim-patch?branch=master&service=github)
