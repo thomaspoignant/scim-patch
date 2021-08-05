@@ -574,7 +574,8 @@ describe('SCIM PATCH', () => {
                 value: {
                     "name.givenName": "John",
                     "name.familyName": "Doe",
-                    "name.formatted": "John Doe"
+                    "name.formatted": "John Doe",
+                    "favorites.food": "lemon"
                 }
             };
             expect(scimUser.name.nestedArray).to.be.undefined;
@@ -583,6 +584,7 @@ describe('SCIM PATCH', () => {
             expect(afterPatch.name.givenName).to.be.eq("John");
             expect(afterPatch.name.familyName).to.be.eq("Doe");
             expect(afterPatch.name.formatted).to.be.eq("John Doe");
+            expect(afterPatch?.favorites?.food).to.be.eq("lemon");
             return done();
         });
 
