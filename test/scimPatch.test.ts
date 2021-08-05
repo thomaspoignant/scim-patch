@@ -548,7 +548,7 @@ describe('SCIM PATCH', () => {
             return done();
         });
 
-        // Check issue https://github.com/thomaspoignant/scim-patch/issues/42 to understand this usecase
+        // Check issue https://github.com/thomaspoignant/scim-patch/issues/42 to understand this use-case
         it("ADD: empty array add filter type + field 2nd level", (done) => {
             const patch: ScimPatchAddReplaceOperation = {
                 op: "Add",
@@ -566,6 +566,26 @@ describe('SCIM PATCH', () => {
             }
             return done();
         });
+
+        // Check issue https://github.com/thomaspoignant/scim-patch/issues/132 to understand this use-case
+        it("ADD: dot notation with no path", done => {
+            const patch: ScimPatchAddReplaceOperation = {
+                op: 'add',
+                value: {
+                    "name.givenName": "John",
+                    "name.familyName": "Doe",
+                    "name.formatted": "John Doe"
+                }
+            };
+            expect(scimUser.name.nestedArray).to.be.undefined;
+            const afterPatch = scimPatch(scimUser, [patch]);
+            console.log(afterPatch);
+            expect(afterPatch.name.givenName).to.be.eq("John");
+            expect(afterPatch.name.familyName).to.be.eq("Doe");
+            expect(afterPatch.name.formatted).to.be.eq("John Doe");
+            return done();
+        });
+
     });
     describe('remove', () => {
         it('REMOVE: with no path', done => {
