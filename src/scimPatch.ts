@@ -307,23 +307,31 @@ function addOrReplaceAttribute(property: any, patch: ScimPatchAddReplaceOperatio
     }
 
     if (typeof property === 'object') {
-        if (typeof patch.value !== 'object') {
-            if (patch.op === 'add')
-                throw new InvalidScimPatchOp('Invalid patch query.');
-
-            return patch.value;
-        }
-
-        // We add all the patch values to the property object.
-        for (const [key, value] of Object.entries(patch.value)) {
-            assign(property, key.split('.'), value);
-        }
-
-        return property;
+        return addOrReplaceObjectAttribute(property, patch);
     }
 
     // If the target location specifies a single-valued attribute, the existing value is replaced.
     return patch.value;
+}
+
+/**
+ * addOrReplaceObjectAttribute will add an attribute if it is an object
+ * @param property The property we want to replace
+ * @param patch The patch operation
+ */
+function addOrReplaceObjectAttribute(property: any, patch: ScimPatchAddReplaceOperation): any {
+    if (typeof patch.value !== 'object') {
+        if (patch.op === 'add')
+            throw new InvalidScimPatchOp('Invalid patch query.');
+
+        return patch.value;
+    }
+
+    // We add all the patch values to the property object.
+    for (const [key, value] of Object.entries(patch.value)) {
+        assign(property, key.split('.'), value);
+    }
+    return property;
 }
 
 /**
