@@ -307,21 +307,49 @@ function addOrReplaceAttribute(property: any, patch: ScimPatchAddReplaceOperatio
     }
 
     if (typeof property === 'object') {
-        if (typeof patch.value !== 'object') {
-            if (patch.op === 'add')
-                throw new InvalidScimPatchOp('Invalid patch query.');
-
-            return patch.value;
-        }
-
-        return {
-            ...property,
-            ...patch.value
-        };
+        return addOrReplaceObjectAttribute(property, patch);
     }
 
     // If the target location specifies a single-valued attribute, the existing value is replaced.
     return patch.value;
+}
+
+/**
+ * addOrReplaceObjectAttribute will add an attribute if it is an object
+ * @param property The property we want to replace
+ * @param patch The patch operation
+ */
+function addOrReplaceObjectAttribute(property: any, patch: ScimPatchAddReplaceOperation): any {
+    if (typeof patch.value !== 'object') {
+        if (patch.op === 'add')
+            throw new InvalidScimPatchOp('Invalid patch query.');
+
+        return patch.value;
+    }
+
+    // We add all the patch values to the property object.
+    for (const [key, value] of Object.entries(patch.value)) {
+        assign(property, key.split('.'), value);
+    }
+    return property;
+}
+
+/**
+ * assign is taking an array of key and add the associated nested object.
+ * @param obj the object where we should the key
+ * @param keyPath an array which represent the path of the nested object
+ * @param value value to assign
+ */
+function assign(obj:any, keyPath:Array<string>, value:any) {
+    const lastKeyIndex = keyPath.length-1;
+    for (let i = 0; i < lastKeyIndex; ++ i) {
+        const key = keyPath[i];
+        if (!(key in obj)){
+            obj[key] = {};
+        }
+        obj = obj[key];
+    }
+    obj[keyPath[lastKeyIndex]] = value;
 }
 
 /**

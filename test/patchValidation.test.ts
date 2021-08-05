@@ -65,4 +65,19 @@ describe('PATCH Validation', () => {
         expect(() => patchBodyValidation(patch)).to.throw(InvalidScimPatchRequest);
         return done();
     });
+
+    it('Add with no path', done => {
+        const patch: any = {
+            schemas: ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
+            Operations: [{
+                op: 'add', value: {
+                    "name.givenName": "John",
+                    "name.familyName": "Doe",
+                    "name.formatted": "John Doe"
+                }
+            }]
+        };
+        expect(() => patchBodyValidation(patch)).to.not.throw();
+        return done();
+    });
 });
