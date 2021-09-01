@@ -362,7 +362,7 @@ function filterWithQuery<T>(arr: Array<T>, querySearch: string): Array<T> {
     try {
         return arr.filter(filter(parse(querySearch)));
     } catch (error) {
-        throw new InvalidScimPatchOp(error);
+        throw new InvalidScimPatchOp("${error}");
     }
 }
 
