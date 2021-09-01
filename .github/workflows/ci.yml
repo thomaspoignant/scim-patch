@@ -6,7 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Setup Node.js environment
-        uses: actions/setup-node@v2.1.4
+        uses: actions/setup-node@v2
       - run: sudo npm install -g typescript nyc mocha
       - run: npm install
       - run: npm run build
