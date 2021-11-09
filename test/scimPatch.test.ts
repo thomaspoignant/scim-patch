@@ -53,6 +53,15 @@ describe('SCIM PATCH', () => {
             return done();
         });
 
+        it('REPLACE: first level property with fully qualified path', done => {
+            const expected = false;
+            const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: expected, path: 'urn:ietf:params:scim:schemas:core:2.0:User:active'};
+            const afterPatch = scimPatch(scimUser, [patch]);
+            expect(afterPatch.active).to.be.eq(expected);
+            return done();
+        });
+
+
         it('REPLACE: first level property without path', done => {
             const expected = false;
             const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: {active: expected}};
