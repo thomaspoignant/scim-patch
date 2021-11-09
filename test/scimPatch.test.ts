@@ -37,7 +37,9 @@ describe('SCIM PATCH', () => {
         "lastModified": "2019-11-20T09:25:30.208Z",
         "location": "**REQUIRED**/Users/tea_4"
       },
-      "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department": "value"
+      "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User" : {
+          "department": "value"
+      }
     }`);
         return done();
     });
@@ -192,16 +194,15 @@ describe('SCIM PATCH', () => {
             return done();
         });
 
-        it('REPLACE: with version number in path', done => {
+        it('REPLACE: with extensions schema path', done => {
             const expected = 'newValue';
-            const path = 'urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department';
             const patch: ScimPatchAddReplaceOperation = {
                 op: 'replace',
                 value: expected,
-                path: path
+                path: 'urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department'
             };
             const afterPatch = scimPatch(scimUser, [patch]);
-            expect(afterPatch[path]).to.be.eq(expected);
+            expect(afterPatch['urn:ietf:params:scim:schemas:extension:enterprise:2.0:User']?.department).to.be.eq(expected);
             return done();
         });
 
@@ -462,15 +463,17 @@ describe('SCIM PATCH', () => {
             return done();
         });
 
-        it('ADD: with version number in path', done => {
+        it('ADD: with extension schema path', done => {
             const expected = 'newValue';
-            const path = 'urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department';
-            delete scimUser[path];
+            const schemaExtension = 'urn:ietf:params:scim:schemas:extension:enterprise:2.0:User';
+            delete scimUser[schemaExtension];
             const patch: ScimPatchAddReplaceOperation = {
-                op: 'add', value: 'newValue', path: path
+                op: 'add',
+                value: 'newValue',
+                path: 'urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department'
             };
             const afterPatch = scimPatch(scimUser, [patch]);
-            expect(afterPatch[path]).to.be.eq(expected);
+            expect(afterPatch[schemaExtension]?.department).to.be.eq(expected);
             return done();
         });
 
@@ -773,11 +776,13 @@ describe('SCIM PATCH', () => {
             return done();
         });
 
-        it('REMOVE: with version number in path', done => {
-            const path = 'urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department';
-            const patch: ScimPatchRemoveOperation = {op: 'remove', path: path};
+        it('REMOVE: with extensions schema path', done => {
+            const schemaExtension = 'urn:ietf:params:scim:schemas:extension:enterprise:2.0:User';
+            const patch: ScimPatchRemoveOperation = {
+                op: 'remove',
+                path: 'urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department'};
             const afterPatch = scimPatch(scimUser, [patch]);
-            expect(afterPatch[path]).not.to.exist;
+            expect(afterPatch[schemaExtension]?.department).not.to.exist;
             return done();
         });
     });
