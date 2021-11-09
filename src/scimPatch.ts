@@ -55,10 +55,13 @@ export {
 const IS_ARRAY_SEARCH = /(\[|\])/;
 // Regex to extract key and search request (ex: emails[primary eq true).
 const ARRAY_SEARCH = /^(.+)\[(.+)\]$/;
-// Split path on all periods except e.g. "2.0"
-const SPLIT_PERIOD = /(?!\d)\.(?!\d)/g;
+// Split path on periods
+const SPLIT_PERIOD = /\./g;
 // Valid patch operation, value needs to be in lowercase here.
 const AUTHORIZED_OPERATION = ['remove', 'add', 'replace'];
+
+const CORE_SCHEMA_USER = 'urn:ietf:params:scim:schemas:core:2.0:User';
+const CORE_SCHEMA_GROUP = 'urn:ietf:params:scim:schemas:core:2.0:Group';
 
 export const PATCH_OPERATION_SCHEMA = 'urn:ietf:params:scim:api:messages:2.0:PatchOp';
 /*
@@ -123,13 +126,36 @@ function validatePatchOperation(operation: ScimPatchOperation): void {
         throw new InvalidScimPatchRequest('Path is supposed to be a string');
 }
 
+function resolvePaths(path: string): string[] {
+    const uriIndex = path.lastIndexOf(':');
+
+    if (uriIndex < 0) {
+        // No schema prefix - this is a core schema path
+        return path.split(SPLIT_PERIOD);
+    }
+    
+    const schemaUri = path.substring(0, uriIndex);
+    const paths = path.substring(uriIndex +1).split(SPLIT_PERIOD);
+    switch(schemaUri) {        
+        case CORE_SCHEMA_GROUP:
+        case CORE_SCHEMA_USER:
+            // Ignore core schema URIs in paths.  These are allowed but not part of object keys
+            break;
+        default:
+            // Assume any other provided schema URI is an extension
+            paths.unshift(schemaUri);
+            break;
+    }
+    return paths;
+}
+
 function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: ScimPatchRemoveOperation): T {
     // We manipulate the object directly without knowing his property, that's why we use any.
     let resource: Record<string, any> = scimResource;
     validatePatchOperation(patch);
 
     // Path is supposed to be set, there are a validation in the validateOperation function.
-    const paths = patch.path.split(SPLIT_PERIOD);
+    const paths = resolvePaths(patch.path);
     resource = navigate(resource, paths);
 
     // Dealing with the last element of the path.
@@ -171,7 +197,7 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
         return addOrReplaceAttribute(scimResource, patch);
 
     // We navigate till the second to last of the path.
-    const paths = patch.path.split(SPLIT_PERIOD);
+    const paths = resolvePaths(patch.path);
     const lastSubPath = paths[paths.length - 1];
 
     try {
