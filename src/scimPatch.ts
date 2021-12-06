@@ -56,7 +56,7 @@ const IS_ARRAY_SEARCH = /(\[|\])/;
 // Regex to extract key and search request (ex: emails[primary eq true).
 const ARRAY_SEARCH = /^(.+)\[(.+)\]$/;
 // Split path on periods
-const SPLIT_PERIOD = /(?!\B"[^\[]*)\.(?![^\]]*"\B)/g;
+const SPLIT_PERIOD = /(?!\B"[^[]*)\.(?![^\]]*"\B)/g;
 // Valid patch operation, value needs to be in lowercase here.
 const AUTHORIZED_OPERATION = ['remove', 'add', 'replace'];
 
