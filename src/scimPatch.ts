@@ -56,7 +56,7 @@ const IS_ARRAY_SEARCH = /(\[|\])/;
 // Regex to extract key and search request (ex: emails[primary eq true).
 const ARRAY_SEARCH = /^(.+)\[(.+)\]$/;
 // Split path on periods
-const SPLIT_PERIOD = /\./g;
+const SPLIT_PERIOD = /(?!\B"[^[]*)\.(?![^\]]*"\B)/g;
 // Valid patch operation, value needs to be in lowercase here.
 const AUTHORIZED_OPERATION = ['remove', 'add', 'replace'];
 
@@ -133,10 +133,10 @@ function resolvePaths(path: string): string[] {
         // No schema prefix - this is a core schema path
         return path.split(SPLIT_PERIOD);
     }
-    
+
     const schemaUri = path.substring(0, uriIndex);
     const paths = path.substring(uriIndex +1).split(SPLIT_PERIOD);
-    switch(schemaUri) {        
+    switch(schemaUri) {
         case CORE_SCHEMA_GROUP:
         case CORE_SCHEMA_USER:
             // Ignore core schema URIs in paths.  These are allowed but not part of object keys
@@ -388,7 +388,7 @@ function filterWithQuery<T>(arr: Array<T>, querySearch: string): Array<T> {
     try {
         return arr.filter(filter(parse(querySearch)));
     } catch (error) {
-        throw new InvalidScimPatchOp("${error}");
+        throw new InvalidScimPatchOp(`${error}`);
     }
 }
 
