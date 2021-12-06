@@ -279,6 +279,18 @@ describe('SCIM PATCH', () => {
             expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp);
             return done();
         });
+
+        it("REPLACE: filter with an email containing dots", (done) => {
+            const expected = [ {"value": "batman@superheroes.com","primary": true} ];
+            const patch: ScimPatchAddReplaceOperation = {
+                op: "Replace",
+                value: "batman@superheroes.com",
+                path: "emails[value eq \"spiderman@superheroes.com\"].value"
+            };
+            const afterPatch = scimPatch(scimUser, [patch]);
+            expect(afterPatch.emails).to.be.deep.eq(expected);
+            return done();
+        });
     });
 
     describe('add', () => {
@@ -592,7 +604,6 @@ describe('SCIM PATCH', () => {
             };
             expect(scimUser.name.nestedArray).to.be.undefined;
             const afterPatch = scimPatch(scimUser, [patch]);
-            console.log(afterPatch);
             expect(afterPatch.name.givenName).to.be.eq("John");
             expect(afterPatch.name.familyName).to.be.eq("Doe");
             expect(afterPatch.name.formatted).to.be.eq("John Doe");
