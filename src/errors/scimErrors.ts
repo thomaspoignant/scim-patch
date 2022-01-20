@@ -50,6 +50,19 @@ export class FilterOnEmptyArray extends InvalidScimPatchOp {
   }
 }
 
+export class FilterArrayTargetNotFound extends InvalidScimPatchOp {
+  schema: any;
+  attrName: string;
+  valuePath: string;
+
+  constructor(message: string, attrName: string, valuePath: string, schema?: any) {
+    super(`${message}`);
+    this.attrName = attrName;
+    this.valuePath = valuePath;
+    this.schema = schema;
+  }
+}
+
 export class NoPathInScimPatchOp extends InvalidScimPatch {
   constructor() {
     super('Missing path in "remove" patch operation', 'noTarget');

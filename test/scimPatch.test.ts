@@ -147,7 +147,7 @@ describe('SCIM PATCH', () => {
                 path: 'surName[value eq "bogus"]',
                 value: 'this value should not be added',
             };
-            expect(() => scimPatch(scimUser, [patch])).to.throw(NoTarget);
+            expect(() => scimPatch(scimUser, [patch])).to.throw(NoTarget, 'a value selection filter (surName[value eq "bogus"]) has been supplied and no record match was made');
             return done();
         });
 
@@ -236,7 +236,7 @@ describe('SCIM PATCH', () => {
                 path: "surName[primary eq true].value",
                 value: "surname"
             };
-            expect(() => scimPatch(scimUser, [patch])).to.throw(NoTarget);
+            expect(() => scimPatch(scimUser, [patch])).to.throw(NoTarget, 'a value selection filter (surName[primary eq true].value) has been supplied and no record match was made');
             return done();
         });
 
@@ -276,7 +276,7 @@ describe('SCIM PATCH', () => {
                 value: "1111 Street Rd",
                 path: "addresses[type eq \"work\"].formatted"
             };
-            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp);
+            expect(() => scimPatch(scimUser, [patch])).to.throw(NoTarget, 'a value selection filter (addresses[type eq "work"].formatted) has been supplied and no record match was made');
             return done();
         });
 
@@ -552,13 +552,37 @@ describe('SCIM PATCH', () => {
             return done();
         });
 
+        it("ADD: existing array add filter type + field (Azure AD)", (done) => {
+            const patch: ScimPatchAddReplaceOperation = {
+                op: "Add",
+                value: "1122 Street Rd",
+                path: "addresses[type eq \"work\"].formatted"
+            };
+            scimUser.addresses = [{
+                type: 'home',
+                formatted: '2222 Avenue Blvd'
+            }];
+            const afterPatch = scimPatch(scimUser, [patch]);
+            expect(afterPatch.addresses).to.not.be.undefined;
+            expect(afterPatch.addresses?.length).to.be.eq(2);
+            if (afterPatch.addresses !== undefined){
+                const existingAddress = afterPatch.addresses[0];
+                expect(existingAddress.type).to.be.eq("home");
+                expect(existingAddress.formatted).to.be.eq("2222 Avenue Blvd");
+                const newAddress = afterPatch.addresses[1];
+                expect(newAddress.type).to.be.eq("work");
+                expect(newAddress.formatted).to.be.eq("1122 Street Rd");
+            }
+            return done();
+        });
+
         it("ADD: empty array multiple filter should throw an error", (done) => {
             const patch: ScimPatchAddReplaceOperation = {
                 op: "Add",
                 value: "1111 Street Rd",
                 path: "addresses[type eq \"work\" or type eq \"home\"].formatted"
             };
-            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp);
+            expect(() => scimPatch(scimUser, [patch])).to.throw(NoTarget, 'a value selection filter (addresses[type eq "work" or type eq "home"].formatted) has been supplied and no record match was made');
             return done();
         });
 

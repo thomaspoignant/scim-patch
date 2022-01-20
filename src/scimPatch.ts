@@ -7,7 +7,9 @@ import {
     NoTarget,
     RemoveValueNestedArrayNotSupported,
     RemoveValueNotArray,
-    InvalidScimRemoveValue, FilterOnEmptyArray
+    InvalidScimRemoveValue,
+    FilterOnEmptyArray,
+    FilterArrayTargetNotFound
 } from './errors/scimErrors';
 import {
     ScimPatchSchema,
@@ -203,7 +205,7 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
     try {
         resource = navigate(resource, paths);
     } catch(e) {
-        if (e instanceof FilterOnEmptyArray) {
+        if (e instanceof FilterOnEmptyArray || e instanceof FilterArrayTargetNotFound) {
             resource = e.schema;
             // check issue https://github.com/thomaspoignant/scim-patch/issues/42 to see why we should add this
             const parsedPath = parse(e.valuePath);
@@ -215,16 +217,17 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
                 const result: any = {};
                 result[parsedPath.attrPath] = parsedPath.compValue;
                 result[lastSubPath] = addOrReplaceAttribute(resource, patch);
-                resource[e.attrName] = [result];
+                resource[e.attrName] = [...(resource[e.attrName] ?? []), result];
                 return scimResource;
             }
+            throw new NoTarget(patch.path);
         }
         throw e;
     }
 
     if (!IS_ARRAY_SEARCH.test(lastSubPath)) {
         if (resource === undefined) {
-            throw new NoTarget(patch.value);
+            throw new NoTarget(patch.path);
         }
         resource[lastSubPath] = addOrReplaceAttribute(resource[lastSubPath], patch);
         return scimResource;
@@ -241,7 +244,7 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
     // code 400 and a "scimType" error code of "noTarget".
     const isReplace = patch.op.toLowerCase() === 'replace';
     if (isReplace && matchFilter.length === 0) {
-        throw new NoTarget(patch.value);
+        throw new NoTarget(patch.path);
     }
 
     // We are sure to find an index because matchFilter comes from array.
@@ -286,11 +289,14 @@ function navigate(inputSchema: any, paths: string[]): any {
         // We check if the element is an array with query (ex: emails[primary eq true).
         if (IS_ARRAY_SEARCH.test(subPath)) {
             try {
-                const {valuePath, array} = extractArray(subPath, schema);
+                const {attrName, valuePath, array} = extractArray(subPath, schema);
                 // Get the item who is successful for the search query.
                 const matchFilter = filterWithQuery<any>(array, valuePath);
                 // We are sure to find an index because matchFilter comes from array.
                 const index = array.findIndex(item => matchFilter.includes(item));
+                if (index < 0) {
+                    throw new FilterArrayTargetNotFound('A matching array entry was not found using the supplied filter.', attrName, valuePath, schema);
+                }
                 schema = array[index];
             } catch (error) {
                 if(error instanceof FilterOnEmptyArray){
