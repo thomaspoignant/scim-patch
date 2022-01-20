@@ -226,9 +226,6 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
     }
 
     if (!IS_ARRAY_SEARCH.test(lastSubPath)) {
-        if (resource === undefined) {
-            throw new NoTarget(patch.path);
-        }
         resource[lastSubPath] = addOrReplaceAttribute(resource[lastSubPath], patch);
         return scimResource;
     }
