@@ -38,7 +38,7 @@
     "mocha": "9.0.1",
     "nyc": "15.1.0",
     "ts-node": "10.0.0",
-    "typescript": "4.1.2"
+    "typescript": "4.5.5"
   },
   "dependencies": {
     "fast-deep-equal": "3.1.3",
