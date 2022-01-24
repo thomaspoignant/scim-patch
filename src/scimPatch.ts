@@ -121,7 +121,7 @@ function validatePatchOperation(operation: ScimPatchOperation): void {
     if (operation.op === 'remove' && !operation.path)
         throw new NoPathInScimPatchOp();
 
-    if (operation.op === 'add' && !('value' in operation))
+    if (operation.op.toLowerCase() === 'add' && !('value' in operation))
         throw new InvalidScimPatchRequest(`The operation ${operation.op} MUST contain a "value" member whose content specifies the value to be added`);
 
     if (operation.path && typeof operation.path !== 'string')
@@ -350,7 +350,7 @@ function addOrReplaceAttribute(property: any, patch: ScimPatchAddReplaceOperatio
  */
 function addOrReplaceObjectAttribute(property: any, patch: ScimPatchAddReplaceOperation): any {
     if (typeof patch.value !== 'object') {
-        if (patch.op === 'add')
+        if (patch.op.toLowerCase() === 'add')
             throw new InvalidScimPatchOp('Invalid patch query.');
 
         return patch.value;
