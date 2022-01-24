@@ -635,6 +635,22 @@ describe('SCIM PATCH', () => {
             return done();
         });
 
+        // Check issue https://github.com/thomaspoignant/scim-patch/issues/186 to understand this use-case
+        it("ADD: on null property", done => {
+            const user: ScimUser = {
+                schemas: ["urn:ietf:params:scim:schemas:core:2.0:User"],
+                meta: {resourceType: "User", created: new Date(), lastModified: new Date(), location: "users/4"},
+                active: true, emails: [{ value:"batman@superheroes.com", primary: true }],
+                name: {familyName: "bat", givenName: "man"}, userName: "batman",
+                newProperty: null
+            };
+            const patch: ScimPatchAddReplaceOperation = { op: "add", path: "newProperty", value: "1" };
+            expect(user.newProperty).to.be.null;
+
+            const afterPatch = scimPatch(user, [patch]);
+            expect(afterPatch.newProperty).to.be.eq("1");
+            return done();
+        });
     });
     describe('remove', () => {
         it('REMOVE: with no path', done => {

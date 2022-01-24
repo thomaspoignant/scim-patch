@@ -335,7 +335,7 @@ function addOrReplaceAttribute(property: any, patch: ScimPatchAddReplaceOperatio
         return a;
     }
 
-    if (typeof property === 'object') {
+    if (property !== null && typeof property === 'object') {
         return addOrReplaceObjectAttribute(property, patch);
     }
 
