@@ -576,6 +576,18 @@ describe('SCIM PATCH', () => {
             return done();
         });
 
+        it("ADD: existing array add filter type + field (Azure AD) with lower case add", (done) => {
+            const patch: ScimPatchAddReplaceOperation = { op: "add",value: "1122 Street Rd", path: "addresses[type eq \"work\"].formatted" };
+            const afterPatch = scimPatch(scimUser, [patch]);
+            expect(afterPatch.addresses?.length).to.be.eq(1);
+            if (afterPatch.addresses !== undefined){
+                const newAddress = afterPatch.addresses[0];
+                expect(newAddress.type).to.be.eq("work");
+                expect(newAddress.formatted).to.be.eq("1122 Street Rd");
+            }
+            return done();
+        });
+
         it("ADD: empty array multiple filter should throw an error", (done) => {
             const patch: ScimPatchAddReplaceOperation = {
                 op: "Add",

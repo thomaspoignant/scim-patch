@@ -121,7 +121,7 @@ function validatePatchOperation(operation: ScimPatchOperation): void {
     if (operation.op === 'remove' && !operation.path)
         throw new NoPathInScimPatchOp();
 
-    if (operation.op === 'add' && !('value' in operation))
+    if (operation.op.toLowerCase() === 'add' && !('value' in operation))
         throw new InvalidScimPatchRequest(`The operation ${operation.op} MUST contain a "value" member whose content specifies the value to be added`);
 
     if (operation.path && typeof operation.path !== 'string')
@@ -216,7 +216,7 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
             ) {
                 const result: any = {};
                 result[parsedPath.attrPath] = parsedPath.compValue;
-                result[lastSubPath] = addOrReplaceAttribute(resource, patch);
+                result[lastSubPath] = addOrReplaceAttribute(resource, patch, true);
                 resource[e.attrName] = [...(resource[e.attrName] ?? []), result];
                 return scimResource;
             }
@@ -315,9 +315,10 @@ function navigate(inputSchema: any, paths: string[]): any {
  * Add or Replace a property in the ScimResource
  * @param property The property we want to replace
  * @param patch The patch operation
+ * @param multiValuedPathFilter True if thi is a multivalued path filter query
  * @return the patched property
  */
-function addOrReplaceAttribute(property: any, patch: ScimPatchAddReplaceOperation): any {
+function addOrReplaceAttribute(property: any, patch: ScimPatchAddReplaceOperation, multiValuedPathFilter?: boolean): any {
     if (Array.isArray(property)) {
         if (Array.isArray(patch.value)) {
             // if we're adding an array, we need to remove duplicated values from existing array
@@ -336,7 +337,7 @@ function addOrReplaceAttribute(property: any, patch: ScimPatchAddReplaceOperatio
     }
 
     if (property !== null && typeof property === 'object') {
-        return addOrReplaceObjectAttribute(property, patch);
+        return addOrReplaceObjectAttribute(property, patch, multiValuedPathFilter);
     }
 
     // If the target location specifies a single-valued attribute, the existing value is replaced.
@@ -347,10 +348,11 @@ function addOrReplaceAttribute(property: any, patch: ScimPatchAddReplaceOperatio
  * addOrReplaceObjectAttribute will add an attribute if it is an object
  * @param property The property we want to replace
  * @param patch The patch operation
+ * @param multiValuedPathFilter True if thi is a multivalued path filter query
  */
-function addOrReplaceObjectAttribute(property: any, patch: ScimPatchAddReplaceOperation): any {
+function addOrReplaceObjectAttribute(property: any, patch: ScimPatchAddReplaceOperation, multiValuedPathFilter?: boolean): any {
     if (typeof patch.value !== 'object') {
-        if (patch.op === 'add')
+        if (patch.op.toLowerCase() === 'add' && !multiValuedPathFilter)
             throw new InvalidScimPatchOp('Invalid patch query.');
 
         return patch.value;
