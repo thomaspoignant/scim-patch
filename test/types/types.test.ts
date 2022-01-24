@@ -43,7 +43,7 @@ export interface ScimUser extends ScimResource {
         type?: string;
     }>;
     meta: ScimMeta & { resourceType: 'User' };
-    newProperty?: string;
+    newProperty?: string | null;
     newProperty3?: string;
     favorites?: {
         food?: string
