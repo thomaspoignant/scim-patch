@@ -360,7 +360,7 @@ function addOrReplaceObjectAttribute(property: any, patch: ScimPatchAddReplaceOp
 
     // We add all the patch values to the property object.
     for (const [key, value] of Object.entries(patch.value)) {
-        assign(property, key.split('.'), value);
+        assign(property, resolvePaths(key), value);
     }
     return property;
 }

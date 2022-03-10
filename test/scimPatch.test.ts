@@ -3,7 +3,7 @@ import {
     InvalidScimPatchRequest,
     NoPathInScimPatchOp,
     scimPatch,
-    InvalidScimPatch
+    InvalidScimPatch,
 } from '../src/scimPatch';
 import {ScimUser} from './types/types.test';
 import {expect} from 'chai';
@@ -38,6 +38,7 @@ describe('SCIM PATCH', () => {
         "location": "**REQUIRED**/Users/tea_4"
       },
       "urn:ietf:params:scim:schemas:extension:enterprise:2.0:User" : {
+          "organization": "value",
           "department": "value"
       }
     }`);
@@ -83,6 +84,23 @@ describe('SCIM PATCH', () => {
             const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: {familyName: expected}, path: 'name'};
             const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch.name.familyName).to.be.eq(expected);
+            return done();
+        });
+
+        it('REPLACE: 2 level extension schema property without path', done => {
+            const expectedOrganization = 'newOrganization';
+            const expectedDepartment = 'newDepartment';
+            const schemaExtension = 'urn:ietf:params:scim:schemas:extension:enterprise:2.0:User';
+
+            const patch: ScimPatchAddReplaceOperation = {
+                op: 'replace', value: {
+                    [`${schemaExtension}:organization`]: expectedOrganization,
+                    [`${schemaExtension}:department`]: expectedDepartment
+                }
+            };
+            const afterPatch = scimPatch(scimUser, [patch]);
+            expect(afterPatch[schemaExtension]?.organization).to.be.eq(expectedOrganization);
+            expect(afterPatch[schemaExtension]?.department).to.be.eq(expectedDepartment);
             return done();
         });
 
@@ -323,6 +341,20 @@ describe('SCIM PATCH', () => {
             const patch: ScimPatchAddReplaceOperation = {op: 'add', value: {newProperty: expected}, path: 'name'};
             const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch.name.newProperty).to.be.eq(expected);
+            return done();
+        });
+
+        it('ADD: 2 level extension schema property without path', done => {
+            const expectedDivision = 'newDepartment';
+            const schemaExtension = 'urn:ietf:params:scim:schemas:extension:enterprise:2.0:User';
+
+            const patch: ScimPatchAddReplaceOperation = {
+                op: 'add', value: {
+                    [`${schemaExtension}:division`]: expectedDivision
+                }
+            };
+            const afterPatch = scimPatch(scimUser, [patch]);
+            expect(afterPatch[schemaExtension]?.division).to.be.eq(expectedDivision);
             return done();
         });
 

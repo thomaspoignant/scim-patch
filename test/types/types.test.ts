@@ -49,6 +49,8 @@ export interface ScimUser extends ScimResource {
         food?: string
     };
     'urn:ietf:params:scim:schemas:extension:enterprise:2.0:User'?: {
-        department: string;
+        organization?: string;
+        division?: string;
+        department?: string;
     }
 }
