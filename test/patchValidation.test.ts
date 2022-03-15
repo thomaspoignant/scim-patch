@@ -33,6 +33,17 @@ describe('PATCH Validation', () => {
         return done();
     });
 
+    it('Non-string operation', done => {
+        const patch: any = {
+            schemas: ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
+            Operations: [{
+                op: 123, value: false, path: 'active'
+            }]
+        };
+        expect(() => patchBodyValidation(patch)).to.throw(InvalidScimPatchRequest);
+        return done();
+    });
+
     it('Operation remove without path', done => {
         const patch: any = {
             schemas: ['urn:ietf:params:scim:api:messages:2.0:PatchOp'],
