@@ -115,7 +115,7 @@ export function scimPatch<T extends ScimResource>(scimResource: T, patchOperatio
  * @throws {NoPathInScimPatchOp} if the operation is a remove with no path.
  */
 function validatePatchOperation(operation: ScimPatchOperation): void {
-    if (!operation.op || Array.isArray(operation.op) || !isValidOperation(operation.op))
+    if (typeof operation.op !== 'string' || !isValidOperation(operation.op))
         throw new InvalidScimPatchRequest(`Invalid op "${operation.op}" in the request.`);
 
     if (operation.op === 'remove' && !operation.path)
