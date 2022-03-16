@@ -158,7 +158,12 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
 
     // Path is supposed to be set, there are a validation in the validateOperation function.
     const paths = resolvePaths(patch.path);
-    resource = navigate(resource, paths);
+    resource = navigate(resource, paths, true);
+
+    // The path didn't exist, hence can return back the original resource untouched
+    if (!resource) {
+        return scimResource;
+    }
 
     // Dealing with the last element of the path.
     const lastSubPath = paths[paths.length - 1];
@@ -203,7 +208,7 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
     const lastSubPath = paths[paths.length - 1];
 
     try {
-        resource = navigate(resource, paths);
+        resource = navigate(resource, paths, false);
     } catch(e) {
         if (e instanceof FilterOnEmptyArray || e instanceof FilterArrayTargetNotFound) {
             resource = e.schema;
@@ -276,9 +281,10 @@ function extractArray(subPath: string, schema: any): ScimSearchQuery {
  * navigate allow to get the sub object who want to edit with the patch operation.
  * @param inputSchema the initial ScimResource
  * @param paths an Array who contains the path of the sub object
+ * @param isRemoveOp a flag that tells whether the operation that invoked is remove or not
  * @return the parent object of the element we want to edit
  */
-function navigate(inputSchema: any, paths: string[]): any {
+function navigate(inputSchema: any, paths: string[], isRemoveOp: boolean): any {
     let schema = inputSchema;
     for (let i = 0; i < paths.length - 1; i++) {
         const subPath = paths[i];
@@ -303,8 +309,14 @@ function navigate(inputSchema: any, paths: string[]): any {
             }
         } else {
             // The element is not an array.
-            if (!schema[subPath])
-                schema[subPath] = {};
+            switch (true) {
+                // If its a remove operation & the path doesn't exist,
+                // then there's no need to navigate further, can exit early
+                case !schema[subPath] && isRemoveOp:
+                    return false;
+                case !schema[subPath] && !isRemoveOp:
+                    schema[subPath] = {};
+            }
             schema = schema[subPath];
         }
     }

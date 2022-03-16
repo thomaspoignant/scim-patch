@@ -889,6 +889,14 @@ describe('SCIM PATCH', () => {
             expect(afterPatch[schemaExtension]?.department).not.to.exist;
             return done();
         });
+
+        it('REMOVE: with unavailable nested fields', done => {
+            const patch: ScimPatchRemoveOperation = {op: 'remove', path: 'someField.level_1_depth.level_2_depth.final_depth'};
+            const afterPatch: any = scimPatch(scimUser, [patch]);
+            console.log(JSON.stringify(afterPatch));
+            expect(afterPatch.someField).not.to.exist;
+            return done();
+        })
     });
     describe('invalid requests', () => {
         it('INVALID: wrong operation name', done => {
