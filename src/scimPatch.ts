@@ -309,15 +309,9 @@ function navigate(inputSchema: any, paths: string[], isRemoveOp: boolean): any {
             }
         } else {
             // The element is not an array.
-            switch (true) {
-                // If its a remove operation & the path doesn't exist,
-                // then there's no need to navigate further, can exit early
-                case !schema[subPath] && isRemoveOp:
-                    return false;
-                case !schema[subPath] && !isRemoveOp:
-                    schema[subPath] = {};
-            }
-            schema = schema[subPath];
+            if (!schema[subPath] && isRemoveOp)
+                return false;
+            schema = schema[subPath] || (schema[subPath] = {});
         }
     }
     return schema;
