@@ -896,7 +896,7 @@ describe('SCIM PATCH', () => {
             console.log(JSON.stringify(afterPatch));
             expect(afterPatch.someField).not.to.exist;
             return done();
-        })
+        });
     });
     describe('invalid requests', () => {
         it('INVALID: wrong operation name', done => {
