@@ -234,7 +234,7 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
     const {valuePath, array} = extractArray(lastSubPath, resource);
 
     // Get the list of items who are successful for the search query.
-    const matchFilter = filterWithQuery<any>(array, valuePath, false);
+    const matchFilter = filterWithQuery<any>(array, valuePath);
 
     // If the target location is a multi-valued attribute for which a value selection filter ("valuePath") has been
     // supplied and no record match was made, the service provider SHALL indicate failure by returning HTTP status
@@ -288,7 +288,7 @@ function navigate(inputSchema: any, paths: string[]): any {
             try {
                 const {attrName, valuePath, array} = extractArray(subPath, schema);
                 // Get the item who is successful for the search query.
-                const matchFilter = filterWithQuery<any>(array, valuePath, false);
+                const matchFilter = filterWithQuery<any>(array, valuePath);
                 // We are sure to find an index because matchFilter comes from array.
                 const index = array.findIndex(item => matchFilter.includes(item));
                 if (index < 0) {
@@ -390,7 +390,7 @@ function assign(obj:any, keyPath:Array<string>, value:any) {
  * @param exclude a flag which if true, excludes the elements that match the filter
  * @return an array who contains the search results.
  */
-function filterWithQuery<T>(arr: Array<T>, querySearch: string, exclude: boolean): Array<T> {
+function filterWithQuery<T>(arr: Array<T>, querySearch: string, exclude?: boolean): Array<T> {
     try {
         const f = filter(parse(querySearch));
         return arr.filter(e => exclude ? !f(e) : f(e));
