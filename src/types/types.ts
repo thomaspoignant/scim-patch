@@ -36,3 +36,9 @@ export interface ScimMeta {
   readonly lastModified: Date;
   readonly location?: string;
 }
+
+// filterWithQueryOptions: options used while calling filterWithQuery
+export interface FilterWithQueryOptions {
+  // if true, excludes the elements that match the filter
+  excludeIfMatchFilter?: boolean
+}
