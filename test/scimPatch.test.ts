@@ -944,6 +944,14 @@ describe('SCIM PATCH', () => {
             expect(afterPatch[schemaExtension]?.department).not.to.exist;
             return done();
         });
+
+        // see https://github.com/thomaspoignant/scim-patch/issues/215
+        it('REPLACE: don\'t mutate the original object', done => {
+            const patch: ScimPatchRemoveOperation = {op: 'remove', path: 'active'};
+            const afterPatch = scimPatch(scimUser, [patch], {mutateDocument:false});
+            expect(scimUser).not.to.eq(afterPatch);
+            return done();
+        });
     });
     describe('invalid requests', () => {
         it('INVALID: wrong operation name', done => {
