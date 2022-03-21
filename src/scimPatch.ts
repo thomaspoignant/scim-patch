@@ -21,7 +21,7 @@ import {
     ScimPatch,
     ScimResource,
     ScimMeta,
-    FilterWithQueryOptions,
+    FilterWithQueryOptions, ScimPatchOptions,
 } from './types/types';
 import {parse, filter} from 'scim2-parse-filter';
 import deepEqual = require('fast-deep-equal');
@@ -91,7 +91,12 @@ export function patchBodyValidation(body: ScimPatch): void {
  * @return the scimResource patched.
  * @throws {InvalidScimPatchOp} if the patch could not happen.
  */
-export function scimPatch<T extends ScimResource>(scimResource: T, patchOperations: Array<ScimPatchOperation>): T {
+export function scimPatch<T extends ScimResource>(scimResource: T, patchOperations: Array<ScimPatchOperation>,
+                                                  options: ScimPatchOptions = {mutateDocument: true}): T {
+    if (!options.mutateDocument) {
+        scimResource = _deepClone(scimResource);
+    }
+
     return patchOperations.reduce((patchedResource, patch) => {
         switch (patch.op) {
             case 'remove':
@@ -448,5 +453,22 @@ class ScimSearchQuery {
       readonly valuePath: string,
       readonly array: Array<any>
     ) {
+    }
+}
+
+/**
+ * Deeply clone the object.
+ * https://jsperf.com/deep-copy-vs-json-stringify-json-parse/25 (recursiveDeepCopy)
+ * @param  {any} obj value to clone
+ * @return {any} cloned obj
+ */
+function _deepClone<T>(obj: T) {
+    switch (typeof obj) {
+        case "object":
+            return JSON.parse(JSON.stringify(obj)); //Faster than ES5 clone - http://jsperf.com/deep-cloning-of-objects/5
+        case "undefined":
+            return null; //this is how JSON.stringify behaves for array items
+        default:
+            return obj; //no need to clone primitives
     }
 }

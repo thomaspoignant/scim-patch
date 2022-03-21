@@ -79,6 +79,7 @@ const scimUser: ScimUser = {
 
 const patch: ScimPatchOperation = { op: 'replace', value: { active: false } };
 const patchedUser = scimPatch(scimUser, patch);
+// scimUser === patchedUser, see Options section if you want to avoid updating the original object
 ```
 
 This particular operation will return : 
@@ -92,5 +93,17 @@ This particular operation will return :
   "meta": { "resourceType": "User", "created": "2019-12-19T14:36:08.838Z", "lastModified": "2019-12-19T14:36:08.838Z" }
 }
 ```
+
+#### Options
+By default `scimPatch()` is updating the scim resource you pass in the function.  
+If you want to avoid this, you can add an option while calling `scimPatch()`, it will do a copy of the object and work
+on this copy.
+
+Your call will look like this now:
+```typescript
+const patchedUser = scimPatch(scimUser, patch, {mutateDocument: false});
+// scimUser !== patchedUser
+```
+
 # How can I contribute?
 See the [contributor's guide](CONTRIBUTING.md) for some helpful tips.

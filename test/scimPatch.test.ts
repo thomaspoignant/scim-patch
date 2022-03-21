@@ -309,6 +309,16 @@ describe('SCIM PATCH', () => {
             expect(afterPatch.emails).to.be.deep.eq(expected);
             return done();
         });
+
+        // see https://github.com/thomaspoignant/scim-patch/issues/215
+        it('REPLACE: don\'t mutate the original object', done => {
+            const expected = false;
+            const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: expected, path: 'active'};
+            const afterPatch = scimPatch(scimUser, [patch], {mutateDocument:false});
+            expect(scimUser).not.to.be.eq(afterPatch);
+            return done();
+        });
+
     });
 
     describe('add', () => {
@@ -696,6 +706,15 @@ describe('SCIM PATCH', () => {
             return done();
         });
 
+        // see https://github.com/thomaspoignant/scim-patch/issues/215
+        it('ADD: don\'t mutate the original object', done => {
+            const expected = 'newValue';
+            const patch: ScimPatchAddReplaceOperation = {op: 'add', value: {newProperty: expected}};
+            const afterPatch = scimPatch(scimUser, [patch], {mutateDocument: false});
+            expect(scimUser).not.to.be.eq(afterPatch);
+            return done();
+        });
+
         it("ADD: on adding duplicate objects to an array, value is object", done => {
             const patch: ScimPatchAddReplaceOperation = {
                 op: "add",
@@ -923,6 +942,14 @@ describe('SCIM PATCH', () => {
                 path: 'urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department'};
             const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch[schemaExtension]?.department).not.to.exist;
+            return done();
+        });
+
+        // see https://github.com/thomaspoignant/scim-patch/issues/215
+        it('REPLACE: don\'t mutate the original object', done => {
+            const patch: ScimPatchRemoveOperation = {op: 'remove', path: 'active'};
+            const afterPatch = scimPatch(scimUser, [patch], {mutateDocument:false});
+            expect(scimUser).not.to.eq(afterPatch);
             return done();
         });
     });
