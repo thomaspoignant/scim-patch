@@ -695,6 +695,42 @@ describe('SCIM PATCH', () => {
             expect(afterPatch.newProperty).to.be.eq("1");
             return done();
         });
+
+        it("ADD: on adding duplicate objects to an array, value is object", done => {
+            const patch: ScimPatchAddReplaceOperation = {
+                op: "add",
+                path: "emails",
+                value: {
+                    value: "spiderman@superheroes.com",
+                    primary: true
+                }
+            };
+
+            const afterPatch = scimPatch(scimUser, [patch]);
+            expect(afterPatch.emails.length).to.be.eq(1);
+            return done();
+        });
+
+        it("ADD: on adding duplicate objects to an array, value is array of objects ", done => {
+            const patch: ScimPatchAddReplaceOperation = {
+                op: "add",
+                path: "emails",
+                value: [
+                    {
+                        value: "spiderman@superheroes.com",
+                        primary: true
+                    },
+                    {
+                        value: "batman@superheroes.com",
+                        primary: false
+                    }
+            ]
+            };
+
+            const afterPatch = scimPatch(scimUser, [patch]);
+            expect(afterPatch.emails.length).to.be.eq(2);
+            return done();
+        });
     });
     describe('remove', () => {
         it('REMOVE: with no path', done => {

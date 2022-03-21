@@ -323,7 +323,7 @@ function addOrReplaceAttribute(property: any, patch: ScimPatchAddReplaceOperatio
         if (Array.isArray(patch.value)) {
             // if we're adding an array, we need to remove duplicated values from existing array
             if (patch.op.toLowerCase() === "add") {
-                const valuesToAdd = patch.value.filter(item => !property.includes(item));
+                const valuesToAdd = patch.value.filter(item => !deepIncludes(property, item));
                 return property.concat(valuesToAdd);
             }
             // else this is a replace operation
@@ -331,7 +331,7 @@ function addOrReplaceAttribute(property: any, patch: ScimPatchAddReplaceOperatio
         }
 
         const a = property;
-        if (!a.includes(patch.value))
+        if (!deepIncludes(a, patch.value))
             a.push(patch.value);
         return a;
     }
@@ -423,6 +423,17 @@ function removeWithPatchValue<T>(arr: Array<T>, itemsToRemove: Array<T> | Record
     });
 
     return arr;
+}
+
+/**
+ * deepIncludes has similar behaviour as Array.prototype.includes,
+ * just that instead of === for equality check, it uses deepEqual library
+ * @param array the array on which inclusion check has to be performed
+ * @param item the item whose inclusion has to be checked
+ * @returns true if the item is present, else false
+ */
+function deepIncludes(array: any[], item: any): boolean {
+    return array.some(el => deepEqual(item, el));
 }
 
 function isValidOperation(operation: string): boolean {
