@@ -94,7 +94,7 @@ export function patchBodyValidation(body: ScimPatch): void {
 export function scimPatch<T extends ScimResource>(scimResource: T, patchOperations: Array<ScimPatchOperation>,
                                                   options: ScimPatchOptions = {mutateDocument: true}): T {
     if (!options.mutateDocument) {
-        scimResource = _deepClone(scimResource)
+        scimResource = _deepClone(scimResource);
     }
 
     return patchOperations.reduce((patchedResource, patch) => {
