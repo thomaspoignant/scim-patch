@@ -20,7 +20,8 @@ import {
     ScimPatchAddReplaceOperation,
     ScimPatch,
     ScimResource,
-    ScimMeta
+    ScimMeta,
+    filterWithQueryOptions,
 } from './types/types';
 import {parse, filter} from 'scim2-parse-filter';
 import deepEqual = require('fast-deep-equal');
@@ -180,7 +181,7 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
     const {attrName, valuePath, array} = extractArray(lastSubPath, resource);
 
     // We keep only items who don't match the query if supplied.
-    resource[attrName] = filterWithQuery<any>(array, valuePath, true);
+    resource[attrName] = filterWithQuery<any>(array, valuePath, {excludeIfMatchFilter: true});
 
     // If the complex multi-valued attribute has no remaining records, the attribute SHALL be considered unassigned.
     if (resource[attrName].length === 0)
@@ -387,13 +388,14 @@ function assign(obj:any, keyPath:Array<string>, value:any) {
  * Return the items in the array who match the filter.
  * @param arr the collection where we are searching.
  * @param querySearch the search request.
- * @param exclude a flag which if true, excludes the elements that match the filter
+ * @param options options used while calling filterWithQuery
  * @return an array who contains the search results.
  */
-function filterWithQuery<T>(arr: Array<T>, querySearch: string, exclude?: boolean): Array<T> {
+function filterWithQuery<T>(arr: Array<T>, querySearch: string,
+                            options: filterWithQueryOptions = ({} as filterWithQueryOptions)): Array<T> {
     try {
         const f = filter(parse(querySearch));
-        return arr.filter(e => exclude ? !f(e) : f(e));
+        return arr.filter(e => options.excludeIfMatchFilter ? !f(e) : f(e));
     } catch (error) {
         throw new InvalidScimPatchOp(`${error}`);
     }
