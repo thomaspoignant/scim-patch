@@ -38,7 +38,7 @@ export interface ScimMeta {
 }
 
 // filterWithQueryOptions: options used while calling filterWithQuery
-export interface filterWithQueryOptions {
+export interface FilterWithQueryOptions {
   // if true, excludes the elements that match the filter
   excludeIfMatchFilter?: boolean
 }

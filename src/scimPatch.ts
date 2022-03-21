@@ -21,7 +21,7 @@ import {
     ScimPatch,
     ScimResource,
     ScimMeta,
-    filterWithQueryOptions,
+    FilterWithQueryOptions,
 } from './types/types';
 import {parse, filter} from 'scim2-parse-filter';
 import deepEqual = require('fast-deep-equal');
@@ -392,7 +392,7 @@ function assign(obj:any, keyPath:Array<string>, value:any) {
  * @return an array who contains the search results.
  */
 function filterWithQuery<T>(arr: Array<T>, querySearch: string,
-                            options: filterWithQueryOptions = ({} as filterWithQueryOptions)): Array<T> {
+                            options: FilterWithQueryOptions = ({} as FilterWithQueryOptions)): Array<T> {
     try {
         const f = filter(parse(querySearch));
         return arr.filter(e => options.excludeIfMatchFilter ? !f(e) : f(e));
