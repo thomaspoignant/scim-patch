@@ -309,6 +309,16 @@ describe('SCIM PATCH', () => {
             expect(afterPatch.emails).to.be.deep.eq(expected);
             return done();
         });
+
+        // see https://github.com/thomaspoignant/scim-patch/issues/215
+        it('REPLACE: don\'t mutate the original object', done => {
+            const expected = false;
+            const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: expected, path: 'active'};
+            const afterPatch = scimPatch(scimUser, [patch], {mutateDocument:false});
+            expect(scimUser).not.to.be.eq(afterPatch);
+            return done();
+        });
+
     });
 
     describe('add', () => {
@@ -693,6 +703,15 @@ describe('SCIM PATCH', () => {
 
             const afterPatch = scimPatch(user, [patch]);
             expect(afterPatch.newProperty).to.be.eq("1");
+            return done();
+        });
+
+        // see https://github.com/thomaspoignant/scim-patch/issues/215
+        it('ADD: don\'t mutate the original object', done => {
+            const expected = 'newValue';
+            const patch: ScimPatchAddReplaceOperation = {op: 'add', value: {newProperty: expected}};
+            const afterPatch = scimPatch(scimUser, [patch], {mutateDocument: false});
+            expect(scimUser).not.to.be.eq(afterPatch);
             return done();
         });
 

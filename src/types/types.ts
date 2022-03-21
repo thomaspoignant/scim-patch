@@ -37,6 +37,11 @@ export interface ScimMeta {
   readonly location?: string;
 }
 
+// ScimPatchOptions is a set of options to change the way to perform your ScimPatch
+export interface ScimPatchOptions {
+  mutateDocument?: boolean
+}
+
 // filterWithQueryOptions: options used while calling filterWithQuery
 export interface FilterWithQueryOptions {
   // if true, excludes the elements that match the filter
