@@ -36,3 +36,9 @@ export interface ScimMeta {
   readonly lastModified: Date;
   readonly location?: string;
 }
+
+// NavigateOptions used to pass configuration to `navigate`
+export interface NavigateOptions {
+  // true for 'remove' operations, false otherwise
+  isRemoveOp?: boolean;
+}
