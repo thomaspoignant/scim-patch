@@ -96,7 +96,7 @@ export function scimPatch<T extends ScimResource>(scimResource: T, patchOperatio
     if (!options.mutateDocument) {
         // Deeply clone the object.
         // https://jsperf.com/deep-copy-vs-json-stringify-json-parse/25 (recursiveDeepCopy)
-        scimResource = JSON.parse(JSON.stringify(scimResource))
+        scimResource = JSON.parse(JSON.stringify(scimResource));
     }
 
     return patchOperations.reduce((patchedResource, patch) => {
