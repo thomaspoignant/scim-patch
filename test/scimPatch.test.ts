@@ -893,7 +893,6 @@ describe('SCIM PATCH', () => {
         it('REMOVE: with unavailable nested fields', done => {
             const patch: ScimPatchRemoveOperation = {op: 'remove', path: 'someField.level_1_depth.level_2_depth.final_depth'};
             const afterPatch: any = scimPatch(scimUser, [patch]);
-            console.log(JSON.stringify(afterPatch));
             expect(afterPatch.someField).not.to.exist;
             return done();
         });
