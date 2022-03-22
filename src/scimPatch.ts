@@ -22,7 +22,9 @@ import {
     ScimPatch,
     ScimResource,
     ScimMeta,
-    NavigateOptions
+    NavigateOptions,
+    FilterWithQueryOptions,
+    ScimPatchOptions,
 } from './types/types';
 import {parse, filter} from 'scim2-parse-filter';
 import deepEqual = require('fast-deep-equal');
@@ -92,7 +94,14 @@ export function patchBodyValidation(body: ScimPatch): void {
  * @return the scimResource patched.
  * @throws {InvalidScimPatchOp} if the patch could not happen.
  */
-export function scimPatch<T extends ScimResource>(scimResource: T, patchOperations: Array<ScimPatchOperation>): T {
+export function scimPatch<T extends ScimResource>(scimResource: T, patchOperations: Array<ScimPatchOperation>,
+                                                  options: ScimPatchOptions = {mutateDocument: true}): T {
+    if (!options.mutateDocument) {
+        // Deeply clone the object.
+        // https://jsperf.com/deep-copy-vs-json-stringify-json-parse/25 (recursiveDeepCopy)
+        scimResource = JSON.parse(JSON.stringify(scimResource));
+    }
+
     return patchOperations.reduce((patchedResource, patch) => {
         switch (patch.op) {
             case 'remove':
@@ -190,7 +199,7 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
     const {attrName, valuePath, array} = extractArray(lastSubPath, resource);
 
     // We keep only items who don't match the query if supplied.
-    resource[attrName] = array.filter((e: any) => !filterWithQuery<any>(array, valuePath).includes(e));
+    resource[attrName] = filterWithQuery<any>(array, valuePath, {excludeIfMatchFilter: true});
 
     // If the complex multi-valued attribute has no remaining records, the attribute SHALL be considered unassigned.
     if (resource[attrName].length === 0)
@@ -335,7 +344,7 @@ function addOrReplaceAttribute(property: any, patch: ScimPatchAddReplaceOperatio
         if (Array.isArray(patch.value)) {
             // if we're adding an array, we need to remove duplicated values from existing array
             if (patch.op.toLowerCase() === "add") {
-                const valuesToAdd = patch.value.filter(item => !property.includes(item));
+                const valuesToAdd = patch.value.filter(item => !deepIncludes(property, item));
                 return property.concat(valuesToAdd);
             }
             // else this is a replace operation
@@ -343,7 +352,7 @@ function addOrReplaceAttribute(property: any, patch: ScimPatchAddReplaceOperatio
         }
 
         const a = property;
-        if (!a.includes(patch.value))
+        if (!deepIncludes(a, patch.value))
             a.push(patch.value);
         return a;
     }
@@ -399,11 +408,14 @@ function assign(obj:any, keyPath:Array<string>, value:any) {
  * Return the items in the array who match the filter.
  * @param arr the collection where we are searching.
  * @param querySearch the search request.
+ * @param options options used while calling filterWithQuery
  * @return an array who contains the search results.
  */
-function filterWithQuery<T>(arr: Array<T>, querySearch: string): Array<T> {
+function filterWithQuery<T>(arr: Array<T>, querySearch: string,
+                            options: FilterWithQueryOptions = ({} as FilterWithQueryOptions)): Array<T> {
     try {
-        return arr.filter(filter(parse(querySearch)));
+        const f = filter(parse(querySearch));
+        return arr.filter(e => options.excludeIfMatchFilter ? !f(e) : f(e));
     } catch (error) {
         throw new InvalidScimPatchOp(`${error}`);
     }
@@ -433,6 +445,17 @@ function removeWithPatchValue<T>(arr: Array<T>, itemsToRemove: Array<T> | Record
     });
 
     return arr;
+}
+
+/**
+ * deepIncludes has similar behaviour as Array.prototype.includes,
+ * just that instead of === for equality check, it uses deepEqual library
+ * @param array the array on which inclusion check has to be performed
+ * @param item the item whose inclusion has to be checked
+ * @returns true if the item is present, else false
+ */
+function deepIncludes(array: any[], item: any): boolean {
+    return array.some(el => deepEqual(item, el));
 }
 
 function isValidOperation(operation: string): boolean {

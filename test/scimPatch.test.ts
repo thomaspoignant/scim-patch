@@ -309,6 +309,16 @@ describe('SCIM PATCH', () => {
             expect(afterPatch.emails).to.be.deep.eq(expected);
             return done();
         });
+
+        // see https://github.com/thomaspoignant/scim-patch/issues/215
+        it('REPLACE: don\'t mutate the original object', done => {
+            const expected = false;
+            const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: expected, path: 'active'};
+            const afterPatch = scimPatch(scimUser, [patch], {mutateDocument:false});
+            expect(scimUser).not.to.be.eq(afterPatch);
+            return done();
+        });
+
     });
 
     describe('add', () => {
@@ -695,6 +705,51 @@ describe('SCIM PATCH', () => {
             expect(afterPatch.newProperty).to.be.eq("1");
             return done();
         });
+
+        // see https://github.com/thomaspoignant/scim-patch/issues/215
+        it('ADD: don\'t mutate the original object', done => {
+            const expected = 'newValue';
+            const patch: ScimPatchAddReplaceOperation = {op: 'add', value: {newProperty: expected}};
+            const afterPatch = scimPatch(scimUser, [patch], {mutateDocument: false});
+            expect(scimUser).not.to.be.eq(afterPatch);
+            return done();
+        });
+
+        it("ADD: on adding duplicate objects to an array, value is object", done => {
+            const patch: ScimPatchAddReplaceOperation = {
+                op: "add",
+                path: "emails",
+                value: {
+                    value: "spiderman@superheroes.com",
+                    primary: true
+                }
+            };
+
+            const afterPatch = scimPatch(scimUser, [patch]);
+            expect(afterPatch.emails.length).to.be.eq(1);
+            return done();
+        });
+
+        it("ADD: on adding duplicate objects to an array, value is array of objects ", done => {
+            const patch: ScimPatchAddReplaceOperation = {
+                op: "add",
+                path: "emails",
+                value: [
+                    {
+                        value: "spiderman@superheroes.com",
+                        primary: true
+                    },
+                    {
+                        value: "batman@superheroes.com",
+                        primary: false
+                    }
+            ]
+            };
+
+            const afterPatch = scimPatch(scimUser, [patch]);
+            expect(afterPatch.emails.length).to.be.eq(2);
+            return done();
+        });
     });
     describe('remove', () => {
         it('REMOVE: with no path', done => {
@@ -896,7 +951,16 @@ describe('SCIM PATCH', () => {
             expect(afterPatch.someField).not.to.exist;
             return done();
         });
+          
+        // see https://github.com/thomaspoignant/scim-patch/issues/215
+        it('REPLACE: don\'t mutate the original object', done => {
+            const patch: ScimPatchRemoveOperation = {op: 'remove', path: 'active'};
+            const afterPatch = scimPatch(scimUser, [patch], {mutateDocument:false});
+            expect(scimUser).not.to.eq(afterPatch);
+            return done();
+        });
     });
+
     describe('invalid requests', () => {
         it('INVALID: wrong operation name', done => {
             const patch: any = {op: 'delete', value: true, path: 'active'};
