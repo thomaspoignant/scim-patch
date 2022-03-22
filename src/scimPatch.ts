@@ -9,7 +9,8 @@ import {
     RemoveValueNotArray,
     InvalidScimRemoveValue,
     FilterOnEmptyArray,
-    FilterArrayTargetNotFound
+    FilterArrayTargetNotFound,
+    InvalidRemoveOpPath
 } from './errors/scimErrors';
 import {
     ScimPatchSchema,
@@ -158,11 +159,14 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
 
     // Path is supposed to be set, there are a validation in the validateOperation function.
     const paths = resolvePaths(patch.path);
-    resource = navigate(resource, paths, true);
-
-    // The path didn't exist, hence can return back the original resource untouched
-    if (!resource) {
-        return scimResource;
+    
+    try {
+        resource = navigate(resource, paths, true);
+    } catch (error) {
+        if (error instanceof InvalidRemoveOpPath) {
+            return scimResource;
+        }
+        throw error;
     }
 
     // Dealing with the last element of the path.
@@ -310,7 +314,8 @@ function navigate(inputSchema: any, paths: string[], isRemoveOp: boolean): any {
         } else {
             // The element is not an array.
             if (!schema[subPath] && isRemoveOp)
-                return false;
+                throw new InvalidRemoveOpPath();
+            
             schema = schema[subPath] || (schema[subPath] = {});
         }
     }
