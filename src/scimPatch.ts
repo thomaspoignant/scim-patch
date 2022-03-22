@@ -288,7 +288,7 @@ function extractArray(subPath: string, schema: any): ScimSearchQuery {
  * @param isRemoveOp a flag that tells whether the operation that invoked is remove or not
  * @return the parent object of the element we want to edit
  */
-function navigate(inputSchema: any, paths: string[], isRemoveOp: boolean): any {
+function navigate(inputSchema: any, paths: string[], isRemoveOp: boolean): Record<string, unknown> {
     let schema = inputSchema;
     for (let i = 0; i < paths.length - 1; i++) {
         const subPath = paths[i];
