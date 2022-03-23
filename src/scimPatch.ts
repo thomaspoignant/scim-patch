@@ -9,7 +9,8 @@ import {
     RemoveValueNotArray,
     InvalidScimRemoveValue,
     FilterOnEmptyArray,
-    FilterArrayTargetNotFound
+    FilterArrayTargetNotFound,
+    InvalidRemoveOpPath
 } from './errors/scimErrors';
 import {
     ScimPatchSchema,
@@ -21,7 +22,9 @@ import {
     ScimPatch,
     ScimResource,
     ScimMeta,
-    FilterWithQueryOptions, ScimPatchOptions,
+    NavigateOptions,
+    FilterWithQueryOptions,
+    ScimPatchOptions,
 } from './types/types';
 import {parse, filter} from 'scim2-parse-filter';
 import deepEqual = require('fast-deep-equal');
@@ -166,7 +169,15 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
 
     // Path is supposed to be set, there are a validation in the validateOperation function.
     const paths = resolvePaths(patch.path);
-    resource = navigate(resource, paths);
+    
+    try {
+        resource = navigate(resource, paths, {isRemoveOp: true});
+    } catch (error) {
+        if (error instanceof InvalidRemoveOpPath) {
+            return scimResource;
+        }
+        throw error;
+    }
 
     // Dealing with the last element of the path.
     const lastSubPath = paths[paths.length - 1];
@@ -284,9 +295,10 @@ function extractArray(subPath: string, schema: any): ScimSearchQuery {
  * navigate allow to get the sub object who want to edit with the patch operation.
  * @param inputSchema the initial ScimResource
  * @param paths an Array who contains the path of the sub object
+ * @param options options used while calling navigate
  * @return the parent object of the element we want to edit
  */
-function navigate(inputSchema: any, paths: string[]): any {
+function navigate(inputSchema: any, paths: string[], options: NavigateOptions = {}): Record<string, unknown> {
     let schema = inputSchema;
     for (let i = 0; i < paths.length - 1; i++) {
         const subPath = paths[i];
@@ -311,9 +323,10 @@ function navigate(inputSchema: any, paths: string[]): any {
             }
         } else {
             // The element is not an array.
-            if (!schema[subPath])
-                schema[subPath] = {};
-            schema = schema[subPath];
+            if (!schema[subPath] && options.isRemoveOp)
+                throw new InvalidRemoveOpPath();
+            
+            schema = schema[subPath] || (schema[subPath] = {});
         }
     }
     return schema;

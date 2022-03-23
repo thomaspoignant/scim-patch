@@ -945,6 +945,13 @@ describe('SCIM PATCH', () => {
             return done();
         });
 
+        it('REMOVE: with unavailable nested fields', done => {
+            const patch: ScimPatchRemoveOperation = {op: 'remove', path: 'someField.level_1_depth.level_2_depth.final_depth'};
+            const afterPatch: any = scimPatch(scimUser, [patch]);
+            expect(afterPatch.someField).not.to.exist;
+            return done();
+        });
+          
         // see https://github.com/thomaspoignant/scim-patch/issues/215
         it('REPLACE: don\'t mutate the original object', done => {
             const patch: ScimPatchRemoveOperation = {op: 'remove', path: 'active'};
@@ -953,6 +960,7 @@ describe('SCIM PATCH', () => {
             return done();
         });
     });
+
     describe('invalid requests', () => {
         it('INVALID: wrong operation name', done => {
             const patch: any = {op: 'delete', value: true, path: 'active'};

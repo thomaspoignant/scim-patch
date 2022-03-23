@@ -83,3 +83,9 @@ export class NoTarget extends InvalidScimPatch {
    );
  }
 }
+
+export class InvalidRemoveOpPath extends InvalidScimPatch {
+  constructor() {
+    super(`Path specified in 'remove' operation doesn't exist`);
+  }
+}

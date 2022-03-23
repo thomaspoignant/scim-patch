@@ -37,8 +37,16 @@ export interface ScimMeta {
   readonly location?: string;
 }
 
+// NavigateOptions used to pass configuration to `navigate`
+export interface NavigateOptions {
+  // true for 'remove' operations, false otherwise
+  isRemoveOp?: boolean;
+}
+
 // ScimPatchOptions is a set of options to change the way to perform your ScimPatch
 export interface ScimPatchOptions {
+  // if true, patches are applied to the original passed document
+  // if false, a copy of the original document is obtained and patches are applied to it
   mutateDocument?: boolean
 }
 
