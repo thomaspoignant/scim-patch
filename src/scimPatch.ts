@@ -91,6 +91,7 @@ export function patchBodyValidation(body: ScimPatch): void {
  * This method apply patch operations on a SCIM Resource.
  * @param scimResource The initial resource
  * @param patchOperations An array of SCIM patch operations we want to apply on the scimResource object.
+ * @param options Options to customize some behaviour of scimPatch
  * @return the scimResource patched.
  * @throws {InvalidScimPatchOp} if the patch could not happen.
  */
