@@ -381,7 +381,7 @@ function addOrReplaceObjectAttribute(property: any, patch: ScimPatchAddReplaceOp
 
     // We add all the patch values to the property object.
     for (const [key, value] of Object.entries(patch.value)) {
-        assign(property, resolvePaths(key), value);
+        assign(property, resolvePaths(key), value, patch.op);
     }
     return property;
 }
@@ -391,8 +391,9 @@ function addOrReplaceObjectAttribute(property: any, patch: ScimPatchAddReplaceOp
  * @param obj the object where we should the key
  * @param keyPath an array which represent the path of the nested object
  * @param value value to assign
+ * @param op patch operation
  */
-function assign(obj:any, keyPath:Array<string>, value:any) {
+function assign(obj:any, keyPath:Array<string>, value:any, op: string) {
     const lastKeyIndex = keyPath.length-1;
     for (let i = 0; i < lastKeyIndex; ++ i) {
         const key = keyPath[i];
@@ -400,6 +401,21 @@ function assign(obj:any, keyPath:Array<string>, value:any) {
             obj[key] = {};
         }
         obj = obj[key];
+    }
+
+    // If the attribute is an array and the operation is "add",
+    // then the value should be added to the array
+    const attribute = obj[keyPath[lastKeyIndex]];
+    if (op.toLowerCase() === "add" && Array.isArray(attribute)) {
+        // If the value is also an array, append all values of the array to the attribute
+        if (Array.isArray(value)) {
+            value.forEach((val) => attribute.push(val));
+            return;
+        }
+
+        // If value is not an array, simply append it as a whole to end of attribute
+        attribute.push(value);
+        return;
     }
     obj[keyPath[lastKeyIndex]] = value;
 }
