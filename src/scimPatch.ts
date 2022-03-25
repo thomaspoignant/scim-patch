@@ -409,12 +409,12 @@ function assign(obj:any, keyPath:Array<string>, value:any, op: string) {
     if (op.toLowerCase() === "add" && Array.isArray(attribute)) {
         // If the value is also an array, append all values of the array to the attribute
         if (Array.isArray(value)) {
-            value.forEach((val) => attribute.push(val));
+            obj[keyPath[lastKeyIndex]] = [...attribute, ...value];
             return;
         }
 
         // If value is not an array, simply append it as a whole to end of attribute
-        attribute.push(value);
+        obj[keyPath[lastKeyIndex]] = [...attribute, value];
         return;
     }
     obj[keyPath[lastKeyIndex]] = value;
