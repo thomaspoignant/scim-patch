@@ -133,7 +133,7 @@ function validatePatchOperation(operation: ScimPatchOperation): void {
     if (operation.op === 'remove' && !operation.path)
         throw new NoPathInScimPatchOp();
 
-    if (operation.op.toLowerCase() === 'add' && !('value' in operation))
+    if (isAddOperation(operation.op) && !('value' in operation))
         throw new InvalidScimPatchRequest(`The operation ${operation.op} MUST contain a "value" member whose content specifies the value to be added`);
 
     if (operation.path && typeof operation.path !== 'string')
@@ -170,7 +170,7 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
 
     // Path is supposed to be set, there are a validation in the validateOperation function.
     const paths = resolvePaths(patch.path);
-    
+
     try {
         resource = navigate(resource, paths, {isRemoveOp: true});
     } catch (error) {
@@ -229,7 +229,7 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
             resource = e.schema;
             // check issue https://github.com/thomaspoignant/scim-patch/issues/42 to see why we should add this
             const parsedPath = parse(e.valuePath);
-            if (patch.op.toLowerCase() === "add" &&
+            if (isAddOperation(patch.op) &&
               "compValue" in parsedPath &&
               parsedPath.compValue !== undefined &&
               parsedPath.op === "eq"
@@ -259,8 +259,7 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
     // If the target location is a multi-valued attribute for which a value selection filter ("valuePath") has been
     // supplied and no record match was made, the service provider SHALL indicate failure by returning HTTP status
     // code 400 and a "scimType" error code of "noTarget".
-    const isReplace = patch.op.toLowerCase() === 'replace';
-    if (isReplace && matchFilter.length === 0) {
+    if (isReplaceOperation(patch.op) && matchFilter.length === 0) {
         throw new NoTarget(patch.path);
     }
 
@@ -326,7 +325,7 @@ function navigate(inputSchema: any, paths: string[], options: NavigateOptions = 
             // The element is not an array.
             if (!schema[subPath] && options.isRemoveOp)
                 throw new InvalidRemoveOpPath();
-            
+
             schema = schema[subPath] || (schema[subPath] = {});
         }
     }
@@ -344,7 +343,7 @@ function addOrReplaceAttribute(property: any, patch: ScimPatchAddReplaceOperatio
     if (Array.isArray(property)) {
         if (Array.isArray(patch.value)) {
             // if we're adding an array, we need to remove duplicated values from existing array
-            if (patch.op.toLowerCase() === "add") {
+            if (isAddOperation(patch.op)) {
                 const valuesToAdd = patch.value.filter(item => !deepIncludes(property, item));
                 return property.concat(valuesToAdd);
             }
@@ -374,7 +373,7 @@ function addOrReplaceAttribute(property: any, patch: ScimPatchAddReplaceOperatio
  */
 function addOrReplaceObjectAttribute(property: any, patch: ScimPatchAddReplaceOperation, multiValuedPathFilter?: boolean): any {
     if (typeof patch.value !== 'object') {
-        if (patch.op.toLowerCase() === 'add' && !multiValuedPathFilter)
+        if (isAddOperation(patch.op) && !multiValuedPathFilter)
             throw new InvalidScimPatchOp('Invalid patch query.');
 
         return patch.value;
@@ -407,7 +406,7 @@ function assign(obj:any, keyPath:Array<string>, value:any, op: string) {
     // If the attribute is an array and the operation is "add",
     // then the value should be added to the array
     const attribute = obj[keyPath[lastKeyIndex]];
-    if (op.toLowerCase() === "add" && Array.isArray(attribute)) {
+    if (isAddOperation(op) && Array.isArray(attribute)) {
         // If the value is also an array, append all values of the array to the attribute
         if (Array.isArray(value)) {
             obj[keyPath[lastKeyIndex]] = [...attribute, ...value];
@@ -477,6 +476,24 @@ function deepIncludes(array: any[], item: any): boolean {
 
 function isValidOperation(operation: string): boolean {
     return AUTHORIZED_OPERATION.includes(operation.toLowerCase());
+}
+
+/**
+ * isAddOperation check if the operation is an ADD
+ * @param operation the name of the SCIM Patch operation
+ * @return true if this is an add operation
+ */
+function isAddOperation(operation: string): boolean {
+    return operation !== undefined && operation.toLowerCase() === 'add';
+}
+
+/**
+ * isReplaceOperation check if the operation is an REPACE
+ * @param operation the name of the SCIM Patch operation
+ * @return true if this is a replace operation
+ */
+function isReplaceOperation(operation: string): boolean {
+    return operation !== undefined && operation.toLowerCase() === 'replace';
 }
 
 class ScimSearchQuery {
