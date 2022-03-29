@@ -170,7 +170,7 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
 
     // Path is supposed to be set, there are a validation in the validateOperation function.
     const paths = resolvePaths(patch.path);
-    
+
     try {
         resource = navigate(resource, paths, {isRemoveOp: true});
     } catch (error) {
@@ -325,7 +325,7 @@ function navigate(inputSchema: any, paths: string[], options: NavigateOptions = 
             // The element is not an array.
             if (!schema[subPath] && options.isRemoveOp)
                 throw new InvalidRemoveOpPath();
-            
+
             schema = schema[subPath] || (schema[subPath] = {});
         }
     }
@@ -484,7 +484,7 @@ function isValidOperation(operation: string): boolean {
  * @return true if this is an add operation
  */
 function isAddOperation(operation: string): boolean {
-    return operation !== undefined && operation.toLowerCase() === 'add'
+    return operation !== undefined && operation.toLowerCase() === 'add';
 }
 
 /**
@@ -493,7 +493,7 @@ function isAddOperation(operation: string): boolean {
  * @return true if this is a replace operation
  */
 function isReplaceOperation(operation: string): boolean {
-    return operation !== undefined && operation.toLowerCase() === 'replace'
+    return operation !== undefined && operation.toLowerCase() === 'replace';
 }
 
 class ScimSearchQuery {
