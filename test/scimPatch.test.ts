@@ -750,6 +750,43 @@ describe('SCIM PATCH', () => {
             expect(afterPatch.emails.length).to.be.eq(2);
             return done();
         });
+
+        // see https://github.com/thomaspoignant/scim-patch/issues/220
+        it("ADD: on array attribute when 'path' is absent & value is array should append all values", done => {
+            const patch: ScimPatchAddReplaceOperation = {
+                op: "add",
+                value: {
+                    emails: [
+                        {
+                        value: "batman@superheroes.com",
+                        primary: true
+                      },{
+                        value: "superman@superheroes.com",
+                        primary: true
+                      }]
+                }
+            };
+
+            const afterPatch = scimPatch(scimUser, [patch]);
+            expect(afterPatch.emails.length).to.be.eq(3);
+            return done();
+        });
+
+        it("ADD: on array attribute when 'path' is absent & value is non-array should append the value", done => {
+            const patch: ScimPatchAddReplaceOperation = {
+                op: "add",
+                value: {
+                    emails: {
+                        value: "batman@superheroes.com",
+                        primary: true
+                      }
+                }
+            };
+
+            const afterPatch = scimPatch(scimUser, [patch]);
+            expect(afterPatch.emails.length).to.be.eq(2);
+            return done();
+        });
     });
     describe('remove', () => {
         it('REMOVE: with no path', done => {
