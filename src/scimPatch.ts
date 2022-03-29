@@ -490,7 +490,7 @@ function isAddOperation(operation: string): boolean {
 /**
  * isReplaceOperation check if the operation is an REPACE
  * @param operation the name of the SCIM Patch operation
- * @return true if this is an add operation
+ * @return true if this is a replace operation
  */
 function isReplaceOperation(operation: string): boolean {
     return operation !== undefined && operation.toLowerCase() === 'replace'
