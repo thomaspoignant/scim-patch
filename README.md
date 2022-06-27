@@ -107,3 +107,11 @@ const patchedUser = scimPatch(scimUser, patch, {mutateDocument: false});
 
 # How can I contribute?
 See the [contributor's guide](CONTRIBUTING.md) for some helpful tips.
+
+## Contributors
+
+Thanks so much to our contributors.
+
+<a href="https://github.com/thomaspoignant/scim-patch/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=thomaspoignant/scim-patch" />
+</a>
