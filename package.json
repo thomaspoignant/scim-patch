@@ -24,7 +24,7 @@
   "author": "thomas.poignant@gmail.com",
   "license": "Unlicense",
   "devDependencies": {
-    "@types/benchmark": "2.1.1",
+    "@types/benchmark": "2.1.2",
     "@types/chai": "4.3.3",
     "@types/mocha": "9.1.1",
     "@typescript-eslint/eslint-plugin": "5.35.1",
