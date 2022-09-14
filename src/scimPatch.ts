@@ -81,6 +81,9 @@ export function patchBodyValidation(body: ScimPatch): void {
     if (!body.schemas || !body.schemas.includes(PATCH_OPERATION_SCHEMA))
         throw new InvalidScimPatchRequest('Missing schemas.');
 
+    if (!Array.isArray(body.Operations))
+        throw new InvalidScimPatchRequest('Operations should be an array.');
+
     if (!body.Operations || body.Operations.length <= 0)
         throw new InvalidScimPatchRequest('Missing operations.');
 
