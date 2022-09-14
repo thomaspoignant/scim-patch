@@ -92,6 +92,15 @@ describe('PATCH Validation', () => {
         return done();
     });
 
+    it('empty operation array', done => {
+        const patch: any = {
+            schemas: ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
+            Operations: []
+        };
+        expect(() => patchBodyValidation(patch)).to.throw(InvalidScimPatchRequest);
+        return done();
+    });
+
     it('patchBodyValidation should be resistent if body.Operations is not an array', done => {
         // https://github.com/thomaspoignant/scim-patch/issues/289
         const patch: any = {
