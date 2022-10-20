@@ -34,7 +34,7 @@
     "coveralls": "3.1.1",
     "eslint": "8.25.0",
     "eslint-plugin-mocha": "10.1.0",
-    "eslint-plugin-testing-library": "5.7.3",
+    "eslint-plugin-testing-library": "5.8.0",
     "mocha": "^10.0.0",
     "nyc": "15.1.0",
     "ts-node": "10.9.1",
