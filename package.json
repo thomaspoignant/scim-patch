@@ -27,7 +27,7 @@
     "@types/benchmark": "2.1.2",
     "@types/chai": "4.3.4",
     "@types/mocha": "10.0.0",
-    "@typescript-eslint/eslint-plugin": "5.44.0",
+    "@typescript-eslint/eslint-plugin": "5.45.0",
     "@typescript-eslint/parser": "5.44.0",
     "benchmark": "2.1.4",
     "chai": "4.3.7",
