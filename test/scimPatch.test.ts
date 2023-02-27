@@ -169,6 +169,20 @@ describe('SCIM PATCH', () => {
             return done();
         });
 
+        it('REPLACE: nested object do not exists can be treated as ADD', done => {
+            // empty the surName fields.
+            scimUser.emails = [];
+            const patch: ScimPatchAddReplaceOperation = {
+                op: 'replace',
+                path: 'addresses[type eq "work"].country',
+                value: 'Denmark',
+            };
+            const afterPatch = scimPatch(scimUser, [patch], { treatMissingAsAdd: true });
+            expect(afterPatch.addresses?.[0].country).to.be.eq("Denmark");
+            expect(afterPatch.addresses?.[0].type).to.be.eq("work");
+            return done();
+        });
+
         it('REPLACE: primary email value', done => {
             const expected = 'toto@toto.com';
             const patch1: ScimPatchAddReplaceOperation = {

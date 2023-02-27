@@ -48,6 +48,8 @@ export interface ScimPatchOptions {
   // if true, patches are applied to the original passed document
   // if false, a copy of the original document is obtained and patches are applied to it
   mutateDocument?: boolean
+  // if true, missing attributes to be replaced will be treated as an ADD.
+  treatMissingAsAdd?: boolean
 }
 
 // filterWithQueryOptions: options used while calling filterWithQuery
