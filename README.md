@@ -95,6 +95,8 @@ This particular operation will return :
 ```
 
 #### Options
+
+##### Mutate Document
 By default `scimPatch()` is updating the scim resource you pass in the function.  
 If you want to avoid this, you can add an option while calling `scimPatch()`, it will do a copy of the object and work
 on this copy.
@@ -103,6 +105,22 @@ Your call will look like this now:
 ```typescript
 const patchedUser = scimPatch(scimUser, patch, {mutateDocument: false});
 // scimUser !== patchedUser
+```
+
+##### Treat Missing as Add
+
+By default `scimPatch()` will throw an error if a replace operation targets an attribute that does not exist. 
+If you prefer to treat these operations as additions, then set `treatMissingAsAdd: true`
+
+```typescript 
+// scimUser has no addresses
+ const patch = {
+    op: 'replace',
+    path: 'addresses[type eq "work"].country',
+    value: 'Australia',
+};
+const patchedUser = scimPatch(scimUser, patch, {treatMissingAsAdd: true});
+// patchedUser.addresses[0].country === "Australia"
 ```
 
 # How can I contribute?
