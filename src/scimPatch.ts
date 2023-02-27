@@ -99,7 +99,7 @@ export function patchBodyValidation(body: ScimPatch): void {
  * @throws {InvalidScimPatchOp} if the patch could not happen.
  */
 export function scimPatch<T extends ScimResource>(scimResource: T, patchOperations: Array<ScimPatchOperation>,
-                                                  options: ScimPatchOptions = {mutateDocument: true}): T {
+                                                  options: ScimPatchOptions = {mutateDocument: true, treatMissingAsAdd: false}): T {
     if (!options.mutateDocument) {
         // Deeply clone the object.
         // https://jsperf.com/deep-copy-vs-json-stringify-json-parse/25 (recursiveDeepCopy)
@@ -115,7 +115,7 @@ export function scimPatch<T extends ScimResource>(scimResource: T, patchOperatio
             case 'Add':
             case 'replace':
             case 'Replace':
-                return applyAddOrReplaceOperation(patchedResource, patch);
+                return applyAddOrReplaceOperation(patchedResource, patch, !!options.treatMissingAsAdd);
             default:
                 throw new InvalidScimPatchRequest(`Operator is invalid for SCIM patch request. ${patch}`);
         }
@@ -213,7 +213,7 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
 }
 
 
-function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, patch: ScimPatchAddReplaceOperation): T {
+function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, patch: ScimPatchAddReplaceOperation, treatMissingAsAdd: boolean): T {
     // We manipulate the object directly without knowing his property, that's why we use any.
     let resource: Record<string, any> = scimResource;
     validatePatchOperation(patch);
@@ -242,6 +242,20 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
                 result[lastSubPath] = addOrReplaceAttribute(resource, patch, true);
                 resource[e.attrName] = [...(resource[e.attrName] ?? []), result];
                 return scimResource;
+            } else if (
+              treatMissingAsAdd &&
+              isReplaceOperation(patch.op) &&
+              "compValue" in parsedPath &&
+              parsedPath.compValue !== undefined &&
+              parsedPath.op === "eq"
+            ) {
+              // If the target location path specifies an attribute that does not
+              // exist, the service provider SHALL treat the operation as an "add".
+              return applyAddOrReplaceOperation(
+                scimResource,
+                { ...patch, op: "add" },
+                false
+              );
             }
             throw new NoTarget(patch.path);
         }
