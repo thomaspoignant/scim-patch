@@ -37,6 +37,7 @@ export interface ScimUser extends ScimResource {
     addresses?: Array<{
        type: string;
        formatted: string;
+       country?: string;
     }>;
     roles?: Array<{
         value: string;
