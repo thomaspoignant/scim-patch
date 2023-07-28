@@ -109,8 +109,8 @@ const patchedUser = scimPatch(scimUser, patch, {mutateDocument: false});
 
 ##### Treat Missing as Add
 
-By default `scimPatch()` will throw an error if a replace operation targets an attribute that does not exist. 
-If you prefer to treat these operations as additions, then set `treatMissingAsAdd: true`
+By default `scimPatch()` will treat as Add a replace operation that targets an attribute that does not exist.
+If you prefer to throw an error instead, then set `treatMissingAsAdd: false`
 
 ```typescript 
 // scimUser has no addresses
@@ -119,7 +119,7 @@ If you prefer to treat these operations as additions, then set `treatMissingAsAd
     path: 'addresses[type eq "work"].country',
     value: 'Australia',
 };
-const patchedUser = scimPatch(scimUser, patch, {treatMissingAsAdd: true});
+const patchedUser = scimPatch(scimUser, patch, {treatMissingAsAdd: false});
 // patchedUser.addresses[0].country === "Australia"
 ```
 
