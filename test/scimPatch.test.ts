@@ -260,6 +260,19 @@ describe('SCIM PATCH', () => {
             return done();
         });
 
+        it("REPLACE: no record match was made, treatMissingAsAdd false", (done) => {
+            // empty the surName fields.
+            scimUser.surName = [];
+            const patch: ScimPatchAddReplaceOperation = {
+                op: "replace",
+                path: "surName[primary eq true].value",
+                value: "surname"
+            };
+            expect(() => scimPatch(scimUser, [patch],{treatMissingAsAdd: false}))
+                .to.throw(NoTarget, 'a value selection filter (surName[primary eq true].value) has been supplied and no record match was made');
+            return done();
+        });
+
         it("REPLACE: no record match was made", (done) => {
             // empty the surName fields.
             scimUser.surName = [];
@@ -268,7 +281,9 @@ describe('SCIM PATCH', () => {
                 path: "surName[primary eq true].value",
                 value: "surname"
             };
-            expect(() => scimPatch(scimUser, [patch])).to.throw(NoTarget, 'a value selection filter (surName[primary eq true].value) has been supplied and no record match was made');
+
+            const afterPatch = scimPatch(scimUser, [patch]);
+            expect(afterPatch.surName).to.be.deep.eq([{"primary": true,"value": "surname"}]);
             return done();
         });
 
@@ -308,7 +323,7 @@ describe('SCIM PATCH', () => {
                 value: "1111 Street Rd",
                 path: "addresses[type eq \"work\"].formatted"
             };
-            expect(() => scimPatch(scimUser, [patch])).to.throw(NoTarget, 'a value selection filter (addresses[type eq "work"].formatted) has been supplied and no record match was made');
+            expect(() => scimPatch(scimUser, [patch], {treatMissingAsAdd: false})).to.throw(NoTarget, 'a value selection filter (addresses[type eq "work"].formatted) has been supplied and no record match was made');
             return done();
         });
 
