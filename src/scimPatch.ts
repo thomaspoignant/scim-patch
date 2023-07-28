@@ -99,7 +99,7 @@ export function patchBodyValidation(body: ScimPatch): void {
  * @throws {InvalidScimPatchOp} if the patch could not happen.
  */
 export function scimPatch<T extends ScimResource>(scimResource: T, patchOperations: Array<ScimPatchOperation>,
-                                                  options: ScimPatchOptions = {mutateDocument: true, treatMissingAsAdd: false}): T {
+                                                  options: ScimPatchOptions = {mutateDocument: true, treatMissingAsAdd: true}): T {
     if (!options.mutateDocument) {
         // Deeply clone the object.
         // https://jsperf.com/deep-copy-vs-json-stringify-json-parse/25 (recursiveDeepCopy)
