@@ -32,7 +32,7 @@
     "benchmark": "2.1.4",
     "chai": "4.3.8",
     "coveralls": "3.1.1",
-    "eslint": "8.49.0",
+    "eslint": "8.50.0",
     "eslint-plugin-mocha": "10.1.0",
     "eslint-plugin-testing-library": "6.0.2",
     "mocha": "^10.2.0",
