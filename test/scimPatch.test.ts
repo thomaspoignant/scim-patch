@@ -62,7 +62,6 @@ describe('SCIM PATCH', () => {
             return done();
         });
 
-
         it('REPLACE: first level property without path', done => {
             const expected = false;
             const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: {active: expected}};
@@ -348,6 +347,23 @@ describe('SCIM PATCH', () => {
             return done();
         });
 
+        // see https://github.com/thomaspoignant/scim-patch/issues/489
+        it('REPLACE: Replace op with value of empty object results in circular reference', done => {
+            const expected = [
+                {
+                    "value": "spiderman@superheroes.com",
+                    "primary": true
+                },
+                {
+                    "type": "work",
+                    value: {}
+                }
+            ];
+            const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: {}, path: 'emails[type eq "work"].value'};
+            const afterPatch = scimPatch(scimUser, [patch], { mutateDocument: false, treatMissingAsAdd: true });
+            expect(afterPatch.emails).to.be.deep.eq(expected);
+            return done();
+        });
     });
 
     describe('add', () => {

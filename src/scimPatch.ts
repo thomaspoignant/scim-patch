@@ -396,6 +396,12 @@ function addOrReplaceObjectAttribute(property: any, patch: ScimPatchAddReplaceOp
         return patch.value;
     }
 
+    // fix https://github.com/thomaspoignant/scim-patch/issues/489
+    // when trying to insert an empty object, we should directly insert it without merging.
+    if (Object.keys(patch.value).length === 0) {
+        return {};
+    }
+
     // We add all the patch values to the property object.
     for (const [key, value] of Object.entries(patch.value)) {
         assign(property, resolvePaths(key), value, patch.op);
