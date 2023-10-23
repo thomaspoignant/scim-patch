@@ -3,7 +3,7 @@ import {
     InvalidScimPatchRequest,
     NoPathInScimPatchOp,
     scimPatch,
-    InvalidScimPatch,
+    InvalidScimPatch, ScimPatchOperation,
 } from '../src/scimPatch';
 import {ScimUser} from './types/types.test';
 import {expect} from 'chai';
@@ -362,6 +362,34 @@ describe('SCIM PATCH', () => {
             const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: {}, path: 'emails[type eq "work"].value'};
             const afterPatch = scimPatch(scimUser, [patch], { mutateDocument: false, treatMissingAsAdd: true });
             expect(afterPatch.emails).to.be.deep.eq(expected);
+            return done();
+        });
+
+        // see https://github.com/thomaspoignant/scim-patch/issues/503
+        it('REPLACE: Path with a complex filter match only the first occurrence', done => {
+            scimUser.emails.push({value: 'user1@test.com', primary: true});
+            scimUser.emails.push({value: 'user2@test.com', primary: true});
+            scimUser.emails.push({value: 'user3@test.com', primary: true});
+            scimUser.emails.push({value: 'user1@gmail.com', primary: false});
+            scimUser.emails.push({value: 'user2@gmail.com', primary: false});
+            scimUser.emails.push({value: 'user3@gmail.com', primary: false});
+            scimUser.emails.push({value: 'user4@gmail.com', primary: false});
+            scimUser.emails.push({value: 'user5@gmail.com', primary: false});
+            scimUser.emails.push({value: 'user6@gmail.com', primary: false});
+            scimUser.emails.push({value: 'user7@gmail.com', primary: false});
+            scimUser.emails.push({value: 'user8@gmail.com', primary: false});
+
+            const patches: ScimPatchOperation[] = [
+                // { op: 'replace', path: 'emails[value co "gmail"].value', value: 'edited-user1@yahoo.com'  }, // Match only first
+                // { op: 'replace', path: 'emails[value co "gmail"]', value: { value:'edited-user2@yahoo.com' } }, // Match only first
+                // { op: 'add', path: 'emails[value co "gmail"]', value: { value:'edited-user3@yahoo.com' } }, // Match only first
+                // { op: 'add', path: 'emails[value co "gmail"].value', value:'edited-user4@yahoo.com'}, // Match only first (*)
+                { op: 'remove', path: 'emails[value co "gmail"].value'}, // Match only first
+                // { op: 'remove', path: 'emails[value co "gmail"]'}, // This match all the sele
+            ];
+
+            const afterPatch = scimPatch(scimUser, patches, {});
+            console.log(afterPatch);
             return done();
         });
     });
