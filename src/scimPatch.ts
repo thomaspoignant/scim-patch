@@ -168,14 +168,14 @@ function resolvePaths(path: string): string[] {
 
 function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: ScimPatchRemoveOperation): T {
     // We manipulate the object directly without knowing his property, that's why we use any.
-    let resource: Record<string, any> = scimResource;
+    let resources_scoped: Record<string, any>[];
     validatePatchOperation(patch);
 
     // Path is supposed to be set, there are a validation in the validateOperation function.
     const paths = resolvePaths(patch.path);
 
     try {
-        resource = navigate(resource, paths, {isRemoveOp: true});
+        resources_scoped = navigate(scimResource, paths, {isRemoveOp: true});
     } catch (error) {
         if (error instanceof InvalidRemoveOpPath) {
             return scimResource;
@@ -188,26 +188,29 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
 
     if (!IS_ARRAY_SEARCH.test(lastSubPath)) {
         // This is a mono valued property
-        if (!patch.value) {
-            // No value in the remove operation, we delete it.
-            delete resource[lastSubPath];
-            return scimResource;
+        for (const resource of resources_scoped) {
+            if (!patch.value) {
+                // No value in the remove operation, we delete it.
+                delete resource[lastSubPath];
+            } else {
+                // Value in the remove operation, we remove the children by value.
+                resource[lastSubPath] = removeWithPatchValue(resource[lastSubPath], patch.value);
+            }
         }
-
-        // Value in the remove operation, we remove the children by value.
-        resource[lastSubPath] = removeWithPatchValue(resource[lastSubPath], patch.value);
         return scimResource;
     }
+    for (const resource of resources_scoped) {
 
-    // The last element is an Array request.
-    const {attrName, valuePath, array} = extractArray(lastSubPath, resource);
+        // The last element is an Array request.
+        const {attrName, valuePath, array} = extractArray(lastSubPath, resource);
 
-    // We keep only items who don't match the query if supplied.
-    resource[attrName] = filterWithQuery<any>(array, valuePath, {excludeIfMatchFilter: true});
+        // We keep only items who don't match the query if supplied.
+        resource[attrName] = filterWithQuery<any>(array, valuePath, {excludeIfMatchFilter: true});
 
-    // If the complex multi-valued attribute has no remaining records, the attribute SHALL be considered unassigned.
-    if (resource[attrName].length === 0)
-        delete resource[attrName];
+        // If the complex multi-valued attribute has no remaining records, the attribute SHALL be considered unassigned.
+        if (resource[attrName].length === 0)
+            delete resource[attrName];
+    }
 
     return scimResource;
 }
@@ -215,7 +218,8 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
 
 function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, patch: ScimPatchAddReplaceOperation, treatMissingAsAdd: boolean): T {
     // We manipulate the object directly without knowing his property, that's why we use any.
-    let resource: Record<string, any> = scimResource;
+    // let resource: Record<string, any> = scimResource;
+    let resources_scoped: Record<string, any>[];
     validatePatchOperation(patch);
 
     if (!patch.path)
@@ -226,10 +230,11 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
     const lastSubPath = paths[paths.length - 1];
 
     try {
-        resource = navigate(resource, paths);
+        resources_scoped = navigate(scimResource, paths);
     } catch(e) {
+        // console.error(e);
         if (e instanceof FilterOnEmptyArray || e instanceof FilterArrayTargetNotFound) {
-            resource = e.schema;
+            const resource: Record<string, any> = e.schema;
             // check issue https://github.com/thomaspoignant/scim-patch/issues/42 to see why we should add this
             const parsedPath = parse(e.valuePath);
             if (isAddOperation(patch.op) &&
@@ -261,28 +266,38 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
         }
         throw e;
     }
-
+    // console.log(resources_scoped);
+    // console.log({op:patch.op,len:resources_scoped.length, lastSubPath});
     if (!IS_ARRAY_SEARCH.test(lastSubPath)) {
-        resource[lastSubPath] = addOrReplaceAttribute(resource[lastSubPath], patch);
-        return scimResource;
+        for (const resource of resources_scoped) {
+            resource[lastSubPath] = addOrReplaceAttribute(resource[lastSubPath], patch);
+        }
+        return scimResource;   
     }
+
+    
 
     // The last element is an Array request.
-    const {valuePath, array} = extractArray(lastSubPath, resource);
+    for (const resource of resources_scoped) {
+        
+        const {valuePath, array} = extractArray(lastSubPath, resource);
 
-    // Get the list of items who are successful for the search query.
-    const matchFilter = filterWithQuery<any>(array, valuePath);
+        // Get the list of items who are successful for the search query.
+        const matchFilter = filterWithQuery<any>(array, valuePath);
 
-    // If the target location is a multi-valued attribute for which a value selection filter ("valuePath") has been
-    // supplied and no record match was made, the service provider SHALL indicate failure by returning HTTP status
-    // code 400 and a "scimType" error code of "noTarget".
-    if (isReplaceOperation(patch.op) && matchFilter.length === 0) {
-        throw new NoTarget(patch.path);
+        // If the target location is a multi-valued attribute for which a value selection filter ("valuePath") has been
+        // supplied and no record match was made, the service provider SHALL indicate failure by returning HTTP status
+        // code 400 and a "scimType" error code of "noTarget".
+        if (isReplaceOperation(patch.op) && matchFilter.length === 0) {
+            throw new NoTarget(patch.path);
+        }
+        for (let i = 0; i < array.length; i++) {
+            // We are sure to find at least one index because matchFilter comes from array.
+            if(matchFilter.includes(array[i])){
+                array[i] = addOrReplaceAttribute(array[i], patch);
+            }
+        }
     }
-
-    // We are sure to find an index because matchFilter comes from array.
-    const index = array.findIndex(item => matchFilter.includes(item));
-    array[index] = addOrReplaceAttribute(array[index], patch);
 
     return scimResource;
 }
@@ -315,38 +330,54 @@ function extractArray(subPath: string, schema: any): ScimSearchQuery {
  * @param options options used while calling navigate
  * @return the parent object of the element we want to edit
  */
-function navigate(inputSchema: any, paths: string[], options: NavigateOptions = {}): Record<string, unknown> {
-    let schema = inputSchema;
+function navigate(inputSchema: any, paths: string[], options: NavigateOptions = {}): Record<string, unknown>[] {
+    let schemas: any[] = [inputSchema];
     for (let i = 0; i < paths.length - 1; i++) {
         const subPath = paths[i];
 
         // We check if the element is an array with query (ex: emails[primary eq true).
-        if (IS_ARRAY_SEARCH.test(subPath)) {
-            try {
-                const {attrName, valuePath, array} = extractArray(subPath, schema);
-                // Get the item who is successful for the search query.
-                const matchFilter = filterWithQuery<any>(array, valuePath);
-                // We are sure to find an index because matchFilter comes from array.
-                const index = array.findIndex(item => matchFilter.includes(item));
-                if (index < 0) {
-                    throw new FilterArrayTargetNotFound('A matching array entry was not found using the supplied filter.', attrName, valuePath, schema);
+        if (IS_ARRAY_SEARCH.test(subPath)) {           
+            schemas = schemas.flatMap((schema)=>{ 
+                try {
+                    const {attrName, valuePath, array} = extractArray(subPath, schema);
+                    // Get the item who is successful for the search query.
+                    const matchFilter = filterWithQuery<any>(array, valuePath);
+                    if (matchFilter.length === 0) {
+                        throw new FilterArrayTargetNotFound('A matching array entry was not found using the supplied filter.', attrName, valuePath, schema);
+                    }
+                    return matchFilter;
+                } catch (error) {
+                    //FIXME this throw stop the execution at the first "error"
+                    if(error instanceof FilterOnEmptyArray){
+                        error.schema = schema;
+                    }
+                    throw error;
                 }
-                schema = array[index];
-            } catch (error) {
-                if(error instanceof FilterOnEmptyArray){
-                    error.schema = schema;
-                }
-                throw error;
-            }
+            });
         } else {
             // The element is not an array.
-            if (!schema[subPath] && options.isRemoveOp)
-                throw new InvalidRemoveOpPath();
-
-            schema = schema[subPath] || (schema[subPath] = {});
+            if (schemas.every(Array.isArray)) {
+                schemas = schemas.flatMap((schema) => {
+                    return schema.map((item) => {
+                        if (!item[subPath] && options.isRemoveOp)
+                            throw new InvalidRemoveOpPath(); //????
+        
+                        return schema[item] || (schema[item] = {});
+                    });
+                });
+            } else if(!schemas.some(Array.isArray)) {
+                schemas = schemas.map((schema) => {
+                    if (!schema[subPath] && options.isRemoveOp)
+                        throw new InvalidRemoveOpPath();
+    
+                    return schema[subPath] || (schema[subPath] = {});
+                });
+            }else {
+                throw Error("TODO");
+            }
         }
     }
-    return schema;
+    return schemas;
 }
 
 /**
