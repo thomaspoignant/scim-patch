@@ -232,7 +232,7 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
     try {
         resources_scoped = navigate(scimResource, paths);
     } catch(e) {
-        // console.error(e);
+// console.error(e);
         if (e instanceof FilterOnEmptyArray || e instanceof FilterArrayTargetNotFound) {
             const resource: Record<string, any> = e.schema;
             // check issue https://github.com/thomaspoignant/scim-patch/issues/42 to see why we should add this
@@ -355,26 +355,12 @@ function navigate(inputSchema: any, paths: string[], options: NavigateOptions = 
                 }
             });
         } else {
-            // The element is not an array.
-            if (schemas.every(Array.isArray)) {
-                schemas = schemas.flatMap((schema) => {
-                    return schema.map((item) => {
-                        if (!item[subPath] && options.isRemoveOp)
-                            throw new InvalidRemoveOpPath(); //????
-        
-                        return schema[item] || (schema[item] = {});
-                    });
-                });
-            } else if(!schemas.some(Array.isArray)) {
-                schemas = schemas.map((schema) => {
-                    if (!schema[subPath] && options.isRemoveOp)
-                        throw new InvalidRemoveOpPath();
-    
-                    return schema[subPath] || (schema[subPath] = {});
-                });
-            }else {
-                throw Error("TODO");
-            }
+            schemas = schemas.flatMap((schema)=>{
+                if (!schema[subPath] && options.isRemoveOp)
+                    throw new InvalidRemoveOpPath();
+
+                return schema[subPath] || (schema[subPath] = {});
+            });
         }
     }
     return schemas;
@@ -399,6 +385,7 @@ function addOrReplaceAttribute(property: any, patch: ScimPatchAddReplaceOperatio
             return patch.value;
         }
 
+        //FIXME
         const a = property;
         if (!deepIncludes(a, patch.value))
             a.push(patch.value);
