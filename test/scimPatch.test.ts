@@ -364,23 +364,24 @@ describe('SCIM PATCH', () => {
             expect(afterPatch.emails[3].newProperty).to.be.eq(expected);         
             return done();
         });
-        // it('REPLACE: replace on multiValued objects without complete path', done => {
-        //     scimUser.emails = [
-        //         { value: "addr1@email.com", primary: true, newProperty: "pre"},
-        //         { value: "addr2@email.com", primary: false, newProperty: "pre" },
-        //         { value: "addr3@email.com", primary: false, newProperty: "pre" },
-        //         { value: "addr4@email.com", primary: false, newProperty: "pre" },
-        //     ];
-        //     const expected = "post";
-        //     const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: {newProperty: expected}, path: 'emails'};
-        //     const afterPatch = scimPatch(scimUser, [patch]);
-        //     console.log(afterPatch.emails);
-        //     expect(afterPatch.emails[0].newProperty).to.be.eq(expected);
-        //     expect(afterPatch.emails[1].newProperty).to.be.eq(expected);       
-        //     expect(afterPatch.emails[2].newProperty).to.be.eq(expected);       
-        //     expect(afterPatch.emails[3].newProperty).to.be.eq(expected);         
-        //     return done();
-        // });
+        it('REPLACE: replace on multiValued objects without complete path', done => {
+            scimUser.emails = [
+                { value: "addr1@email.com", primary: true, newProperty: "pre"},
+                { value: "addr2@email.com", primary: false, newProperty: "pre" },
+                { value: "addr3@email.com", primary: false, newProperty: "pre" },
+                { value: "addr4@email.com", primary: false, newProperty: "pre" },
+            ];
+            const expected = "post";
+            const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: {newProperty: expected}, path: 'emails'};
+            const afterPatch = scimPatch(scimUser, [patch]);
+            console.log(afterPatch.emails);
+            expect(afterPatch.emails[0].newProperty).to.be.eq(expected);
+            expect(afterPatch.emails[1].newProperty).to.be.eq(expected);       
+            expect(afterPatch.emails[2].newProperty).to.be.eq(expected);       
+            expect(afterPatch.emails[3].newProperty).to.be.eq(expected);      
+            expect(afterPatch.emails.length).to.be.eq(4);
+            return done();
+        });
 
         it('REPLACE: filter that match multiple elements of complex multiValued attribute', done => {
             scimUser.emails = [

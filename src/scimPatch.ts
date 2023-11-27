@@ -347,7 +347,12 @@ function navigate(inputSchema: any, paths: string[], options: NavigateOptions = 
                     }
                     return matchFilter;
                 } catch (error) {
-                    //FIXME this throw stop the execution at the first "error"
+                    /*
+                        FIXME In some edge cases, not fully compliant with SCIM, this can prematurely throw en error
+                        For example if we have a structure with multiValued complex
+                        attribute inside of a multiValued complex attribute, in
+                        this case this throw even if only a "branch" of the search fail.
+                    */
                     if(error instanceof FilterOnEmptyArray){
                         error.schema = schema;
                     }
@@ -385,7 +390,11 @@ function addOrReplaceAttribute(property: any, patch: ScimPatchAddReplaceOperatio
             return patch.value;
         }
 
-        //FIXME
+        if(isReplaceOperation(patch.op)){
+            return property.map( 
+                (it) => addOrReplaceAttribute(it,patch,multiValuedPathFilter)
+            );
+        }
         const a = property;
         if (!deepIncludes(a, patch.value))
             a.push(patch.value);
