@@ -373,7 +373,6 @@ describe('SCIM PATCH', () => {
             const expected = "post";
             const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: {newProperty: expected}, path: 'emails'};
             const afterPatch = scimPatch(scimUser, [patch]);
-            console.log(afterPatch.emails);
             expect(afterPatch.emails[0].newProperty).to.be.eq(expected);
             expect(afterPatch.emails[1].newProperty).to.be.eq(expected);       
             expect(afterPatch.emails[2].newProperty).to.be.eq(expected);       

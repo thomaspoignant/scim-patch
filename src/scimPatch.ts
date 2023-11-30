@@ -232,7 +232,6 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
     try {
         resources_scoped = navigate(scimResource, paths);
     } catch(e) {
-// console.error(e);
         if (e instanceof FilterOnEmptyArray || e instanceof FilterArrayTargetNotFound) {
             const resource: Record<string, any> = e.schema;
             // check issue https://github.com/thomaspoignant/scim-patch/issues/42 to see why we should add this
@@ -266,8 +265,6 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
         }
         throw e;
     }
-    // console.log(resources_scoped);
-    // console.log({op:patch.op,len:resources_scoped.length, lastSubPath});
     if (!IS_ARRAY_SEARCH.test(lastSubPath)) {
         for (const resource of resources_scoped) {
             resource[lastSubPath] = addOrReplaceAttribute(resource[lastSubPath], patch);
