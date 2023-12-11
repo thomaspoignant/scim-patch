@@ -37,7 +37,7 @@
     "eslint-plugin-testing-library": "6.2.0",
     "mocha": "^10.2.0",
     "nyc": "15.1.0",
-    "ts-node": "10.9.1",
+    "ts-node": "10.9.2",
     "typescript": "5.3.3"
   },
   "dependencies": {
