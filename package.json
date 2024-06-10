@@ -36,7 +36,7 @@
     "eslint-plugin-mocha": "10.4.3",
     "eslint-plugin-testing-library": "6.2.2",
     "mocha": "^10.2.0",
-    "nyc": "15.1.0",
+    "nyc": "17.0.0",
     "ts-node": "10.9.2",
     "typescript": "5.4.5"
   },
