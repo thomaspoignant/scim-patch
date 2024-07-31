@@ -432,6 +432,14 @@ describe('SCIM PATCH', () => {
             expect(afterPatch.emails).to.be.deep.eq(expected);
             return done();
         });
+
+        // see https://github.com/thomaspoignant/scim-patch/issues/693
+        it('REPLACE: Replace op with value of empty object should merge if the target property is an object', done => {
+            const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: {}, path: 'name'};
+            const afterPatch = scimPatch(scimUser, [patch], { mutateDocument: false, treatMissingAsAdd: true });
+            expect(afterPatch.name).to.be.deep.eq(scimUser.name);
+            return done();
+        });
     });
 
     describe('add', () => {
@@ -933,6 +941,15 @@ describe('SCIM PATCH', () => {
             expect(afterPatch.emails[1].newProperty).to.be.eq(expected);       
             expect(afterPatch.emails[2].newProperty).to.be.eq(expected);       
             expect(afterPatch.emails[3].newProperty).to.be.eq(expected);  
+            return done();
+        });
+
+        
+        // see https://github.com/thomaspoignant/scim-patch/issues/693
+        it('ADD: value of empty object should merge if the target property is an object', done => {
+            const patch: ScimPatchAddReplaceOperation = {op: 'add', value: {}, path: 'name'};
+            const afterPatch = scimPatch(scimUser, [patch], { mutateDocument: false, treatMissingAsAdd: true });
+            expect(afterPatch.name).to.be.deep.eq(scimUser.name);
             return done();
         });
     });

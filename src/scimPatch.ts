@@ -243,7 +243,7 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
             ) {
                 const result: any = {};
                 result[parsedPath.attrPath] = parsedPath.compValue;
-                result[lastSubPath] = addOrReplaceAttribute(resource, patch, true);
+                result[lastSubPath] = addOrReplaceAttribute(undefined, patch, true);
                 resource[e.attrName] = [...(resource[e.attrName] ?? []), result];
                 return scimResource;
             } else if (
@@ -418,12 +418,6 @@ function addOrReplaceObjectAttribute(property: any, patch: ScimPatchAddReplaceOp
             throw new InvalidScimPatchOp('Invalid patch query.');
 
         return patch.value;
-    }
-
-    // fix https://github.com/thomaspoignant/scim-patch/issues/489
-    // when trying to insert an empty object, we should directly insert it without merging.
-    if (Object.keys(patch.value).length === 0) {
-        return {};
     }
 
     // We add all the patch values to the property object.
