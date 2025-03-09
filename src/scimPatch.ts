@@ -529,7 +529,7 @@ function isAddOperation(operation: string): boolean {
 }
 
 /**
- * isReplaceOperation check if the operation is an REPACE
+ * isReplaceOperation check if the operation is an REPLACE
  * @param operation the name of the SCIM Patch operation
  * @return true if this is a replace operation
  */
