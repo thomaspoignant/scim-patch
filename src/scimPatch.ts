@@ -63,6 +63,8 @@ const IS_ARRAY_SEARCH = /(\[|\])/;
 const ARRAY_SEARCH = /^(.+)\[(.+)\]$/;
 // Split path on periods
 const SPLIT_PERIOD = /(?!\B"[^[]*)\.(?![^\]]*"\B)/g;
+// Regex to fetch the URN from a path.
+const URN_MATCH = /^((?:[A-Za-z0-9][A-Za-z0-9.+-]*:)+[A-Za-z0-9.+-]*)/;
 // Valid patch operation, value needs to be in lowercase here.
 const AUTHORIZED_OPERATION = ['remove', 'add', 'replace'];
 
@@ -144,7 +146,10 @@ function validatePatchOperation(operation: ScimPatchOperation): void {
 }
 
 function resolvePaths(path: string): string[] {
-    const uriIndex = path.lastIndexOf(':');
+    // Identify the URN prefix if present
+    const urnPath = path.match(URN_MATCH);
+    // Find the last colon in the urn path
+    const uriIndex = urnPath ? (urnPath[1] ?? urnPath[0]).lastIndexOf(':') : -1;
 
     if (uriIndex < 0) {
         // No schema prefix - this is a core schema path
