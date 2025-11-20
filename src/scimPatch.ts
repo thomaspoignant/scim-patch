@@ -149,7 +149,7 @@ function resolvePaths(path: string): string[] {
     // Identify the URN prefix if present
     const urnPath = path.match(URN_MATCH);
     // Find the last colon in the urn path
-    const uriIndex = urnPath ? (urnPath[1] ?? urnPath[0]).lastIndexOf(':') : -1;
+    const uriIndex = urnPath ? urnPath[1].lastIndexOf(':') : -1;
 
     if (uriIndex < 0) {
         // No schema prefix - this is a core schema path
