@@ -1195,6 +1195,23 @@ describe('SCIM PATCH', () => {
             expect(afterPatch.emails[3].newProperty).to.be.an('undefined');         
             return done();
         });
+
+        it('REPLACE: should handle colon in quoted filter values', done => {
+            scimUser.roles = [
+                { value: "3675b69e-8324-4110-bdca-059031aa8da3:admin", type: "admin" },
+                { value: "other-role", type: "user" }
+            ];
+            const expected = "updated";
+            const patch: ScimPatchAddReplaceOperation = {
+                op: 'replace',
+                value: expected,
+                path: 'roles[value eq "3675b69e-8324-4110-bdca-059031aa8da3:admin"].value'
+            };
+            const afterPatch = scimPatch(scimUser, [patch]);
+            expect(afterPatch.roles![0].value).to.be.eq(expected);
+            expect(afterPatch.roles![1].value).to.be.eq("other-role");
+            return done();
+        });
     });
 
     describe('invalid requests', () => {
