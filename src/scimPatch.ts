@@ -68,6 +68,8 @@ const AUTHORIZED_OPERATION = ['remove', 'add', 'replace'];
 
 const CORE_SCHEMA_USER = 'urn:ietf:params:scim:schemas:core:2.0:User';
 const CORE_SCHEMA_GROUP = 'urn:ietf:params:scim:schemas:core:2.0:Group';
+// Keys that would let a patch reach Object.prototype (prototype pollution, GHSA-9m6g-wc8r-q59c).
+const DANGEROUS_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 
 export const PATCH_OPERATION_SCHEMA = 'urn:ietf:params:scim:api:messages:2.0:PatchOp';
 /*
@@ -146,22 +148,30 @@ function validatePatchOperation(operation: ScimPatchOperation): void {
 function resolvePaths(path: string): string[] {
     const uriIndex = path.lastIndexOf(':');
 
+    let paths: string[];
     if (uriIndex < 0) {
         // No schema prefix - this is a core schema path
-        return path.split(SPLIT_PERIOD);
+        paths = path.split(SPLIT_PERIOD);
+    } else {
+        const schemaUri = path.substring(0, uriIndex);
+        paths = path.substring(uriIndex + 1).split(SPLIT_PERIOD);
+        switch (schemaUri) {
+            case CORE_SCHEMA_GROUP:
+            case CORE_SCHEMA_USER:
+                // Ignore core schema URIs in paths.  These are allowed but not part of object keys
+                break;
+            default:
+                // Assume any other provided schema URI is an extension
+                paths.unshift(schemaUri);
+                break;
+        }
     }
 
-    const schemaUri = path.substring(0, uriIndex);
-    const paths = path.substring(uriIndex +1).split(SPLIT_PERIOD);
-    switch(schemaUri) {
-        case CORE_SCHEMA_GROUP:
-        case CORE_SCHEMA_USER:
-            // Ignore core schema URIs in paths.  These are allowed but not part of object keys
-            break;
-        default:
-            // Assume any other provided schema URI is an extension
-            paths.unshift(schemaUri);
-            break;
+    // Reject keys that would walk into Object.prototype (prototype pollution, GHSA-9m6g-wc8r-q59c).
+    for (const segment of paths) {
+        if (DANGEROUS_KEYS.has(segment)) {
+            throw new InvalidScimPatchOp(`Forbidden key in patch path: ${segment}`);
+        }
     }
     return paths;
 }
