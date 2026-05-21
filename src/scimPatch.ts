@@ -154,8 +154,8 @@ function resolvePaths(path: string): string[] {
         paths = path.split(SPLIT_PERIOD);
     } else {
         const schemaUri = path.substring(0, uriIndex);
-        paths = path.substring(uriIndex +1).split(SPLIT_PERIOD);
-        switch(schemaUri) {
+        paths = path.substring(uriIndex + 1).split(SPLIT_PERIOD);
+        switch (schemaUri) {
             case CORE_SCHEMA_GROUP:
             case CORE_SCHEMA_USER:
                 // Ignore core schema URIs in paths.  These are allowed but not part of object keys
