@@ -368,10 +368,17 @@ function navigate(inputSchema: any, paths: string[], options: NavigateOptions = 
             });
         } else {
             schemas = schemas.flatMap((schema)=>{
-                if (!schema[subPath] && options.isRemoveOp)
+                // Only treat own properties as existing. Following inherited keys (e.g. toString)
+                // would resolve to shared built-ins and allow prototype pollution
+                // (GHSA-2mhw-wcx5-v3xj). For own keys we keep the original "||" semantics so a
+                // falsy intermediate (e.g. a null attribute) is still replaced with a container.
+                const existing = (schema != null && Object.prototype.hasOwnProperty.call(schema, subPath))
+                    ? schema[subPath]
+                    : undefined;
+                if (!existing && options.isRemoveOp)
                     throw new InvalidRemoveOpPath();
 
-                return schema[subPath] || (schema[subPath] = {});
+                return existing || (schema[subPath] = {});
             });
         }
     }
@@ -448,7 +455,10 @@ function assign(obj:any, keyPath:Array<string>, value:any, op: string) {
     const lastKeyIndex = keyPath.length-1;
     for (let i = 0; i < lastKeyIndex; ++ i) {
         const key = keyPath[i];
-        if (!(key in obj)){
+        // Use an own-property check ("in" walks the prototype chain) so an inherited key
+        // (e.g. toString) is treated as missing and a fresh own container is created,
+        // instead of descending into a shared built-in (GHSA-2mhw-wcx5-v3xj).
+        if (!Object.prototype.hasOwnProperty.call(obj, key)){
             obj[key] = {};
         }
         obj = obj[key];
