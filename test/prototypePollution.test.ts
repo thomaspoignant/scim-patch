@@ -117,6 +117,8 @@ describe("Prototype pollution via scim-patch", () => {
 
     expect((Object.prototype.toString as any).scimPatchPolluted).to.equal(undefined);
     expect(({} as any).toString.scimPatchPolluted).to.equal(undefined);
+    // The write must land on the resource's own property, not be silently dropped.
+    expect((scimUser as any).toString.scimPatchPolluted).to.equal("polluted");
   });
 
   it("does not pollute an inherited built-in method via a no-path dotted value key (GHSA-2mhw-wcx5-v3xj)", () => {
@@ -129,6 +131,7 @@ describe("Prototype pollution via scim-patch", () => {
 
     expect((Object.prototype.toString as any).noPathPolluted).to.equal(undefined);
     expect(({} as any).toString.noPathPolluted).to.equal(undefined);
+    expect((scimUser as any).toString.noPathPolluted).to.equal("polluted");
   });
 
   it("does not pollute other inherited members (valueOf, hasOwnProperty)", () => {
@@ -143,6 +146,8 @@ describe("Prototype pollution via scim-patch", () => {
     expect((Object.prototype.hasOwnProperty as any).scimPatchPolluted).to.equal(undefined);
     expect(({} as any).valueOf.scimPatchPolluted).to.equal(undefined);
     expect(({} as any).hasOwnProperty.scimPatchPolluted).to.equal(undefined);
+    expect((scimUser as any).valueOf.scimPatchPolluted).to.equal("polluted");
+    expect((scimUser as any).hasOwnProperty.scimPatchPolluted).to.equal("polluted");
   });
 
   it("does not pollute via a replace op on an inherited method", () => {
@@ -152,6 +157,7 @@ describe("Prototype pollution via scim-patch", () => {
 
     expect((Object.prototype.toString as any).scimPatchPolluted).to.equal(undefined);
     expect(({} as any).toString.scimPatchPolluted).to.equal(undefined);
+    expect((scimUser as any).toString.scimPatchPolluted).to.equal("polluted");
   });
 
   it("does not pollute via deep nesting through an inherited method", () => {
@@ -161,6 +167,7 @@ describe("Prototype pollution via scim-patch", () => {
 
     expect((Object.prototype.toString as any).deep).to.equal(undefined);
     expect(({} as any).toString.deep).to.equal(undefined);
+    expect((scimUser as any).toString.deep.scimPatchPolluted).to.equal("polluted");
   });
 
   it("does not pollute via an inherited method after an array-search segment", () => {
@@ -174,6 +181,7 @@ describe("Prototype pollution via scim-patch", () => {
 
     expect((Object.prototype.toString as any).scimPatchPolluted).to.equal(undefined);
     expect(({} as any).toString.scimPatchPolluted).to.equal(undefined);
+    expect((scimUser.emails[0] as any).toString.scimPatchPolluted).to.equal("polluted");
   });
 
   it("still creates nested structure under a null intermediate attribute (issue #186 regression)", () => {
