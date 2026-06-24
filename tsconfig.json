@@ -8,6 +8,8 @@
     "sourceMap": true,
     "strict": true,
     "target": "es2017",
+    "lib": ["es2019"],
+    "types": ["mocha", "node"],
     "incremental": true,
     "allowJs": false
   },
