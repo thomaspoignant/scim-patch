@@ -47,8 +47,8 @@ describe("Prototype pollution via scim-patch", () => {
       ])
     ).to.throw(InvalidScimPatchOp);
 
-    expect((Object.prototype as any).polluted).to.equal(undefined);
-    expect(({} as any).polluted).to.equal(undefined);
+    expect((Object.prototype as any).polluted).to.be.undefined;
+    expect(({} as any).polluted).to.be.undefined;
   });
 
   it("rejects the __proto__.isAdmin escalation shape", () => {
@@ -62,8 +62,8 @@ describe("Prototype pollution via scim-patch", () => {
       ])
     ).to.throw(InvalidScimPatchOp);
 
-    expect((Object.prototype as any).isAdmin).to.equal(undefined);
-    expect(({} as any).isAdmin).to.equal(undefined);
+    expect((Object.prototype as any).isAdmin).to.be.undefined;
+    expect(({} as any).isAdmin).to.be.undefined;
   });
 
   it("rejects a __proto__ segment supplied through the patch path", () => {
@@ -77,8 +77,8 @@ describe("Prototype pollution via scim-patch", () => {
       ])
     ).to.throw(InvalidScimPatchOp);
 
-    expect((Object.prototype as any).polluted).to.equal(undefined);
-    expect(({} as any).polluted).to.equal(undefined);
+    expect((Object.prototype as any).polluted).to.be.undefined;
+    expect(({} as any).polluted).to.be.undefined;
   });
 
   it("rejects constructor / prototype keys as well", () => {
@@ -102,8 +102,8 @@ describe("Prototype pollution via scim-patch", () => {
       ])
     ).to.throw(InvalidScimPatchOp);
 
-    expect((Object.prototype as any).polluted).to.equal(undefined);
-    expect(({} as any).polluted).to.equal(undefined);
+    expect((Object.prototype as any).polluted).to.be.undefined;
+    expect(({} as any).polluted).to.be.undefined;
   });
 
   it("does not pollute an inherited built-in method via a dotted path (GHSA-2mhw-wcx5-v3xj)", () => {
@@ -115,8 +115,8 @@ describe("Prototype pollution via scim-patch", () => {
       },
     ]);
 
-    expect((Object.prototype.toString as any).scimPatchPolluted).to.equal(undefined);
-    expect(({} as any).toString.scimPatchPolluted).to.equal(undefined);
+    expect((Object.prototype.toString as any).scimPatchPolluted).to.be.undefined;
+    expect(({} as any).toString.scimPatchPolluted).to.be.undefined;
     // The write must land on the resource's own property, not be silently dropped.
     expect((scimUser as any).toString.scimPatchPolluted).to.equal("polluted");
   });
@@ -129,8 +129,8 @@ describe("Prototype pollution via scim-patch", () => {
       },
     ]);
 
-    expect((Object.prototype.toString as any).noPathPolluted).to.equal(undefined);
-    expect(({} as any).toString.noPathPolluted).to.equal(undefined);
+    expect((Object.prototype.toString as any).noPathPolluted).to.be.undefined;
+    expect(({} as any).toString.noPathPolluted).to.be.undefined;
     expect((scimUser as any).toString.noPathPolluted).to.equal("polluted");
   });
 
@@ -142,10 +142,10 @@ describe("Prototype pollution via scim-patch", () => {
       { op: "add", path: "hasOwnProperty.scimPatchPolluted", value: "polluted" },
     ]);
 
-    expect((Object.prototype.valueOf as any).scimPatchPolluted).to.equal(undefined);
-    expect((Object.prototype.hasOwnProperty as any).scimPatchPolluted).to.equal(undefined);
-    expect(({} as any).valueOf.scimPatchPolluted).to.equal(undefined);
-    expect(({} as any).hasOwnProperty.scimPatchPolluted).to.equal(undefined);
+    expect((Object.prototype.valueOf as any).scimPatchPolluted).to.be.undefined;
+    expect((Object.prototype.hasOwnProperty as any).scimPatchPolluted).to.be.undefined;
+    expect(({} as any).valueOf.scimPatchPolluted).to.be.undefined;
+    expect(({} as any).hasOwnProperty.scimPatchPolluted).to.be.undefined;
     expect((scimUser as any).valueOf.scimPatchPolluted).to.equal("polluted");
     expect((scimUser as any).hasOwnProperty.scimPatchPolluted).to.equal("polluted");
   });
@@ -155,8 +155,8 @@ describe("Prototype pollution via scim-patch", () => {
       { op: "replace", path: "toString.scimPatchPolluted", value: "polluted" },
     ]);
 
-    expect((Object.prototype.toString as any).scimPatchPolluted).to.equal(undefined);
-    expect(({} as any).toString.scimPatchPolluted).to.equal(undefined);
+    expect((Object.prototype.toString as any).scimPatchPolluted).to.be.undefined;
+    expect(({} as any).toString.scimPatchPolluted).to.be.undefined;
     expect((scimUser as any).toString.scimPatchPolluted).to.equal("polluted");
   });
 
@@ -165,8 +165,8 @@ describe("Prototype pollution via scim-patch", () => {
       { op: "add", path: "toString.deep.scimPatchPolluted", value: "polluted" },
     ]);
 
-    expect((Object.prototype.toString as any).deep).to.equal(undefined);
-    expect(({} as any).toString.deep).to.equal(undefined);
+    expect((Object.prototype.toString as any).deep).to.be.undefined;
+    expect(({} as any).toString.deep).to.be.undefined;
     expect((scimUser as any).toString.deep.scimPatchPolluted).to.equal("polluted");
   });
 
@@ -179,8 +179,8 @@ describe("Prototype pollution via scim-patch", () => {
       },
     ]);
 
-    expect((Object.prototype.toString as any).scimPatchPolluted).to.equal(undefined);
-    expect(({} as any).toString.scimPatchPolluted).to.equal(undefined);
+    expect((Object.prototype.toString as any).scimPatchPolluted).to.be.undefined;
+    expect(({} as any).toString.scimPatchPolluted).to.be.undefined;
     expect((scimUser.emails[0] as any).toString.scimPatchPolluted).to.equal("polluted");
   });
 
