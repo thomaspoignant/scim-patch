@@ -133,3 +133,5 @@ Thanks so much to our contributors.
 <a href="https://github.com/thomaspoignant/scim-patch/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=thomaspoignant/scim-patch" />
 </a>
+
+<!-- ci-verify: auto-assign workflow (remove me) -->
