@@ -8,7 +8,7 @@ import {
 import {ScimUser} from './types/types.test';
 import {expect} from 'chai';
 import {ScimPatchAddReplaceOperation, ScimPatchRemoveOperation} from '../src/types/types';
-import {RemoveValueNestedArrayNotSupported, NoTarget, RemoveValueNotArray} from "../src/errors/scimErrors";
+import {RemoveValueNestedArrayNotSupported, NoTarget, RemoveValueNotArray, FilterOnEmptyArray} from "../src/errors/scimErrors";
 
 describe('SCIM PATCH', () => {
     let scimUser: ScimUser;
@@ -975,10 +975,13 @@ describe('SCIM PATCH', () => {
             return done();
         });
 
-        // A FilterOnEmptyArray raised while navigating a remove path must surface as a ScimError.
+        // A FilterOnEmptyArray raised while navigating a remove path must surface as a ScimError
+        // without the parent resource attached as `error.schema`.
         it('REMOVE: with a value filter on a mono valued attribute in the path', done => {
             const patch: ScimPatchRemoveOperation = {op: 'remove', path: 'name[primary eq true].familyName'};
-            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp, 'Impossible to search on a mono valued attribute');
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp, 'Impossible to search on a mono valued attribute')
+                .and.not.be.instanceOf(FilterOnEmptyArray)
+                .and.not.have.property('schema');
             expect(scimUser.name).to.deep.equal({familyName: 'Parker', givenName: 'Peter'});
             return done();
         });
@@ -1274,6 +1277,24 @@ describe('SCIM PATCH', () => {
             const patch: ScimPatchAddReplaceOperation = {op: 'add', value: 'x', path: 'userName[primary eq true].newProperty'};
             expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp, 'Impossible to search on a mono valued attribute');
             expect(scimUser.userName).to.equal('spiderman');
+            return done();
+        });
+
+        it('INVALID: add with a value filter on a mono valued attribute as the last path segment', done => {
+            const patch: ScimPatchAddReplaceOperation = {op: 'add', value: 'x', path: 'userName[primary eq true]'};
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp, 'Impossible to search on a mono valued attribute')
+                .and.not.be.instanceOf(FilterOnEmptyArray)
+                .and.not.have.property('schema');
+            expect(scimUser.userName).to.equal('spiderman');
+            return done();
+        });
+
+        it('INVALID: remove with a value filter on a mono valued attribute as the last path segment', done => {
+            const patch: ScimPatchRemoveOperation = {op: 'remove', path: 'name[primary eq true]'};
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp, 'Impossible to search on a mono valued attribute')
+                .and.not.be.instanceOf(FilterOnEmptyArray)
+                .and.not.have.property('schema');
+            expect(scimUser.name).to.deep.equal({familyName: 'Parker', givenName: 'Peter'});
             return done();
         });
 

@@ -71,6 +71,7 @@ const CORE_SCHEMA_USER = 'urn:ietf:params:scim:schemas:core:2.0:User';
 const CORE_SCHEMA_GROUP = 'urn:ietf:params:scim:schemas:core:2.0:Group';
 // Keys that would let a patch reach Object.prototype (prototype pollution, GHSA-9m6g-wc8r-q59c).
 const DANGEROUS_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+const MONO_VALUED_SEARCH_ERROR = 'Impossible to search on a mono valued attribute.';
 
 export const PATCH_OPERATION_SCHEMA = 'urn:ietf:params:scim:api:messages:2.0:PatchOp';
 /*
@@ -192,7 +193,8 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
         if (error instanceof InvalidRemoveOpPath) {
             return scimResource;
         }
-        throw error;
+        // Do not surface FilterOnEmptyArray: it carries the parent resource in `.schema`.
+        throwWithoutAttachedSchema(error);
     }
 
     // Dealing with the last element of the path.
@@ -214,7 +216,14 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
     for (const resource of resources_scoped) {
 
         // The last element is an Array request.
-        const {attrName, valuePath, array} = extractArray(lastSubPath, resource);
+        let attrName: string;
+        let valuePath: string;
+        let array: Array<any>;
+        try {
+            ({attrName, valuePath, array} = extractArray(lastSubPath, resource));
+        } catch (error) {
+            throwWithoutAttachedSchema(error);
+        }
 
         // We keep only items who don't match the query if supplied.
         resource[attrName] = filterWithQuery<any>(array, valuePath, {excludeIfMatchFilter: true});
@@ -260,7 +269,7 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
                 // than `e`, which carries the parent object in `e.schema`.
                 const existing = resource[e.attrName];
                 if (existing != null && !Array.isArray(existing)) {
-                    throw new InvalidScimPatchOp('Impossible to search on a mono valued attribute.');
+                    throw new InvalidScimPatchOp(MONO_VALUED_SEARCH_ERROR);
                 }
                 rejectDangerousKey(parsedPath.attrPath);
                 const result: any = {};
@@ -299,7 +308,13 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
     // The last element is an Array request.
     for (const resource of resources_scoped) {
         
-        const {valuePath, array} = extractArray(lastSubPath, resource);
+        let valuePath: string;
+        let array: Array<any>;
+        try {
+            ({valuePath, array} = extractArray(lastSubPath, resource));
+        } catch (error) {
+            throwWithoutAttachedSchema(error);
+        }
 
         // Get the list of items who are successful for the search query.
         const matchFilter = filterWithQuery<any>(array, valuePath);
@@ -340,7 +355,7 @@ function extractArray(subPath: string, schema: any): ScimSearchQuery {
     const element = schema[attrName];
 
     if (!Array.isArray(element))
-        throw new FilterOnEmptyArray('Impossible to search on a mono valued attribute.', attrName, valuePath);
+        throw new FilterOnEmptyArray(MONO_VALUED_SEARCH_ERROR, attrName, valuePath);
 
     return new ScimSearchQuery(attrName, valuePath, element);
 }
@@ -513,6 +528,17 @@ function rejectDangerousKey(key: string): void {
     if (DANGEROUS_KEYS.has(key)) {
         throw new InvalidScimPatchOp(`Forbidden key in patch path: ${key}`);
     }
+}
+
+/**
+ * Re-throw FilterOnEmptyArray as a fresh InvalidScimPatchOp so callers do not
+ * receive the parent resource attached as `error.schema`.
+ */
+function throwWithoutAttachedSchema(error: unknown): never {
+    if (error instanceof FilterOnEmptyArray) {
+        throw new InvalidScimPatchOp(MONO_VALUED_SEARCH_ERROR);
+    }
+    throw error;
 }
 
 /**
