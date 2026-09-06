@@ -172,7 +172,7 @@ function resolvePaths(path: string): string[] {
         // An array-search segment ("emails[primary eq true]") carries its attribute name in front of
         // the filter, so "__proto__[primary eq true]" must be rejected like "__proto__"
         // (GHSA-33jh-378v-h6r8). ARRAY_SEARCH is the regex extractArray() uses to pick that name.
-        const key = segment.match(ARRAY_SEARCH)?.[1] ?? segment;
+        const key = ARRAY_SEARCH.exec(segment)?.[1] ?? segment;
         if (DANGEROUS_KEYS.has(key)) {
             throw new InvalidScimPatchOp(`Forbidden key in patch path: ${key}`);
         }
