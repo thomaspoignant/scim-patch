@@ -394,6 +394,17 @@ function navigate(inputSchema: any, paths: string[], options: NavigateOptions = 
                 return existing || (schema[subPath] = {});
             });
         }
+
+        // Every element scoped so far must be a complex attribute (a non-null object) to be
+        // navigated into or written to. A primitive (e.g. "userName.foo") or an array of
+        // primitives would otherwise throw a raw TypeError at the next level or at the write site.
+        for (const schema of schemas) {
+            if (schema === null || typeof schema !== 'object') {
+                if (options.isRemoveOp)
+                    throw new InvalidRemoveOpPath();
+                throw new InvalidScimPatchOp(`Attribute "${subPath}" is not a complex attribute, it can't contain sub-attributes.`);
+            }
+        }
     }
     return schemas;
 }
