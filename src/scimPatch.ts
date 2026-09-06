@@ -60,6 +60,7 @@ export {
 // Regex to check if this is search into array request.
 const IS_ARRAY_SEARCH = /(\[|\])/;
 // Regex to extract key and search request (ex: emails[primary eq true).
+// Must stay non-global: resolvePaths() calls exec() per path segment.
 const ARRAY_SEARCH = /^(.+)\[(.+)\]$/;
 // Split path on periods
 const SPLIT_PERIOD = /(?!\B"[^[]*)\.(?![^\]]*"\B)/g;
@@ -171,11 +172,8 @@ function resolvePaths(path: string): string[] {
     for (const segment of paths) {
         // An array-search segment ("emails[primary eq true]") carries its attribute name in front of
         // the filter, so "__proto__[primary eq true]" must be rejected like "__proto__"
-        // (GHSA-33jh-378v-h6r8). ARRAY_SEARCH is the regex extractArray() uses to pick that name.
-        const key = ARRAY_SEARCH.exec(segment)?.[1] ?? segment;
-        if (DANGEROUS_KEYS.has(key)) {
-            throw new InvalidScimPatchOp(`Forbidden key in patch path: ${key}`);
-        }
+        // (GHSA-33jh-378v-h6r8). ARRAY_SEARCH is non-global; exec() in this loop is safe.
+        rejectDangerousKey(ARRAY_SEARCH.exec(segment)?.[1] ?? segment);
     }
     return paths;
 }
@@ -264,6 +262,7 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
                 if (existing != null && !Array.isArray(existing)) {
                     throw new InvalidScimPatchOp('Impossible to search on a mono valued attribute.');
                 }
+                rejectDangerousKey(parsedPath.attrPath);
                 const result: any = {};
                 result[parsedPath.attrPath] = parsedPath.compValue;
                 result[lastSubPath] = addOrReplaceAttribute(undefined, patch, true);
@@ -335,6 +334,9 @@ function extractArray(subPath: string, schema: any): ScimSearchQuery {
         throw new InvalidScimPatchOp(`This part of the path ${subPath} is invalid for SCIM patch request.`);
 
     const [, attrName, valuePath] = matchRequest;
+    // Use-site denylist: resolvePaths already rejects these, but extractArray is what
+    // actually indexes the resource (GHSA-33jh-378v-h6r8). Keep both in sync.
+    rejectDangerousKey(attrName);
     const element = schema[attrName];
 
     if (!Array.isArray(element))
@@ -395,9 +397,11 @@ function navigate(inputSchema: any, paths: string[], options: NavigateOptions = 
             });
         }
 
-        // Every element scoped so far must be a complex attribute (a non-null object) to be
-        // navigated into or written to. A primitive (e.g. "userName.foo") or an array of
-        // primitives would otherwise throw a raw TypeError at the next level or at the write site.
+        // Every element scoped so far must be a complex attribute (a non-null object).
+        // Arrays pass `typeof === "object"`; a multi-valued attribute without a filter is
+        // flattened by the flatMap above into its elements, so an array of primitives
+        // becomes those primitives here and is rejected. Do not add Array.isArray() without
+        // covering unfiltered paths such as emails.<subAttr>, which rely on that flattening.
         for (const schema of schemas) {
             if (schema === null || typeof schema !== 'object') {
                 if (options.isRemoveOp)
@@ -503,6 +507,12 @@ function assign(obj:any, keyPath:Array<string>, value:any, op: string) {
         return;
     }
     obj[keyPath[lastKeyIndex]] = value;
+}
+
+function rejectDangerousKey(key: string): void {
+    if (DANGEROUS_KEYS.has(key)) {
+        throw new InvalidScimPatchOp(`Forbidden key in patch path: ${key}`);
+    }
 }
 
 /**
