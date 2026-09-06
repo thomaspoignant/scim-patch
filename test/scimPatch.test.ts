@@ -715,6 +715,19 @@ describe('SCIM PATCH', () => {
             return done();
         });
 
+        // The issue #42 fallback must keep working when the attribute exists but is null.
+        it("ADD: null array add filter type + field (issue #42)", (done) => {
+            (scimUser as any).addresses = null;
+            const patch: ScimPatchAddReplaceOperation = {
+                op: "add",
+                value: "1111 Street Rd",
+                path: "addresses[type eq \"work\"].formatted"
+            };
+            const afterPatch = scimPatch(scimUser, [patch]);
+            expect(afterPatch.addresses).to.deep.equal([{type: "work", formatted: "1111 Street Rd"}]);
+            return done();
+        });
+
         it("ADD: existing array add filter type + field (Azure AD)", (done) => {
             const patch: ScimPatchAddReplaceOperation = {
                 op: "Add",
@@ -1229,6 +1242,29 @@ describe('SCIM PATCH', () => {
                 path: 'emails[\' eq true].value'
             };
             expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp);
+            return done();
+        });
+
+        // GHSA-33jh-378v-h6r8: a value filter on an attribute that exists but is not an array must be
+        // rejected with a ScimError, without crashing or rewriting the attribute.
+        it('INVALID: add with a value filter on an existing complex mono valued attribute', done => {
+            const patch: ScimPatchAddReplaceOperation = {op: 'add', value: 'x', path: 'name[primary eq true].newProperty'};
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp, 'Impossible to search on a mono valued attribute');
+            expect(scimUser.name).to.deep.equal({familyName: 'Parker', givenName: 'Peter'});
+            return done();
+        });
+
+        it('INVALID: add with a value filter on an existing string attribute', done => {
+            const patch: ScimPatchAddReplaceOperation = {op: 'add', value: 'x', path: 'userName[primary eq true].newProperty'};
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp, 'Impossible to search on a mono valued attribute');
+            expect(scimUser.userName).to.equal('spiderman');
+            return done();
+        });
+
+        it('INVALID: replace with a value filter on an existing mono valued attribute is not treated as add', done => {
+            const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: 'x', path: 'name[primary eq true].newProperty'};
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp, 'Impossible to search on a mono valued attribute');
+            expect(scimUser.name).to.deep.equal({familyName: 'Parker', givenName: 'Peter'});
             return done();
         });
     });
