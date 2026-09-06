@@ -169,8 +169,12 @@ function resolvePaths(path: string): string[] {
 
     // Reject keys that would walk into Object.prototype (prototype pollution, GHSA-9m6g-wc8r-q59c).
     for (const segment of paths) {
-        if (DANGEROUS_KEYS.has(segment)) {
-            throw new InvalidScimPatchOp(`Forbidden key in patch path: ${segment}`);
+        // An array-search segment ("emails[primary eq true]") carries its attribute name in front of
+        // the filter, so "__proto__[primary eq true]" must be rejected like "__proto__"
+        // (GHSA-33jh-378v-h6r8). ARRAY_SEARCH is the regex extractArray() uses to pick that name.
+        const key = segment.match(ARRAY_SEARCH)?.[1] ?? segment;
+        if (DANGEROUS_KEYS.has(key)) {
+            throw new InvalidScimPatchOp(`Forbidden key in patch path: ${key}`);
         }
     }
     return paths;
@@ -251,10 +255,19 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
               parsedPath.compValue !== undefined &&
               parsedPath.op === "eq"
             ) {
+                // FilterOnEmptyArray is raised for any non-array attribute, not only a missing one.
+                // Only a missing (nullish) attribute may be created as a new multi-valued attribute;
+                // an existing single-valued attribute cannot be targeted by a value filter and must
+                // not be spread or overwritten (GHSA-33jh-378v-h6r8). Throw a fresh error rather
+                // than `e`, which carries the parent object in `e.schema`.
+                const existing = resource[e.attrName];
+                if (existing != null && !Array.isArray(existing)) {
+                    throw new InvalidScimPatchOp('Impossible to search on a mono valued attribute.');
+                }
                 const result: any = {};
                 result[parsedPath.attrPath] = parsedPath.compValue;
                 result[lastSubPath] = addOrReplaceAttribute(undefined, patch, true);
-                resource[e.attrName] = [...(resource[e.attrName] ?? []), result];
+                resource[e.attrName] = [...(existing ?? []), result];
                 return scimResource;
             } else if (
               treatMissingAsAdd &&
