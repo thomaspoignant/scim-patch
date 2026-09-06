@@ -249,7 +249,7 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
         if (e instanceof FilterOnEmptyArray || e instanceof FilterArrayTargetNotFound) {
             const resource: Record<string, any> = e.schema;
             // check issue https://github.com/thomaspoignant/scim-patch/issues/42 to see why we should add this
-            const parsedPath = parse(e.valuePath);
+            const parsedPath = parseValuePath(e.valuePath);
             if (isAddOperation(patch.op) &&
               "compValue" in parsedPath &&
               parsedPath.compValue !== undefined &&
@@ -492,6 +492,20 @@ function assign(obj:any, keyPath:Array<string>, value:any, op: string) {
         return;
     }
     obj[keyPath[lastKeyIndex]] = value;
+}
+
+/**
+ * Parse a value filter (ex: primary eq true) and surface a malformed filter as a ScimError,
+ * as filterWithQuery() already does.
+ * @param valuePath the value filter to parse.
+ * @return the parsed filter.
+ */
+function parseValuePath(valuePath: string): ReturnType<typeof parse> {
+    try {
+        return parse(valuePath);
+    } catch (error) {
+        throw new InvalidScimPatchOp(`${error}`);
+    }
 }
 
 /**

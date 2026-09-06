@@ -1275,5 +1275,20 @@ describe('SCIM PATCH', () => {
             expect(scimUser.name).to.deep.equal({familyName: 'Parker', givenName: 'Peter'});
             return done();
         });
+
+        // A malformed value filter on an attribute that does not exist yet must surface as a ScimError,
+        // not as a raw error from the filter parser.
+        it('INVALID: add with a malformed value filter on a missing attribute', done => {
+            const patch: ScimPatchAddReplaceOperation = {op: 'add', value: 'x', path: 'addresses[not a filter].formatted'};
+            expect(scimUser.addresses).to.be.undefined;
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp);
+            return done();
+        });
+
+        it('INVALID: replace with a malformed value filter on a missing attribute', done => {
+            const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: 'x', path: 'addresses[not a filter].formatted'};
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp);
+            return done();
+        });
     });
 });
