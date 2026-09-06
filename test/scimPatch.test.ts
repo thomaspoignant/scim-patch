@@ -8,7 +8,7 @@ import {
 import {ScimUser} from './types/types.test';
 import {expect} from 'chai';
 import {ScimPatchAddReplaceOperation, ScimPatchRemoveOperation} from '../src/types/types';
-import {RemoveValueNestedArrayNotSupported, NoTarget, RemoveValueNotArray} from "../src/errors/scimErrors";
+import {RemoveValueNestedArrayNotSupported, NoTarget, RemoveValueNotArray, FilterOnEmptyArray} from "../src/errors/scimErrors";
 
 describe('SCIM PATCH', () => {
     let scimUser: ScimUser;
@@ -715,6 +715,19 @@ describe('SCIM PATCH', () => {
             return done();
         });
 
+        // The issue #42 fallback must keep working when the attribute exists but is null.
+        it("ADD: null array add filter type + field (issue #42)", (done) => {
+            (scimUser as any).addresses = null;
+            const patch: ScimPatchAddReplaceOperation = {
+                op: "add",
+                value: "1111 Street Rd",
+                path: "addresses[type eq \"work\"].formatted"
+            };
+            const afterPatch = scimPatch(scimUser, [patch]);
+            expect(afterPatch.addresses).to.deep.equal([{type: "work", formatted: "1111 Street Rd"}]);
+            return done();
+        });
+
         it("ADD: existing array add filter type + field (Azure AD)", (done) => {
             const patch: ScimPatchAddReplaceOperation = {
                 op: "Add",
@@ -954,6 +967,25 @@ describe('SCIM PATCH', () => {
         });
     });
     describe('remove', () => {
+        // Navigating through a single-valued attribute has never removed anything; it must stay a no-op.
+        it('REMOVE: through a string attribute is a no-op', done => {
+            const patch: ScimPatchRemoveOperation = {op: 'remove', path: 'userName.foo'};
+            const afterPatch = scimPatch(scimUser, [patch]);
+            expect(afterPatch.userName).to.equal('spiderman');
+            return done();
+        });
+
+        // A FilterOnEmptyArray raised while navigating a remove path must surface as a ScimError
+        // without the parent resource attached as `error.schema`.
+        it('REMOVE: with a value filter on a mono valued attribute in the path', done => {
+            const patch: ScimPatchRemoveOperation = {op: 'remove', path: 'name[primary eq true].familyName'};
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp, 'Impossible to search on a mono valued attribute')
+                .and.not.be.instanceOf(FilterOnEmptyArray)
+                .and.not.have.property('schema');
+            expect(scimUser.name).to.deep.equal({familyName: 'Parker', givenName: 'Peter'});
+            return done();
+        });
+
         it('REMOVE: with no path', done => {
             const patch = <ScimPatchRemoveOperation>{op: 'remove'};
             expect(() => scimPatch(scimUser, [patch])).to.throw(NoPathInScimPatchOp);
@@ -1229,6 +1261,101 @@ describe('SCIM PATCH', () => {
                 path: 'emails[\' eq true].value'
             };
             expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp);
+            return done();
+        });
+
+        // GHSA-33jh-378v-h6r8: a value filter on an attribute that exists but is not an array must be
+        // rejected with a ScimError, without crashing or rewriting the attribute.
+        it('INVALID: add with a value filter on an existing complex mono valued attribute', done => {
+            const patch: ScimPatchAddReplaceOperation = {op: 'add', value: 'x', path: 'name[primary eq true].newProperty'};
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp, 'Impossible to search on a mono valued attribute');
+            expect(scimUser.name).to.deep.equal({familyName: 'Parker', givenName: 'Peter'});
+            return done();
+        });
+
+        it('INVALID: add with a value filter on an existing string attribute', done => {
+            const patch: ScimPatchAddReplaceOperation = {op: 'add', value: 'x', path: 'userName[primary eq true].newProperty'};
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp, 'Impossible to search on a mono valued attribute');
+            expect(scimUser.userName).to.equal('spiderman');
+            return done();
+        });
+
+        it('INVALID: add with a value filter on a mono valued attribute as the last path segment', done => {
+            const patch: ScimPatchAddReplaceOperation = {op: 'add', value: 'x', path: 'userName[primary eq true]'};
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp, 'Impossible to search on a mono valued attribute')
+                .and.not.be.instanceOf(FilterOnEmptyArray)
+                .and.not.have.property('schema');
+            expect(scimUser.userName).to.equal('spiderman');
+            return done();
+        });
+
+        it('INVALID: remove with a value filter on a mono valued attribute as the last path segment', done => {
+            const patch: ScimPatchRemoveOperation = {op: 'remove', path: 'name[primary eq true]'};
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp, 'Impossible to search on a mono valued attribute')
+                .and.not.be.instanceOf(FilterOnEmptyArray)
+                .and.not.have.property('schema');
+            expect(scimUser.name).to.deep.equal({familyName: 'Parker', givenName: 'Peter'});
+            return done();
+        });
+
+        it('INVALID: replace with a value filter on an existing mono valued attribute is not treated as add', done => {
+            const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: 'x', path: 'name[primary eq true].newProperty'};
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp, 'Impossible to search on a mono valued attribute');
+            expect(scimUser.name).to.deep.equal({familyName: 'Parker', givenName: 'Peter'});
+            return done();
+        });
+
+        // A malformed value filter on an attribute that does not exist yet must surface as a ScimError,
+        // not as a raw error from the filter parser.
+        it('INVALID: add with a malformed value filter on a missing attribute', done => {
+            const patch: ScimPatchAddReplaceOperation = {op: 'add', value: 'x', path: 'addresses[not a filter].formatted'};
+            expect(scimUser.addresses).to.be.undefined;
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp);
+            return done();
+        });
+
+        it('INVALID: replace with a malformed value filter on a missing attribute', done => {
+            const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: 'x', path: 'addresses[not a filter].formatted'};
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp);
+            return done();
+        });
+
+        // A path that navigates through a single-valued attribute (string, boolean, array of
+        // primitives) targets nothing that can hold a sub-attribute. It must be rejected with a
+        // ScimError instead of throwing a raw TypeError from the write site.
+        it('INVALID: add through a string attribute', done => {
+            const patch: ScimPatchAddReplaceOperation = {op: 'add', value: 'x', path: 'userName.foo'};
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp);
+            expect(scimUser.userName).to.equal('spiderman');
+            return done();
+        });
+
+        it('INVALID: replace through a boolean attribute', done => {
+            const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: 'x', path: 'active.foo'};
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp);
+            expect(scimUser.active).to.equal(true);
+            return done();
+        });
+
+        it('INVALID: add through a nested string attribute', done => {
+            const patch: ScimPatchAddReplaceOperation = {op: 'add', value: 'x', path: 'name.givenName.foo'};
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp);
+            expect(scimUser.name).to.deep.equal({familyName: 'Parker', givenName: 'Peter'});
+            return done();
+        });
+
+        it('INVALID: add through an array of primitives', done => {
+            scimUser.name.surName2 = ['a', 'b'];
+            const patch: ScimPatchAddReplaceOperation = {op: 'add', value: 'x', path: 'name.surName2.foo'};
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp);
+            expect(scimUser.name.surName2).to.deep.equal(['a', 'b']);
+            return done();
+        });
+
+        it('INVALID: add with a value filter after a string attribute', done => {
+            const patch: ScimPatchAddReplaceOperation = {op: 'add', value: 'x', path: 'userName.emails[primary eq true].newProperty'};
+            expect(() => scimPatch(scimUser, [patch])).to.throw(InvalidScimPatchOp);
+            expect(scimUser.userName).to.equal('spiderman');
             return done();
         });
     });

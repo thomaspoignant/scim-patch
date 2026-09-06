@@ -60,6 +60,7 @@ export {
 // Regex to check if this is search into array request.
 const IS_ARRAY_SEARCH = /(\[|\])/;
 // Regex to extract key and search request (ex: emails[primary eq true).
+// Must stay non-global: resolvePaths() calls exec() per path segment.
 const ARRAY_SEARCH = /^(.+)\[(.+)\]$/;
 // Split path on periods
 const SPLIT_PERIOD = /(?!\B"[^[]*)\.(?![^\]]*"\B)/g;
@@ -70,6 +71,7 @@ const CORE_SCHEMA_USER = 'urn:ietf:params:scim:schemas:core:2.0:User';
 const CORE_SCHEMA_GROUP = 'urn:ietf:params:scim:schemas:core:2.0:Group';
 // Keys that would let a patch reach Object.prototype (prototype pollution, GHSA-9m6g-wc8r-q59c).
 const DANGEROUS_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+const MONO_VALUED_SEARCH_ERROR = 'Impossible to search on a mono valued attribute.';
 
 export const PATCH_OPERATION_SCHEMA = 'urn:ietf:params:scim:api:messages:2.0:PatchOp';
 /*
@@ -169,9 +171,10 @@ function resolvePaths(path: string): string[] {
 
     // Reject keys that would walk into Object.prototype (prototype pollution, GHSA-9m6g-wc8r-q59c).
     for (const segment of paths) {
-        if (DANGEROUS_KEYS.has(segment)) {
-            throw new InvalidScimPatchOp(`Forbidden key in patch path: ${segment}`);
-        }
+        // An array-search segment ("emails[primary eq true]") carries its attribute name in front of
+        // the filter, so "__proto__[primary eq true]" must be rejected like "__proto__"
+        // (GHSA-33jh-378v-h6r8). ARRAY_SEARCH is non-global; exec() in this loop is safe.
+        rejectDangerousKey(ARRAY_SEARCH.exec(segment)?.[1] ?? segment);
     }
     return paths;
 }
@@ -190,7 +193,8 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
         if (error instanceof InvalidRemoveOpPath) {
             return scimResource;
         }
-        throw error;
+        // Do not surface FilterOnEmptyArray: it carries the parent resource in `.schema`.
+        throwWithoutAttachedSchema(error);
     }
 
     // Dealing with the last element of the path.
@@ -212,7 +216,14 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
     for (const resource of resources_scoped) {
 
         // The last element is an Array request.
-        const {attrName, valuePath, array} = extractArray(lastSubPath, resource);
+        let attrName: string;
+        let valuePath: string;
+        let array: Array<any>;
+        try {
+            ({attrName, valuePath, array} = extractArray(lastSubPath, resource));
+        } catch (error) {
+            throwWithoutAttachedSchema(error);
+        }
 
         // We keep only items who don't match the query if supplied.
         resource[attrName] = filterWithQuery<any>(array, valuePath, {excludeIfMatchFilter: true});
@@ -245,16 +256,26 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
         if (e instanceof FilterOnEmptyArray || e instanceof FilterArrayTargetNotFound) {
             const resource: Record<string, any> = e.schema;
             // check issue https://github.com/thomaspoignant/scim-patch/issues/42 to see why we should add this
-            const parsedPath = parse(e.valuePath);
+            const parsedPath = parseValuePath(e.valuePath);
             if (isAddOperation(patch.op) &&
               "compValue" in parsedPath &&
               parsedPath.compValue !== undefined &&
               parsedPath.op === "eq"
             ) {
+                // FilterOnEmptyArray is raised for any non-array attribute, not only a missing one.
+                // Only a missing (nullish) attribute may be created as a new multi-valued attribute;
+                // an existing single-valued attribute cannot be targeted by a value filter and must
+                // not be spread or overwritten (GHSA-33jh-378v-h6r8). Throw a fresh error rather
+                // than `e`, which carries the parent object in `e.schema`.
+                const existing = resource[e.attrName];
+                if (existing != null && !Array.isArray(existing)) {
+                    throw new InvalidScimPatchOp(MONO_VALUED_SEARCH_ERROR);
+                }
+                rejectDangerousKey(parsedPath.attrPath);
                 const result: any = {};
                 result[parsedPath.attrPath] = parsedPath.compValue;
                 result[lastSubPath] = addOrReplaceAttribute(undefined, patch, true);
-                resource[e.attrName] = [...(resource[e.attrName] ?? []), result];
+                resource[e.attrName] = [...(existing ?? []), result];
                 return scimResource;
             } else if (
               treatMissingAsAdd &&
@@ -287,7 +308,13 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
     // The last element is an Array request.
     for (const resource of resources_scoped) {
         
-        const {valuePath, array} = extractArray(lastSubPath, resource);
+        let valuePath: string;
+        let array: Array<any>;
+        try {
+            ({valuePath, array} = extractArray(lastSubPath, resource));
+        } catch (error) {
+            throwWithoutAttachedSchema(error);
+        }
 
         // Get the list of items who are successful for the search query.
         const matchFilter = filterWithQuery<any>(array, valuePath);
@@ -322,10 +349,13 @@ function extractArray(subPath: string, schema: any): ScimSearchQuery {
         throw new InvalidScimPatchOp(`This part of the path ${subPath} is invalid for SCIM patch request.`);
 
     const [, attrName, valuePath] = matchRequest;
+    // Use-site denylist: resolvePaths already rejects these, but extractArray is what
+    // actually indexes the resource (GHSA-33jh-378v-h6r8). Keep both in sync.
+    rejectDangerousKey(attrName);
     const element = schema[attrName];
 
     if (!Array.isArray(element))
-        throw new FilterOnEmptyArray('Impossible to search on a mono valued attribute.', attrName, valuePath);
+        throw new FilterOnEmptyArray(MONO_VALUED_SEARCH_ERROR, attrName, valuePath);
 
     return new ScimSearchQuery(attrName, valuePath, element);
 }
@@ -380,6 +410,19 @@ function navigate(inputSchema: any, paths: string[], options: NavigateOptions = 
 
                 return existing || (schema[subPath] = {});
             });
+        }
+
+        // Every element scoped so far must be a complex attribute (a non-null object).
+        // Arrays pass `typeof === "object"`; a multi-valued attribute without a filter is
+        // flattened by the flatMap above into its elements, so an array of primitives
+        // becomes those primitives here and is rejected. Do not add Array.isArray() without
+        // covering unfiltered paths such as emails.<subAttr>, which rely on that flattening.
+        for (const schema of schemas) {
+            if (schema === null || typeof schema !== 'object') {
+                if (options.isRemoveOp)
+                    throw new InvalidRemoveOpPath();
+                throw new InvalidScimPatchOp(`Attribute "${subPath}" is not a complex attribute, it can't contain sub-attributes.`);
+            }
         }
     }
     return schemas;
@@ -479,6 +522,37 @@ function assign(obj:any, keyPath:Array<string>, value:any, op: string) {
         return;
     }
     obj[keyPath[lastKeyIndex]] = value;
+}
+
+function rejectDangerousKey(key: string): void {
+    if (DANGEROUS_KEYS.has(key)) {
+        throw new InvalidScimPatchOp(`Forbidden key in patch path: ${key}`);
+    }
+}
+
+/**
+ * Re-throw FilterOnEmptyArray as a fresh InvalidScimPatchOp so callers do not
+ * receive the parent resource attached as `error.schema`.
+ */
+function throwWithoutAttachedSchema(error: unknown): never {
+    if (error instanceof FilterOnEmptyArray) {
+        throw new InvalidScimPatchOp(MONO_VALUED_SEARCH_ERROR);
+    }
+    throw error;
+}
+
+/**
+ * Parse a value filter (ex: primary eq true) and surface a malformed filter as a ScimError,
+ * as filterWithQuery() already does.
+ * @param valuePath the value filter to parse.
+ * @return the parsed filter.
+ */
+function parseValuePath(valuePath: string): ReturnType<typeof parse> {
+    try {
+        return parse(valuePath);
+    } catch (error) {
+        throw new InvalidScimPatchOp(`${error}`);
+    }
 }
 
 /**

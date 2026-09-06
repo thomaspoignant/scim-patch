@@ -1,6 +1,7 @@
 import { scimPatch } from "../src/scimPatch";
 import { ScimUser } from "./types/types.test";
 import { InvalidScimPatchOp } from "../src/errors/scimErrors";
+import { ScimPatchOperation } from "../src/types/types";
 import { expect } from "chai";
 
 describe("Prototype pollution via scim-patch", () => {
@@ -205,5 +206,133 @@ describe("Prototype pollution via scim-patch", () => {
 
     expect(patched.name.givenName).to.equal("Miles");
     expect(patched.name.familyName).to.equal("Parker");
+  });
+
+  describe("array-search path segments (GHSA-33jh-378v-h6r8)", () => {
+    // A segment such as "__proto__[primary eq true]" carries the dangerous key in front of the
+    // value filter. It must be rejected like a bare "__proto__" segment, and the resource must come
+    // out untouched: same prototype, not re-parented onto an Array, nothing on Object.prototype.
+    function expectForbiddenKey(resource: any, patch: ScimPatchOperation) {
+      expect(() => scimPatch(resource, [patch])).to.throw(
+        InvalidScimPatchOp,
+        "Forbidden key in patch path"
+      );
+      expect(Object.getPrototypeOf(resource)).to.equal(Object.prototype);
+      expect(resource instanceof Array).to.be.false;
+      expect((Object.prototype as any).polluted).to.be.undefined;
+      expect(({} as any).polluted).to.be.undefined;
+    }
+
+    it("rejects the advisory PoC on an empty resource", () => {
+      const resource: any = {};
+      expectForbiddenKey(resource, {
+        op: "add",
+        path: "__proto__[primary eq true].polluted",
+        value: "yes",
+      });
+    });
+
+    it("rejects a __proto__ array-search segment via add", () => {
+      expectForbiddenKey(scimUser, {
+        op: "add",
+        path: "__proto__[primary eq true].polluted",
+        value: "yes",
+      });
+    });
+
+    it("rejects a __proto__ array-search segment via replace", () => {
+      expectForbiddenKey(scimUser, {
+        op: "replace",
+        path: "__proto__[primary eq true].polluted",
+        value: "yes",
+      });
+    });
+
+    it("rejects a __proto__ array-search segment via remove", () => {
+      expectForbiddenKey(scimUser, {
+        op: "remove",
+        path: "__proto__[primary eq true].polluted",
+      });
+    });
+
+    it("rejects constructor and prototype array-search segments", () => {
+      expectForbiddenKey(scimUser, {
+        op: "add",
+        path: "constructor[primary eq true].polluted",
+        value: "yes",
+      });
+      expectForbiddenKey(scimUser, {
+        op: "add",
+        path: "prototype[primary eq true].polluted",
+        value: "yes",
+      });
+    });
+
+    it("rejects a __proto__ array-search segment behind a schema URN", () => {
+      expectForbiddenKey(scimUser, {
+        op: "add",
+        path: "urn:ietf:params:scim:schemas:core:2.0:User:__proto__[primary eq true].polluted",
+        value: "yes",
+      });
+    });
+
+    it("rejects a nested __proto__ array-search segment after a valid array filter", () => {
+      // The comparison value is deliberately unquoted: the period splitter does not split a
+      // segment that precedes a quoted literal, which would turn the path into a literal key.
+      expectForbiddenKey(scimUser, {
+        op: "add",
+        path: "emails[primary eq true].__proto__[primary eq true].polluted",
+        value: "yes",
+      });
+    });
+
+    it("rejects a value filter on an inherited built-in instead of crashing", () => {
+      expect(() =>
+        scimPatch(scimUser, [
+          { op: "add", path: "toString[primary eq true].newProperty", value: "yes" },
+        ])
+      ).to.throw(InvalidScimPatchOp, "Impossible to search on a mono valued attribute");
+      expect((scimUser as any).toString).to.equal(Object.prototype.toString);
+    });
+
+    it("rejects a __proto__ array-search segment with no sub-attribute", () => {
+      expectForbiddenKey(scimUser, {
+        op: "add",
+        path: "__proto__[primary eq true]",
+        value: "yes",
+      });
+    });
+
+    it("rejects a __proto__ array-search segment on a null-prototype resource", () => {
+      const resource = Object.create(null);
+      expect(() =>
+        scimPatch(resource, [
+          { op: "add", path: "__proto__[primary eq true].polluted", value: "yes" },
+        ])
+      ).to.throw(InvalidScimPatchOp, "Forbidden key in patch path");
+      expect(Object.getPrototypeOf(resource)).to.equal(null);
+      expect((Object.prototype as any).polluted).to.be.undefined;
+    });
+
+    it("rejects __proto__ when it is the value-filter attribute on a missing array", () => {
+      const resource: any = {};
+      expectForbiddenKey(resource, {
+        op: "add",
+        path: "emails[__proto__ eq true].polluted",
+        value: "yes",
+      });
+      expect(resource.emails).to.be.undefined;
+    });
+
+    it("rejects constructor when it is the value-filter attribute on a missing array", () => {
+      const resource: any = {};
+      expectForbiddenKey(resource, {
+        op: "add",
+        path: "emails[constructor eq true].value",
+        value: "x",
+      });
+      expect(resource.emails).to.be.undefined;
+      expect((Function.prototype as any).polluted).to.be.undefined;
+    });
   });
 });
