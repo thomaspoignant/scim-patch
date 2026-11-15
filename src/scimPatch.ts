@@ -533,6 +533,21 @@ function rejectDangerousKey(key: string): void {
 }
 
 /**
+ * Attribute names are case insensitive (RFC 7643 §2.1, RFC 7644 §3.10): return the existing own key
+ * of obj matching key regardless of case, or key itself when none exists. An exact match wins.
+ * The resolved key is checked against the denylist, since JSON.parse creates "__proto__" as an own
+ * key that "__PROTO__" would otherwise resolve to (GHSA-9m6g-wc8r-q59c).
+ */
+function resolveKey(obj: any, key: string): string {
+    if (obj === null || typeof obj !== 'object' || Object.prototype.hasOwnProperty.call(obj, key))
+        return key;
+    const lowerKey = key.toLowerCase();
+    const resolved = Object.keys(obj).find(k => k.toLowerCase() === lowerKey) ?? key;
+    rejectDangerousKey(resolved);
+    return resolved;
+}
+
+/**
  * Re-throw FilterOnEmptyArray as a fresh InvalidScimPatchOp so callers do not
  * receive the parent resource attached as `error.schema`.
  */
