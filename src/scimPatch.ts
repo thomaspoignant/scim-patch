@@ -203,12 +203,13 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
     if (!IS_ARRAY_SEARCH.test(lastSubPath)) {
         // This is a mono valued property
         for (const resource of resources_scoped) {
+            const key = resolveKey(resource, lastSubPath);
             if (!patch.value) {
                 // No value in the remove operation, we delete it.
-                delete resource[lastSubPath];
+                delete resource[key];
             } else {
                 // Value in the remove operation, we remove the children by value.
-                resource[lastSubPath] = removeWithPatchValue(resource[lastSubPath], patch.value);
+                resource[key] = removeWithPatchValue(resource[key], patch.value);
             }
         }
         return scimResource;
@@ -298,7 +299,8 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
     }
     if (!IS_ARRAY_SEARCH.test(lastSubPath)) {
         for (const resource of resources_scoped) {
-            resource[lastSubPath] = addOrReplaceAttribute(resource[lastSubPath], patch);
+            const key = resolveKey(resource, lastSubPath);
+            resource[key] = addOrReplaceAttribute(resource[key], patch);
         }
         return scimResource;   
     }
