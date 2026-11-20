@@ -203,12 +203,13 @@ function applyRemoveOperation<T extends ScimResource>(scimResource: T, patch: Sc
     if (!IS_ARRAY_SEARCH.test(lastSubPath)) {
         // This is a mono valued property
         for (const resource of resources_scoped) {
+            const key = resolveKey(resource, lastSubPath);
             if (!patch.value) {
                 // No value in the remove operation, we delete it.
-                delete resource[lastSubPath];
+                delete resource[key];
             } else {
                 // Value in the remove operation, we remove the children by value.
-                resource[lastSubPath] = removeWithPatchValue(resource[lastSubPath], patch.value);
+                resource[key] = removeWithPatchValue(resource[key], patch.value);
             }
         }
         return scimResource;
@@ -298,7 +299,8 @@ function applyAddOrReplaceOperation<T extends ScimResource>(scimResource: T, pat
     }
     if (!IS_ARRAY_SEARCH.test(lastSubPath)) {
         for (const resource of resources_scoped) {
-            resource[lastSubPath] = addOrReplaceAttribute(resource[lastSubPath], patch);
+            const key = resolveKey(resource, lastSubPath);
+            resource[key] = addOrReplaceAttribute(resource[key], patch);
         }
         return scimResource;   
     }
@@ -528,6 +530,21 @@ function rejectDangerousKey(key: string): void {
     if (DANGEROUS_KEYS.has(key)) {
         throw new InvalidScimPatchOp(`Forbidden key in patch path: ${key}`);
     }
+}
+
+/**
+ * Attribute names are case insensitive (RFC 7643 §2.1, RFC 7644 §3.10): return the existing own key
+ * of obj matching key regardless of case, or key itself when none exists. An exact match wins.
+ * The resolved key is checked against the denylist, since JSON.parse creates "__proto__" as an own
+ * key that "__PROTO__" would otherwise resolve to (GHSA-9m6g-wc8r-q59c).
+ */
+function resolveKey(obj: any, key: string): string {
+    if (obj === null || typeof obj !== 'object' || Object.prototype.hasOwnProperty.call(obj, key))
+        return key;
+    const lowerKey = key.toLowerCase();
+    const resolved = Object.keys(obj).find(k => k.toLowerCase() === lowerKey) ?? key;
+    rejectDangerousKey(resolved);
+    return resolved;
 }
 
 /**
